@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Onboarding 3: Transparency</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4B3621", // Coffee Brown
+                        "secondary": "#E6AF2E", // Muted Gold
+                        "background-light": "#F4F1EA", // Alabaster
+                        "background-dark": "#1E1A16", // Dark Warm Brown
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#2C2520",
+                    },
+                    fontFamily: {
+                        "heading": ["Montserrat", "sans-serif"],
+                        "body": ["Lato", "sans-serif"]
+                    },
+                    borderRadius: { 
+                        "DEFAULT": "0.25rem", 
+                        "lg": "8px", 
+                        "xl": "12px", 
+                        "2xl": "16px",
+                        "full": "9999px" 
+                    },
+                    boxShadow: {
+                        "soft": "0 8px 24px -4px rgba(75, 54, 33, 0.08), 0 4px 12px -2px rgba(75, 54, 33, 0.04)",
+                        "glow": "0 8px 20px -4px rgba(230, 175, 46, 0.3)",
+                    }
+                },
+            },
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;500;700&amp;family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body antialiased bg-background-light dark:bg-background-dark text-[#2C1E12] dark:text-[#F4F1EA] transition-colors duration-300">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-hidden group/design-root">
+<div class="absolute inset-0 z-0 pointer-events-none opacity-[0.05] dark:opacity-[0.08]" style="background-image: linear-gradient(#4B3621 1px, transparent 1px), linear-gradient(90deg, #4B3621 1px, transparent 1px); background-size: 40px 40px;">
+</div>
+<div class="relative z-10 flex flex-col h-full min-h-screen max-w-md mx-auto w-full p-6">
+<div class="flex justify-end pt-2 pb-4">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-transparent text-[#4B3621] dark:text-[#E6AF2E] text-sm font-heading font-bold leading-normal tracking-[0.015em] hover:bg-[#4B3621]/5 dark:hover:bg-[#E6AF2E]/10 transition-colors">
+<span class="truncate">Skip</span>
+</button>
+</div>
+<div class="flex-1 flex flex-col justify-center items-center py-6 gap-3">
+<div class="w-full transform transition-transform hover:scale-[1.01] duration-300">
+<div class="flex items-center justify-between gap-4 rounded-xl bg-surface-light dark:bg-surface-dark p-5 shadow-soft dark:shadow-none border border-white/50 dark:border-white/5">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-lg bg-[#4B3621]/10 text-primary">
+<span class="material-symbols-outlined text-[28px]">home_work</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<p class="text-[#8C7A6B] dark:text-[#A89F91] text-xs font-heading font-semibold uppercase tracking-wider">Base Rent</p>
+<p class="text-[#4B3621] dark:text-[#F4F1EA] text-xl font-heading font-bold leading-tight tabular-nums">$2,500</p>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-background-light dark:bg-background-dark border-2 border-surface-light dark:border-surface-dark z-10 -my-5 shadow-sm text-[#4B3621] dark:text-[#E6AF2E]">
+<span class="material-symbols-outlined text-sm font-bold">add</span>
+</div>
+<div class="w-full transform transition-transform hover:scale-[1.01] duration-300">
+<div class="flex items-center justify-between gap-4 rounded-xl bg-surface-light dark:bg-surface-dark p-5 shadow-soft dark:shadow-none border border-white/50 dark:border-white/5">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-lg bg-[#E6AF2E]/10 text-secondary">
+<span class="material-symbols-outlined text-[28px]">commute</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<p class="text-[#8C7A6B] dark:text-[#A89F91] text-xs font-heading font-semibold uppercase tracking-wider">Commute Est.</p>
+<p class="text-secondary text-xl font-heading font-bold leading-tight tabular-nums">+$300</p>
+</div>
+</div>
+</div>
+</div>
+<div class="w-full flex items-center gap-4 my-3 opacity-60">
+<div class="h-[1px] bg-[#4B3621]/20 dark:bg-white/20 flex-1"></div>
+<span class="text-2xl font-bold text-[#4B3621]/40 dark:text-white/40">=</span>
+<div class="h-[1px] bg-[#4B3621]/20 dark:bg-white/20 flex-1"></div>
+</div>
+<div class="w-full transform transition-transform hover:scale-[1.02] duration-300">
+<div class="flex items-center justify-between gap-4 rounded-xl bg-primary dark:bg-surface-dark dark:border dark:border-[#E6AF2E]/30 p-6 shadow-xl shadow-[#4B3621]/20 ring-1 ring-white/10 relative overflow-hidden">
+<div class="absolute right-0 top-0 p-6 opacity-10">
+<span class="material-symbols-outlined text-9xl -mr-8 -mt-8">architecture</span>
+</div>
+<div class="flex items-center gap-4 relative z-10">
+<div class="flex items-center justify-center w-12 h-12 rounded-lg bg-white/10 text-white backdrop-blur-sm border border-white/10">
+<span class="material-symbols-outlined text-[28px]">account_balance_wallet</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<p class="text-[#E6AF2E] dark:text-[#E6AF2E] text-xs font-heading font-semibold uppercase tracking-wider">True Monthly Cost</p>
+<p class="text-white text-3xl font-heading font-bold leading-tight tabular-nums tracking-tight">$2,800</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-[#E6AF2E] text-[32px] relative z-10">check_circle</span>
+</div>
+</div>
+</div>
+<div class="mt-4 mb-8">
+<h1 class="text-[#4B3621] dark:text-white tracking-tight text-[32px] font-heading font-bold leading-tight text-center pb-3">
+                    Know the True Cost.
+                </h1>
+<p class="text-[#6D5D50] dark:text-[#A89F91] text-base font-normal leading-relaxed text-center px-4 font-body">
+                    No hidden variables. We calculate rent plus commute time to show you the real price of living.
+                </p>
+</div>
+<div class="flex flex-col gap-6 mt-auto pb-4">
+<div class="flex justify-center gap-2">
+<div class="w-2 h-2 rounded-full bg-[#4B3621]/20 dark:bg-white/20"></div>
+<div class="w-2 h-2 rounded-full bg-[#4B3621]/20 dark:bg-white/20"></div>
+<div class="w-8 h-2 rounded-full bg-primary dark:bg-[#E6AF2E] transition-all duration-300"></div>
+</div>
+<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-14 px-5 bg-primary hover:bg-[#3A2A1A] text-white text-base font-heading font-bold leading-normal tracking-[0.015em] shadow-lg shadow-[#4B3621]/25 transition-all active:scale-[0.98]">
+<span class="truncate">Explore Properties</span>
+<span class="material-symbols-outlined ml-2 text-xl">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+
+</body></html>

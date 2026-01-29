@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Property Card Component - kejapin</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;700&amp;family=Montserrat:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "alabaster": "#F8F7F4",
+                        "coffee": "#4B3621",
+                        "gold-muted": "#C5A059",
+                        "dark-grey": "#4A4A4A",
+                        "pure-white": "#FFFFFF"
+                    },
+                    fontFamily: {
+                        "sans": ["Lato", "sans-serif"],
+                        "heading": ["Montserrat", "sans-serif"]
+                    },
+                    borderRadius: { 
+                        "ios": "12px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .pin-footer {
+                clip-path: polygon(0% 0%, 100% 0%, 100% 75%, 55% 75%, 50% 100%, 45% 75%, 0% 75%);
+            }
+        }
+    </style>
+<style>
+        body {
+            background-color: #F8F7F4;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-sans text-dark-grey antialiased p-6">
+<div class="w-full max-w-sm bg-pure-white rounded-ios shadow-[0_10px_40px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col">
+<div class="relative w-full aspect-[4/3] overflow-hidden">
+<img alt="Premium Architecture" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRGJW1fgS6mWGstczZCZgIyxQeu6hHUjJT5OubJhXFxwMNFS6_DC2bwa5JVaUuQ6TIr6flg-rFMXj3yUJa_1JmIWAvH7six4jXkSBk7GYq4mAAavF3izyxBS7YSpiayAL6c_h6Hvrkp6Nmso2agftnxWz_VLCJK_7OLZlx-rEsdjrSaU_hyOYVve9p-o9uzfdu5WXF4a_KY0e2wMmXJro0AIFbiCIdzm363iptplpN014mfjaislkeF-ui7H2KkCjwUQoyc0TXnk4"/>
+<div class="absolute top-4 left-4 flex items-center gap-1.5 bg-pure-white/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-gold-muted !text-[16px] fill-1">verified</span>
+<span class="text-[9px] font-heading font-bold uppercase tracking-[0.1em] text-gold-muted">Verified</span>
+</div>
+<button class="absolute top-4 right-4 size-9 flex items-center justify-center rounded-full bg-black/10 backdrop-blur-md text-white border border-white/20">
+<span class="material-symbols-outlined !text-[20px]">favorite</span>
+</button>
+</div>
+<div class="p-6 pb-0 flex flex-col">
+<div class="mb-1">
+<span class="text-[10px] font-bold text-gold-muted uppercase tracking-widest">Architectural Premium</span>
+<h2 class="text-coffee font-heading text-xl font-bold leading-snug mt-1">
+                    The Glass Pavilion
+                </h2>
+</div>
+<div class="flex items-center gap-1 text-dark-grey/60 mb-6">
+<span class="material-symbols-outlined !text-[14px]">location_on</span>
+<span class="text-xs font-medium tracking-tight">Skyline District, Upper East Side</span>
+</div>
+<div class="flex justify-between items-center py-4 border-t border-alabaster">
+<div class="flex flex-col gap-0.5">
+<span class="text-[10px] text-dark-grey/40 font-bold uppercase tracking-wider">Bedrooms</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-coffee/80 !text-[18px]">bed</span>
+<span class="text-sm font-bold text-coffee">3 Units</span>
+</div>
+</div>
+<div class="w-px h-8 bg-alabaster"></div>
+<div class="flex flex-col gap-0.5">
+<span class="text-[10px] text-dark-grey/40 font-bold uppercase tracking-wider">Bathrooms</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-coffee/80 !text-[18px]">bathtub</span>
+<span class="text-sm font-bold text-coffee">2.5</span>
+</div>
+</div>
+<div class="w-px h-8 bg-alabaster"></div>
+<div class="flex flex-col gap-0.5">
+<span class="text-[10px] text-dark-grey/40 font-bold uppercase tracking-wider">Area</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-coffee/80 !text-[18px]">architecture</span>
+<span class="text-sm font-bold text-coffee">1,850 ft²</span>
+</div>
+</div>
+</div>
+</div>
+<div class="relative w-full h-24 mt-2">
+<div class="pin-footer bg-coffee w-full h-full flex flex-col items-center justify-start pt-4 px-6">
+<span class="text-[10px] font-heading font-medium text-pure-white/60 uppercase tracking-[0.2em] mb-0.5">Total Monthly Cost</span>
+<div class="flex items-baseline gap-1">
+<span class="text-pure-white font-heading text-2xl font-bold tracking-tight">$4,250</span>
+<span class="text-pure-white/40 text-[10px] font-bold">/MO</span>
+</div>
+</div>
+</div>
+<div class="pb-8"></div>
+</div>
+
+</body></html>

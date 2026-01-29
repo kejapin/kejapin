@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kejapin - Marketplace Home Feed</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421", // Coffee Brown
+                        "primary-light": "#6d5440",
+                        "alabaster": "#F4F1EA",
+                        "gold-accent": "#D4AF37",
+                        "background-light": "#F4F1EA", // Using Alabaster as main bg per request
+                        "background-dark": "#1d1915",
+                        "card-light": "#ffffff",
+                        "card-dark": "#2c2620",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"],
+                        "sans": ["Work Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        "soft": "0 4px 20px -2px rgba(74, 52, 33, 0.05)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Custom chevron bottom for cards */
+        .card-chevron {
+            clip-path: polygon(0% 0%, 100% 0%, 100% 95%, 50% 100%, 0% 95%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-primary antialiased">
+<!-- Wrapper for Mobile View -->
+<div class="mx-auto flex h-screen w-full max-w-md flex-col overflow-hidden bg-background-light dark:bg-background-dark shadow-2xl relative">
+<!-- Header -->
+<header class="sticky top-0 z-50 flex items-center justify-between bg-white dark:bg-card-dark px-4 py-3 shadow-sm">
+<div class="flex items-center gap-2">
+<!-- Logo Placeholer / Text -->
+<div class="flex items-center justify-center rounded-lg bg-primary p-1.5 text-white">
+<span class="material-symbols-outlined text-[20px]">apartment</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight text-primary dark:text-white">kejapin</h1>
+</div>
+<div class="flex items-center gap-3">
+<button class="relative rounded-full p-2 text-primary/60 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">
+<span class="material-symbols-outlined block">notifications</span>
+<span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 border border-white dark:border-card-dark"></span>
+</button>
+<button class="flex items-center justify-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-light active:scale-95">
+                    Post
+                </button>
+</div>
+</header>
+<!-- Main Scrollable Content -->
+<main class="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar pb-24">
+<!-- Hero / Search Section -->
+<div class="bg-white dark:bg-card-dark px-4 pb-6 pt-2 rounded-b-3xl shadow-sm mb-4">
+<h2 class="mb-4 text-2xl font-bold leading-tight text-primary dark:text-white">
+                    Find your <span class="opacity-60">architectural</span><br/> sanctuary.
+                </h2>
+<!-- Search Bar -->
+<div class="group flex w-full flex-col rounded-xl bg-alabaster dark:bg-gray-800 p-2 transition-all focus-within:ring-2 focus-within:ring-primary/20">
+<div class="flex items-center px-2 py-1">
+<span class="material-symbols-outlined text-primary/40 dark:text-gray-400 mr-2">search</span>
+<input class="w-full bg-transparent border-none p-0 text-base placeholder:text-primary/40 focus:ring-0 dark:text-white text-primary font-medium h-10" placeholder="Location, Type, Budget" type="text"/>
+</div>
+</div>
+</div>
+<!-- Horizontal Filter Chips -->
+<div class="mb-6 flex w-full gap-3 overflow-x-auto px-4 no-scrollbar">
+<button class="flex h-9 shrink-0 items-center justify-center rounded-full bg-primary px-5 transition active:scale-95">
+<span class="text-sm font-medium text-white">All</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center rounded-full border border-primary/10 bg-white dark:bg-card-dark dark:border-gray-700 px-5 transition active:scale-95">
+<span class="text-sm font-medium text-primary dark:text-gray-300">Bedsitter</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center rounded-full border border-primary/10 bg-white dark:bg-card-dark dark:border-gray-700 px-5 transition active:scale-95">
+<span class="text-sm font-medium text-primary dark:text-gray-300">1 Bedroom</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center rounded-full border border-primary/10 bg-white dark:bg-card-dark dark:border-gray-700 px-5 transition active:scale-95">
+<span class="text-sm font-medium text-primary dark:text-gray-300">Bungalow</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center rounded-full border border-primary/10 bg-white dark:bg-card-dark dark:border-gray-700 px-5 transition active:scale-95">
+<span class="text-sm font-medium text-primary dark:text-gray-300">Maisonette</span>
+</button>
+</div>
+<!-- Property Grid -->
+<div class="grid grid-cols-1 gap-6 px-4 pb-4 sm:grid-cols-2">
+<!-- Card 1 -->
+<div class="group relative flex flex-col rounded-2xl bg-white dark:bg-card-dark shadow-soft transition-all hover:-translate-y-1">
+<!-- Image Container -->
+<div class="relative aspect-[4/5] w-full overflow-hidden rounded-t-2xl">
+<div class="absolute left-3 top-3 z-10 flex items-center gap-1 rounded-md bg-white/90 px-2 py-1 backdrop-blur-sm">
+<span class="material-symbols-outlined text-[16px] text-gold-accent">verified</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-primary">Verified</span>
+</div>
+<button class="absolute right-3 top-3 z-10 rounded-full bg-black/20 p-1.5 text-white backdrop-blur-sm transition hover:bg-white hover:text-red-500">
+<span class="material-symbols-outlined block text-[20px]">favorite</span>
+</button>
+<div class="h-full w-full bg-gray-200 bg-cover bg-center transition duration-500 group-hover:scale-105" data-alt="Modern loft interior with high ceilings and quartz countertops" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCbbKd3GnY_O-6wCb39rMYj8g-lMDsUzJFz4o5_m_aoCdn59Qtelj4wEmyEOt3yPZxeKj9LVnlWmiNNtTPjS2JyQbpGgVdpuamR-R5Q85oYoFUhDdMKiyh-1ttTZ_oezLjz2-HOsnaztHWRVKUqZeNtj-bsNXN9e5WaIZieHSFlrSChR9iTGl9Ad7Ttm7LN2jlcu7sptZiTX-LiYG_7TIn8wGeB4AY-wa2-S1Hi_cn_ppVQwXEWwgrmWkyIN-cVO8fiP1VQlRx-Rz8');">
+</div>
+<!-- Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
+<!-- Price Badge on Image -->
+<div class="absolute bottom-3 left-3 right-3 rounded-lg bg-white/95 p-3 backdrop-blur-md dark:bg-card-dark/95">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-[10px] font-medium text-gray-500 dark:text-gray-400">Total Monthly Cost</span>
+<div class="flex items-baseline gap-1">
+<span class="text-lg font-bold text-primary dark:text-white">KES 50k</span>
+</div>
+</div>
+<div class="h-8 w-px bg-gray-200 dark:bg-gray-600"></div>
+<div class="flex flex-col text-right">
+<span class="text-[10px] text-gray-400">Rent: 45k</span>
+<span class="text-[10px] text-green-600 font-medium">+5k Commute</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Content -->
+<div class="flex flex-col p-4 pb-6">
+<div class="mb-1 flex items-start justify-between">
+<h3 class="text-lg font-bold text-primary dark:text-white">The Quartz Loft</h3>
+<div class="flex items-center gap-1 rounded-md bg-alabaster px-1.5 py-0.5 dark:bg-gray-800">
+<span class="material-symbols-outlined text-[14px] text-primary/60 dark:text-gray-400">star</span>
+<span class="text-xs font-bold text-primary dark:text-white">4.8</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-primary/60 dark:text-gray-400">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<p class="text-xs font-medium">Westlands, Nairobi</p>
+</div>
+</div>
+<!-- Subtle Point Accent -->
+<div class="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white dark:bg-card-dark"></div>
+</div>
+<!-- Card 2 -->
+<div class="group relative flex flex-col rounded-2xl bg-white dark:bg-card-dark shadow-soft transition-all hover:-translate-y-1">
+<!-- Image Container -->
+<div class="relative aspect-[4/5] w-full overflow-hidden rounded-t-2xl">
+<div class="absolute left-3 top-3 z-10 flex items-center gap-1 rounded-md bg-white/90 px-2 py-1 backdrop-blur-sm">
+<span class="material-symbols-outlined text-[16px] text-gold-accent">verified</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-primary">Verified</span>
+</div>
+<button class="absolute right-3 top-3 z-10 rounded-full bg-black/20 p-1.5 text-white backdrop-blur-sm transition hover:bg-white hover:text-red-500">
+<span class="material-symbols-outlined block text-[20px]">favorite</span>
+</button>
+<div class="h-full w-full bg-gray-200 bg-cover bg-center transition duration-500 group-hover:scale-105" data-alt="Exteriror of a modern bungalow house with green garden" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBsx8_OQ4E4GRhmdyW68wE9CwPD4NcWR6AnbMJHb7it7h0nvPbyosMtu5o3vrWaL_ky9ZlRj3nNP1ls_xwCxe2M0azxcA5XH-RpJtFiUnJckGiUsDfqWfdVbZ2NxE11ijdK6ImZy_klwVUPSRxU0MA5x7Ob5KpQu8_7jFEsv658L6w2vyQVbQZR9PpCMuRb85ds-IuG0iMKPbywxPL46skfhdwyI-KjuZNOdPd-Ag-V7gs6hDx8ood8PIyREDUqZ2QSzAR9Y0a_tEk');">
+</div>
+<!-- Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
+<!-- Price Badge on Image -->
+<div class="absolute bottom-3 left-3 right-3 rounded-lg bg-white/95 p-3 backdrop-blur-md dark:bg-card-dark/95">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-[10px] font-medium text-gray-500 dark:text-gray-400">Total Monthly Cost</span>
+<div class="flex items-baseline gap-1">
+<span class="text-lg font-bold text-primary dark:text-white">KES 92k</span>
+</div>
+</div>
+<div class="h-8 w-px bg-gray-200 dark:bg-gray-600"></div>
+<div class="flex flex-col text-right">
+<span class="text-[10px] text-gray-400">Rent: 80k</span>
+<span class="text-[10px] text-green-600 font-medium">+12k Commute</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Content -->
+<div class="flex flex-col p-4 pb-6">
+<div class="mb-1 flex items-start justify-between">
+<h3 class="text-lg font-bold text-primary dark:text-white">Greenfield Haven</h3>
+<div class="flex items-center gap-1 rounded-md bg-alabaster px-1.5 py-0.5 dark:bg-gray-800">
+<span class="material-symbols-outlined text-[14px] text-primary/60 dark:text-gray-400">star</span>
+<span class="text-xs font-bold text-primary dark:text-white">5.0</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-primary/60 dark:text-gray-400">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<p class="text-xs font-medium">Karen, Nairobi</p>
+</div>
+</div>
+<!-- Subtle Point Accent -->
+<div class="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white dark:bg-card-dark"></div>
+</div>
+<!-- Card 3 -->
+<div class="group relative flex flex-col rounded-2xl bg-white dark:bg-card-dark shadow-soft transition-all hover:-translate-y-1">
+<!-- Image Container -->
+<div class="relative aspect-[4/5] w-full overflow-hidden rounded-t-2xl">
+<button class="absolute right-3 top-3 z-10 rounded-full bg-black/20 p-1.5 text-white backdrop-blur-sm transition hover:bg-white hover:text-red-500">
+<span class="material-symbols-outlined block text-[20px]">favorite</span>
+</button>
+<div class="h-full w-full bg-gray-200 bg-cover bg-center transition duration-500 group-hover:scale-105" data-alt="Modern geometric apartment building exterior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCQB_ryMbKjq0QqJM0nvNyvOiANLR-9P95-lx9vmO-1hbL4OWZU7VeSr-n_DhbO8z-GpPwHWjqKEmRuE7BHQiAhwBBy6K6T3CNDvqJbx4t7Ss3B8UcdZZkNEYvp5VB6FbhWkuAioxNi1-cV-7RtDvlHd2b3fA4hTf0q0i7NKtdcwvm6RGbx_sspi3qEQ_LBPG-8LysvrGY-yVHUbua7u-p1zmb0CrWNcFVTu52lBb1kSwbk8HEAswXvhTvBlqoH1fvaKlgXz2ZkE7w');">
+</div>
+<!-- Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
+<!-- Price Badge on Image -->
+<div class="absolute bottom-3 left-3 right-3 rounded-lg bg-white/95 p-3 backdrop-blur-md dark:bg-card-dark/95">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-[10px] font-medium text-gray-500 dark:text-gray-400">Total Monthly Cost</span>
+<div class="flex items-baseline gap-1">
+<span class="text-lg font-bold text-primary dark:text-white">KES 35k</span>
+</div>
+</div>
+<div class="h-8 w-px bg-gray-200 dark:bg-gray-600"></div>
+<div class="flex flex-col text-right">
+<span class="text-[10px] text-gray-400">Rent: 30k</span>
+<span class="text-[10px] text-green-600 font-medium">+5k Commute</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Content -->
+<div class="flex flex-col p-4 pb-6">
+<div class="mb-1 flex items-start justify-between">
+<h3 class="text-lg font-bold text-primary dark:text-white">The Onyx Cube</h3>
+<div class="flex items-center gap-1 rounded-md bg-alabaster px-1.5 py-0.5 dark:bg-gray-800">
+<span class="material-symbols-outlined text-[14px] text-primary/60 dark:text-gray-400">star</span>
+<span class="text-xs font-bold text-primary dark:text-white">4.2</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-primary/60 dark:text-gray-400">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<p class="text-xs font-medium">Kilimani, Nairobi</p>
+</div>
+</div>
+<!-- Subtle Point Accent -->
+<div class="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white dark:bg-card-dark"></div>
+</div>
+<!-- Card 4 -->
+<div class="group relative flex flex-col rounded-2xl bg-white dark:bg-card-dark shadow-soft transition-all hover:-translate-y-1">
+<!-- Image Container -->
+<div class="relative aspect-[4/5] w-full overflow-hidden rounded-t-2xl">
+<div class="absolute left-3 top-3 z-10 flex items-center gap-1 rounded-md bg-white/90 px-2 py-1 backdrop-blur-sm">
+<span class="material-symbols-outlined text-[16px] text-gold-accent">verified</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-primary">Verified</span>
+</div>
+<button class="absolute right-3 top-3 z-10 rounded-full bg-black/20 p-1.5 text-white backdrop-blur-sm transition hover:bg-white hover:text-red-500">
+<span class="material-symbols-outlined block text-[20px]">favorite</span>
+</button>
+<div class="h-full w-full bg-gray-200 bg-cover bg-center transition duration-500 group-hover:scale-105" data-alt="Cozy interior living room with warm lighting" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDK0Hf0bHfbabrIT8JPZrUOoI-MP3hdLVPAIKa6xXFuouVHAFRKzvnVcmmtcMHMuFVfeOPJNEi9x3PlblXdNd9PdJZ3AOve2n5HPjfx9bFt5Y-nXJliLYYg61wARL0qVIZWjgimW9vpIZtpEBM9M3hBoYCGMM1PoFne9PFM95S-U3H1-QhQTMJvYVjqPK-bpU2-k5JY5pq6vYUVO1xmsxTcuO-cpj6jmJ_GVrkpqR7Q7zxsC9bs06E5RrA-SR4fRdZTz0Iyhx-dkv4');">
+</div>
+<!-- Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
+<!-- Price Badge on Image -->
+<div class="absolute bottom-3 left-3 right-3 rounded-lg bg-white/95 p-3 backdrop-blur-md dark:bg-card-dark/95">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-[10px] font-medium text-gray-500 dark:text-gray-400">Total Monthly Cost</span>
+<div class="flex items-baseline gap-1">
+<span class="text-lg font-bold text-primary dark:text-white">KES 62k</span>
+</div>
+</div>
+<div class="h-8 w-px bg-gray-200 dark:bg-gray-600"></div>
+<div class="flex flex-col text-right">
+<span class="text-[10px] text-gray-400">Rent: 55k</span>
+<span class="text-[10px] text-green-600 font-medium">+7k Commute</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Content -->
+<div class="flex flex-col p-4 pb-6">
+<div class="mb-1 flex items-start justify-between">
+<h3 class="text-lg font-bold text-primary dark:text-white">Amber Retreat</h3>
+<div class="flex items-center gap-1 rounded-md bg-alabaster px-1.5 py-0.5 dark:bg-gray-800">
+<span class="material-symbols-outlined text-[14px] text-primary/60 dark:text-gray-400">star</span>
+<span class="text-xs font-bold text-primary dark:text-white">4.9</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-primary/60 dark:text-gray-400">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<p class="text-xs font-medium">Lavington, Nairobi</p>
+</div>
+</div>
+<!-- Subtle Point Accent -->
+<div class="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white dark:bg-card-dark"></div>
+</div>
+</div>
+<div class="h-20 w-full"></div>
+</main>
+<!-- Bottom Navbar -->
+<nav class="absolute bottom-0 left-0 right-0 border-t border-primary/5 bg-white px-6 pb-6 pt-3 dark:bg-card-dark dark:border-gray-800">
+<div class="flex items-center justify-between">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined filled text-[24px]">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary/40 dark:text-gray-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">favorite</span>
+<span class="text-[10px] font-medium">Saved</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary/40 dark:text-gray-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">chat_bubble</span>
+<span class="text-[10px] font-medium">Messages</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary/40 dark:text-gray-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</a>
+</div>
+</nav>
+</div>
+</body></html>

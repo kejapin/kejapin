@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Maintenance Request - kejapin</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&amp;family=Work+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421",
+                        "primary-light": "#6d543e",
+                        "background-light": "#FAF9F6", // Warm off-white
+                        "background-dark": "#1d1915",
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#2C2825",
+                        "border-light": "#e3e0de",
+                        "border-dark": "#403b36",
+                        "accent-red": "#D32F2F",
+                    },
+                    fontFamily: {
+                        "display": ["Montserrat", "sans-serif"],
+                        "body": ["Work Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem", 
+                        "lg": "0.75rem", 
+                        "xl": "1rem", 
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'premium': '0 4px 20px -2px rgba(74, 52, 33, 0.08)',
+                        'inner-premium': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.03)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hiding for cleaner mobile look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Custom form styling overrides */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        .pin-shadow {
+            filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.3));
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-[#161413] dark:text-[#EAE0D5] font-body transition-colors duration-200 antialiased overflow-x-hidden">
+<div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-2xl">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-border-light dark:border-border-dark">
+<button class="text-primary dark:text-[#bcaaa4] text-base font-medium font-body hover:opacity-80 transition-opacity">Cancel</button>
+<h1 class="text-lg font-bold font-display text-primary dark:text-[#EAE0D5]">Report Issue</h1>
+<div class="w-[50px]"></div> <!-- Spacer to balance layout -->
+</header>
+<!-- Main Content Scroll Area -->
+<main class="flex-1 overflow-y-auto px-5 pt-6 pb-24 flex flex-col gap-8">
+<!-- Issue Type Selection -->
+<section class="flex flex-col gap-3">
+<label class="text-sm font-semibold font-display tracking-wide uppercase text-primary/80 dark:text-[#bcaaa4]" for="issue-type">
+                    Type of Issue
+                </label>
+<div class="relative">
+<select class="w-full h-14 pl-4 pr-12 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-base text-[#161413] dark:text-[#EAE0D5] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm font-body appearance-none cursor-pointer" id="issue-type">
+<option disabled="" selected="" value="">Select Category</option>
+<option value="plumbing">Plumbing</option>
+<option value="electric">Electric</option>
+<option value="hvac">HVAC</option>
+<option value="structural">Structural</option>
+<option value="appliance">Appliance</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-primary dark:text-[#bcaaa4]">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+</section>
+<!-- Pinpoint Location (Interactive Feature) -->
+<section class="flex flex-col gap-3">
+<div class="flex justify-between items-end">
+<label class="text-sm font-semibold font-display tracking-wide uppercase text-primary/80 dark:text-[#bcaaa4]">
+                        Pinpoint Location
+                    </label>
+<span class="text-xs text-primary/60 dark:text-[#bcaaa4]/60">Tap to move pin</span>
+</div>
+<div class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-premium border border-border-light dark:border-border-dark group cursor-crosshair">
+<!-- The Background Image -->
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 hover:scale-105" data-alt="Modern minimalist living room interior with neutral tones and wooden floor" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAGrHvMPAQeeFXvMRWdr8S__1m9A3CQTCOl6Qlr_eBoAm_xG03gZGqDZLX-sMf7IWmzrtYKXNlURXws4sPvBCAIAZPqfdseY0TfIVCl9_4LFoka1NBuS6DIDgRNtzGL7gbmL7RqEfgeqVyoZqcztMrrq8EcReJMVMsUjN-Gk_XFn5JLUT0xEFnQzeabnA_w-kty6z56EOX01CORnEf1Ay2HFzAeyJhk5p2op_r3TRbI3b31TshEosTZ4nN0N-GvE6ISYWLZ6c9YJ7U');">
+<!-- Dark overlay for better pin visibility -->
+<div class="absolute inset-0 bg-black/10"></div>
+</div>
+<!-- The Red Pin -->
+<div class="absolute top-[40%] left-[60%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center animate-bounce duration-[2000ms]">
+<span class="material-symbols-outlined text-accent-red text-4xl pin-shadow fill-1">location_on</span>
+<div class="w-2 h-1 bg-black/30 blur-[2px] rounded-[100%] mt-[-4px]"></div>
+</div>
+<!-- Instructions Overlay (fades out on interaction in real app) -->
+<div class="absolute bottom-3 left-3 bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur px-3 py-1.5 rounded-lg border border-white/20 shadow-sm pointer-events-none">
+<p class="text-xs font-medium text-primary dark:text-[#EAE0D5]">Living Room • Wall Damage</p>
+</div>
+</div>
+</section>
+<!-- Media Upload Zone -->
+<section class="flex flex-col gap-3">
+<label class="text-sm font-semibold font-display tracking-wide uppercase text-primary/80 dark:text-[#bcaaa4]">
+                    Evidence
+                </label>
+<div class="relative group">
+<input accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" id="media-upload" multiple="" type="file"/>
+<div class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-primary/30 dark:border-primary/40 rounded-xl bg-surface-light dark:bg-surface-dark transition-colors group-hover:bg-primary/5 dark:group-hover:bg-primary/10 group-hover:border-primary/60">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3 text-primary dark:text-[#bcaaa4]">
+<span class="material-symbols-outlined text-2xl">add_a_photo</span>
+</div>
+<p class="text-sm font-medium text-primary dark:text-[#EAE0D5]">Tap to upload photos</p>
+<p class="text-xs text-primary/50 dark:text-[#bcaaa4]/70 mt-1">JPG, PNG up to 10MB</p>
+</div>
+</div>
+<!-- Preview of uploaded thumbnails (Mockup) -->
+<div class="flex gap-3 overflow-x-auto no-scrollbar py-1">
+<div class="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border border-border-light dark:border-border-dark">
+<img alt="Damage preview 1" class="w-full h-full object-cover" data-alt="Close up texture of a cracked white wall" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoTpdcgGC63tezoPv5hAIP16OQIaUmYy2TSxZGJVgEMWn91nVgaBEZrvdftTqIERloevbAArI1JEexa9V8ZVK4IVRNsUYyMtg5cV8Yqgv3pzNJu93lFjWRceNWJxy8rveGM4YKGKW17dOZ8W14Z_xLUdcqo0pkzscoCb6Q-mW2HpMN61N_VCy4r2-Hifc62GVfZQ-GNY1LShN9nPrRJOVvBZH3D8Sss_1M-mlJD03n0Cn4h1iTSRaoMci1xzfPrbGWmHvT63a1gl0"/>
+<button class="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5 backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px] block">close</span>
+</button>
+</div>
+<div class="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border border-border-light dark:border-border-dark flex items-center justify-center bg-surface-light dark:bg-surface-dark">
+<div class="w-full h-full bg-cover bg-center opacity-50" data-alt="Electrical outlet with burn marks" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBIWTwdcP-sQjS44Ax9eqnJqX_0H1LFri87ikPcjkA_lLS1v-zERtnYZcLQLxHESrecTuj7WAO7HSNNcVcdF6wjXqQcAf5fvRgClzuqKbyX7TwR8M7MbFxYbc_efg4C_x91xYKO-TpcrRuHy8qocJKDuhVD9TW-y9UzVrcgzDJ3OJ_Inb7HYRQJly_dykppnm2ns2SxgkY3mFCEcg7fAt3qXg3OqRXjBgEMtXj1vhZ_XS2OwP-Bh3qLpumfuOVJj2xfV9PUICrvciE')"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Description -->
+<section class="flex flex-col gap-3">
+<label class="text-sm font-semibold font-display tracking-wide uppercase text-primary/80 dark:text-[#bcaaa4]" for="description">
+                    Description
+                </label>
+<textarea class="w-full p-4 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-base text-[#161413] dark:text-[#EAE0D5] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm placeholder:text-primary/40 dark:placeholder:text-[#bcaaa4]/50 resize-none font-body" id="description" placeholder="Describe the issue in detail, including when you first noticed it..." rows="4"></textarea>
+</section>
+</main>
+<!-- Fixed Footer Action -->
+<div class="fixed bottom-0 left-0 right-0 p-5 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-t border-border-light dark:border-border-dark z-40 max-w-md mx-auto">
+<button class="w-full h-14 bg-primary hover:bg-primary-light text-white rounded-xl text-lg font-bold font-display shadow-lg shadow-primary/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+<span>Submit Request</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,45 @@
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+bin/
+build/
+output/
+
+# Data
+*.db
+*.sqlite
+*.pbf
+*.osm.pbf
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node/Flutter
+node_modules/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock

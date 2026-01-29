@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kejapin - Modals &amp; Dialogs Components</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&amp;family=Lato:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421", // Coffee Brown
+                        "coffee": "#4a3421",
+                        "alabaster": "#fbfbf9",
+                        "sage": "#7c9082",
+                        "destructive": "#9e3a3a",
+                    },
+                    fontFamily: {
+                        "heading": ["Montserrat", "sans-serif"],
+                        "body": ["Lato", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "modal": "12px",
+                        "btn": "8px"
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            h1, h2, h3, h4 { @apply font-heading text-coffee; }
+            body { @apply font-body text-coffee; }
+        }
+        .backdrop-blur-custom {
+            backdrop-filter: blur(8px);
+            background-color: rgba(74, 52, 33, 0.2);
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-100 antialiased selection:bg-primary selection:text-white">
+<div class="relative mx-auto flex h-auto min-h-screen w-full max-w-md flex-col bg-white overflow-x-hidden pb-10">
+<header class="px-6 pt-12 pb-6 bg-white border-b border-gray-100">
+<h1 class="text-2xl font-bold">Modals &amp; Dialogs</h1>
+<p class="text-sm text-gray-500 mt-1 font-body italic">Component Showcase (iOS Mobile)</p>
+</header>
+<div class="p-6 space-y-12">
+<section>
+<label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4 block">1. Center Modal</label>
+<div class="relative w-full aspect-[4/5] bg-gray-200 rounded-modal overflow-hidden flex items-center justify-center p-4">
+<div class="absolute inset-0 grayscale opacity-40 bg-[url('https://lh3.googleusercontent.com/aida-public/AB6AXuCDAmj8514rXMCvZkDqUc1Usb7sgC5iWHiAm9gZwv1ZJKjgPVwY_tloeeuBEy9B4OLCcsqg24hq3vYcm0xjQ_UoDy7m66GoMQhfcikkY1P5szZ8mn4UQEXrYFlUrLiLJrrX4u12zu3UMfmcUS5TfMXjSodwUw05Fgpse2-pEwcAjE6jc00_yjUUGJhnBrtLN_iuCW87pOJAfAlBohZhnoLYVghEgNcdTs6gT2VGSnzQAcCtwUPPFF6hwHhsDDML8Q65-HpyN9_KQoI')] bg-cover bg-center"></div>
+<div class="absolute inset-0 backdrop-blur-custom"></div>
+<div class="relative w-full bg-alabaster rounded-modal shadow-2xl overflow-hidden">
+<div class="bg-coffee p-4 text-white">
+<h3 class="text-lg font-bold text-white">Confirm Booking</h3>
+</div>
+<div class="p-5">
+<p class="text-sm leading-relaxed mb-6">Are you sure you want to request a viewing for <span class="font-bold">The Glass House</span> in Kileleshwa?</p>
+<div class="flex flex-col gap-2">
+<button class="w-full bg-coffee text-white font-bold py-3 rounded-btn text-sm">Confirm Request</button>
+<button class="w-full bg-transparent text-coffee font-bold py-3 rounded-btn text-sm">Cancel</button>
+</div>
+</div>
+</div>
+</div>
+<p class="mt-2 text-[11px] text-gray-400">Uses <span class="font-mono">backdrop-blur(8px)</span> with <span class="font-mono">bg-coffee/20</span></p>
+</section>
+<section>
+<label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4 block">2. Bottom Sheet</label>
+<div class="relative w-full aspect-[4/5] bg-gray-200 rounded-modal overflow-hidden flex flex-col justify-end">
+<div class="absolute inset-0 grayscale opacity-40 bg-[url('https://lh3.googleusercontent.com/aida-public/AB6AXuBoURBVj8tA4R6X5EGaspn9TzwhO4P7wmh5pnVN0gcw3g6HPYRGJPTUa8xILELZ3O9cl28TVYawR-egZGqaGBoqm9M1GWi2I3OF1OYd8NPhF8ZMUj2MJ8FDXM2RjueXnjmvbV3rv2xIJM6yXMokjjVzKLQ1ma2zqtIn9Mo_gqc_HMS4JyMRC2CNhtMFUF_twdS7Bw_Iq2hqpUwrFXO2dY-8j4SEaixFUjjTWpNUrk86LLnWGxXPB46u0yIdBEho98tZlLKGB44-Yow')] bg-cover bg-center"></div>
+<div class="absolute inset-0 backdrop-blur-custom"></div>
+<div class="relative w-full bg-alabaster rounded-t-modal shadow-2xl pb-8">
+<div class="w-full flex justify-center py-3">
+<div class="w-10 h-1.5 bg-gray-300 rounded-full"></div>
+</div>
+<div class="px-6 pt-2">
+<h3 class="text-xl font-bold mb-6">Filter Properties</h3>
+<div class="space-y-6">
+<div>
+<h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Price Range</h4>
+<div class="h-1 bg-gray-200 rounded-full relative">
+<div class="absolute left-1/4 right-1/4 h-full bg-coffee"></div>
+<div class="absolute left-1/4 top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-coffee rounded-full"></div>
+<div class="absolute right-1/4 top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-coffee rounded-full"></div>
+</div>
+</div>
+<div>
+<h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Bedrooms</h4>
+<div class="flex gap-2">
+<button class="flex-1 py-2 border border-gray-200 rounded-btn text-xs font-bold">1</button>
+<button class="flex-1 py-2 bg-coffee text-white rounded-btn text-xs font-bold">2</button>
+<button class="flex-1 py-2 border border-gray-200 rounded-btn text-xs font-bold">3+</button>
+</div>
+</div>
+<button class="w-full bg-coffee text-white font-bold py-4 rounded-btn mt-4">Show 124 Results</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section>
+<label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4 block">3. Success Dialog</label>
+<div class="w-full bg-alabaster border border-gray-100 rounded-modal p-6 flex flex-col items-center text-center">
+<div class="w-16 h-16 bg-sage/10 rounded-full flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-sage text-4xl">check_circle</span>
+</div>
+<h3 class="text-lg font-bold mb-2">Request Sent!</h3>
+<p class="text-sm text-gray-600 mb-6 px-4">Your viewing request has been received. Our agent will contact you shortly.</p>
+<button class="px-8 py-2.5 bg-sage text-white font-bold rounded-btn text-sm">Great, thanks</button>
+</div>
+</section>
+<section>
+<label class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4 block">4. Alert Dialog</label>
+<div class="w-full bg-alabaster border border-red-50 rounded-modal p-6">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-destructive text-2xl">warning</span>
+</div>
+<h3 class="text-lg font-bold">Delete Saved Search?</h3>
+</div>
+<p class="text-sm text-gray-600 mb-6">This action cannot be undone. You will stop receiving alerts for "Kileleshwa Under 150k".</p>
+<div class="flex gap-3">
+<button class="flex-1 py-2.5 border border-gray-200 font-bold rounded-btn text-sm">Cancel</button>
+<button class="flex-1 py-2.5 bg-destructive text-white font-bold rounded-btn text-sm">Delete</button>
+</div>
+</div>
+</section>
+</div>
+<div class="mt-auto border-t border-gray-100 px-8 py-4 bg-white flex justify-between items-center opacity-50 grayscale">
+<span class="material-symbols-outlined">home</span>
+<span class="material-symbols-outlined">search</span>
+<span class="material-symbols-outlined">favorite</span>
+<span class="material-symbols-outlined">person</span>
+</div>
+</div>
+
+</body></html>

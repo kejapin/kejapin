@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>kejapin - Global Top Navigation Component</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&amp;family=Work+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "coffee-brown": "#4B3621",
+                        "alabaster": "#F4F1EA",
+                        "muted-gold": "#E6AF2E",
+                        "surface-dark": "#2c2825",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"],
+                        "montserrat": ["Montserrat", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .nav-link-active {
+            @apply relative text-coffee-brown font-montserrat font-bold;
+        }
+        .nav-link-active::after {
+            content: '';
+            @apply absolute -bottom-1 left-0 w-full h-0.5 bg-muted-gold;
+        }
+        .nav-link-hover {
+            @apply text-muted-gold font-montserrat font-bold transition-colors;
+        }
+        .nav-link-default {
+            @apply text-coffee-brown/60 font-montserrat font-bold transition-colors hover:text-muted-gold;
+        }
+        .spec-label {
+            @apply text-[10px] uppercase tracking-widest text-coffee-brown/40 font-bold mb-2 block;
+        }
+        .component-container {
+            @apply bg-white/50 border border-coffee-brown/5 rounded-xl p-4 mb-8;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-alabaster font-display text-coffee-brown antialiased selection:bg-coffee-brown selection:text-white">
+<div class="relative mx-auto flex h-auto min-h-screen w-full max-w-md flex-col bg-alabaster overflow-x-hidden px-5 py-8">
+<header class="mb-10">
+<h1 class="font-montserrat text-xs font-bold uppercase tracking-[0.2em] text-muted-gold mb-1">Specification</h1>
+<h2 class="font-montserrat text-2xl font-bold text-coffee-brown leading-tight">Global Top Navigation</h2>
+<p class="text-sm text-coffee-brown/60 mt-2 font-medium">Standard architectural navigation for mobile and tablet views.</p>
+</header>
+<section class="mb-12">
+<span class="spec-label">Default / Active State</span>
+<div class="component-container">
+<nav class="bg-alabaster/80 backdrop-blur-xl border-b border-coffee-brown/10 px-4 h-16 flex items-center justify-between w-full">
+<div class="flex-shrink-0">
+<span class="font-montserrat text-lg font-bold tracking-tight text-coffee-brown">kejapin</span>
+</div>
+<div class="flex items-center gap-4">
+<a class="text-[10px] uppercase tracking-wider nav-link-active" href="#">Marketplace</a>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]">search</span>
+<div class="relative">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-muted-gold rounded-full border border-alabaster"></span>
+</div>
+<div class="w-7 h-7 rounded-lg overflow-hidden border border-coffee-brown/10 bg-gray-200">
+<img alt="User" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBh9wF0-4XEF8lXL7854sIcPAyK1JwQD_jwrAeO3SPobY8cJ5H2Rsnuy2wwnbkJQhEf2LKt4xq0Q1vpwR3soCaSD51k8swEypSi_IwjTtdPSyj9gVtpEYTA5snGB7Ez3VMX_bdHZ9GpaT_rNdgLlB_5sZPyrnjUEhLhsWjcCL2nvV-0AyEwsxQtA7s1McQLcrUWNVJi10gOTPzQwWs7Ggl2VxYPP9rGPM34vUEUu92Nz32Qc05I-03WD8-CBBnblmO8JUvPwoIFEE8"/>
+</div>
+</div>
+</div>
+</nav>
+</div>
+</section>
+<section class="mb-12">
+<span class="spec-label">Typography &amp; Link States</span>
+<div class="component-container space-y-6">
+<div class="flex items-center justify-between border-b border-coffee-brown/5 pb-4">
+<span class="text-xs font-medium text-coffee-brown/50 italic">Active State</span>
+<span class="nav-link-active text-[11px] uppercase tracking-widest">Marketplace</span>
+</div>
+<div class="flex items-center justify-between border-b border-coffee-brown/5 pb-4">
+<span class="text-xs font-medium text-coffee-brown/50 italic">Hover State</span>
+<span class="nav-link-hover text-[11px] uppercase tracking-widest">For Landlords</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs font-medium text-coffee-brown/50 italic">Inactive State</span>
+<span class="nav-link-default text-[11px] uppercase tracking-widest">Insights</span>
+</div>
+</div>
+</section>
+<section class="mb-12">
+<span class="spec-label">Interactive Elements</span>
+<div class="component-container flex justify-around items-center">
+<div class="flex flex-col items-center gap-2">
+<div class="p-2 bg-white rounded-lg shadow-sm border border-coffee-brown/5">
+<span class="material-symbols-outlined text-[22px]">search</span>
+</div>
+<span class="text-[9px] font-bold text-coffee-brown/40 uppercase">Search</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="p-2 bg-white rounded-lg shadow-sm border border-coffee-brown/5 relative">
+<span class="material-symbols-outlined text-[22px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-muted-gold rounded-full border-2 border-white"></span>
+</div>
+<span class="text-[9px] font-bold text-coffee-brown/40 uppercase">Alert</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-lg overflow-hidden border-2 border-muted-gold shadow-sm">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBh9wF0-4XEF8lXL7854sIcPAyK1JwQD_jwrAeO3SPobY8cJ5H2Rsnuy2wwnbkJQhEf2LKt4xq0Q1vpwR3soCaSD51k8swEypSi_IwjTtdPSyj9gVtpEYTA5snGB7Ez3VMX_bdHZ9GpaT_rNdgLlB_5sZPyrnjUEhLhsWjcCL2nvV-0AyEwsxQtA7s1McQLcrUWNVJi10gOTPzQwWs7Ggl2VxYPP9rGPM34vUEUu92Nz32Qc05I-03WD8-CBBnblmO8JUvPwoIFEE8"/>
+</div>
+<span class="text-[9px] font-bold text-coffee-brown/40 uppercase">Profile</span>
+</div>
+</div>
+</section>
+<section class="mt-auto border-t border-coffee-brown/10 pt-8">
+<div class="grid grid-cols-2 gap-y-4 text-[11px]">
+<div>
+<span class="block font-bold uppercase text-coffee-brown/40 mb-1">Font Family</span>
+<span class="font-montserrat font-bold">Montserrat Bold</span>
+</div>
+<div>
+<span class="block font-bold uppercase text-coffee-brown/40 mb-1">Background</span>
+<span class="font-mono text-[10px]">#F4F1EA / 80% Blur</span>
+</div>
+<div>
+<span class="block font-bold uppercase text-coffee-brown/40 mb-1">Active Highlight</span>
+<span class="text-muted-gold font-bold">#E6AF2E</span>
+</div>
+<div>
+<span class="block font-bold uppercase text-coffee-brown/40 mb-1">Logo/Text</span>
+<span class="text-coffee-brown font-bold">#4B3621</span>
+</div>
+</div>
+</section>
+</div>
+
+</body></html>

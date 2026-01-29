@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kejapin - Viewing Schedule</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421",
+                        "coffee-light": "#6d543e",
+                        "alabaster": "#fbfbf9",
+                        "muted-gold": "#c5a059",
+                        "gold-hover": "#b38f4d",
+                        "background-dark": "#1d1915",
+                        "surface-dark": "#2c2825",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(74, 52, 33, 0.06)',
+                        'gold': '0 4px 14px 0 rgba(197, 160, 89, 0.25)',
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-alabaster dark:bg-background-dark font-display text-primary dark:text-gray-100 antialiased selection:bg-muted-gold selection:text-white">
+<div class="relative mx-auto flex h-auto min-h-screen w-full max-w-md flex-col bg-alabaster dark:bg-background-dark overflow-x-hidden pb-24">
+<header class="sticky top-0 z-30 bg-alabaster/95 dark:bg-background-dark/95 backdrop-blur-md px-6 pt-12 pb-4 border-b border-gray-200/50 dark:border-gray-800">
+<div class="flex items-center justify-between mb-2">
+<button class="w-10 h-10 -ml-2 flex items-center justify-center text-primary dark:text-white">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-primary dark:text-white">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<h1 class="text-2xl font-bold text-primary dark:text-white">Viewing Schedule</h1>
+<p class="text-xs text-coffee-light/60 dark:text-gray-400 font-medium uppercase tracking-widest mt-1">Managed Appointments</p>
+</header>
+<div class="px-6 mt-6">
+<div class="flex gap-2 p-1 bg-gray-200/50 dark:bg-surface-dark rounded-xl">
+<button class="flex-1 py-2 text-sm font-bold rounded-lg bg-white dark:bg-primary shadow-sm text-primary dark:text-white">Upcoming</button>
+<button class="flex-1 py-2 text-sm font-medium text-gray-500 dark:text-gray-400">Past Viewings</button>
+</div>
+</div>
+<main class="mt-8 px-6 space-y-8">
+<section>
+<div class="flex items-center gap-3 mb-4">
+<span class="text-xs font-bold text-muted-gold uppercase tracking-tighter">Today</span>
+<div class="h-px flex-1 bg-gray-100 dark:bg-gray-800"></div>
+</div>
+<div class="group relative flex flex-col rounded-2xl bg-white dark:bg-surface-dark overflow-hidden shadow-soft border border-gray-100 dark:border-gray-800 transition-all active:scale-[0.98]">
+<div class="flex p-4 gap-4">
+<div class="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
+<div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCDAmj8514rXMCvZkDqUc1Usb7sgC5iWHiAm9gZwv1ZJKjgPVwY_tloeeuBEy9B4OLCcsqg24hq3vYcm0xjQ_UoDy7m66GoMQhfcikkY1P5szZ8mn4UQEXrYFlUrLiLJrrX4u12zu3UMfmcUS5TfMXjSodwUw05Fgpse2-pEwcAjE6jc00_yjUUGJhnBrtLN_iuCW87pOJAfAlBohZhnoLYVghEgNcdTs6gT2VGSnzQAcCtwUPPFF6hwHhsDDML8Q65-HpyN9_KQoI');"></div>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-muted-gold uppercase tracking-wider">Premium Listing</span>
+<span class="text-[10px] font-medium text-gray-400">#4402</span>
+</div>
+<h3 class="font-bold text-primary dark:text-white leading-tight mt-0.5">The Glass House</h3>
+<div class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span>Kileleshwa, Unit 4B</span>
+</div>
+</div>
+<div class="flex items-center gap-3 text-xs font-semibold text-primary dark:text-gray-200 mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-muted-gold">calendar_today</span>
+<span>Today</span>
+</div>
+<div class="w-1 h-1 rounded-full bg-gray-300"></div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-muted-gold">schedule</span>
+<span>10:30 AM</span>
+</div>
+</div>
+</div>
+</div>
+<div class="px-4 pb-4 flex gap-2">
+<button class="flex-1 flex items-center justify-center gap-2 bg-muted-gold hover:bg-gold-hover text-white py-2.5 rounded-xl text-xs font-bold shadow-gold transition-colors">
+<span class="material-symbols-outlined text-[18px]">event_available</span>
+                        Add to Calendar
+                    </button>
+<a class="flex items-center justify-center px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">map</span>
+</a>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-center gap-3 mb-4">
+<span class="text-xs font-bold text-gray-400 uppercase tracking-tighter">Tomorrow</span>
+<div class="h-px flex-1 bg-gray-100 dark:bg-gray-800"></div>
+</div>
+<div class="group relative flex flex-col rounded-2xl bg-white dark:bg-surface-dark overflow-hidden shadow-soft border border-gray-100 dark:border-gray-800 transition-all active:scale-[0.98]">
+<div class="flex p-4 gap-4">
+<div class="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
+<div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBoURBVj8tA4R6X5EGaspn9TzwhO4P7wmh5pnVN0gcw3g6HPYRGJPTUa8xILELZ3O9cl28TVYawR-egZGqaGBoqm9M1GWi2I3OF1OYd8NPhF8ZMUj2MJ8FDXM2RjueXnjmvbV3rv2xIJM6yXMokjjVzKLQ1ma2zqtIn9Mo_gqc_HMS4JyMRC2CNhtMFUF_twdS7Bw_Iq2hqpUwrFXO2dY-8j4SEaixFUjjTWpNUrk86LLnWGxXPB46u0yIdBEho98tZlLKGB44-Yow');"></div>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-primary/40 dark:text-gray-500 uppercase tracking-wider">Apartment</span>
+<span class="text-[10px] font-medium text-gray-400">#4418</span>
+</div>
+<h3 class="font-bold text-primary dark:text-white leading-tight mt-0.5">Azure Towers</h3>
+<div class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span>Westlands, Block C</span>
+</div>
+</div>
+<div class="flex items-center gap-3 text-xs font-semibold text-primary dark:text-gray-200 mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-muted-gold">calendar_today</span>
+<span>Tomorrow</span>
+</div>
+<div class="w-1 h-1 rounded-full bg-gray-300"></div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-muted-gold">schedule</span>
+<span>02:15 PM</span>
+</div>
+</div>
+</div>
+</div>
+<div class="px-4 pb-4 flex gap-2">
+<button class="flex-1 flex items-center justify-center gap-2 bg-muted-gold hover:bg-gold-hover text-white py-2.5 rounded-xl text-xs font-bold shadow-gold transition-colors">
+<span class="material-symbols-outlined text-[18px]">event_available</span>
+                        Add to Calendar
+                    </button>
+<a class="flex items-center justify-center px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">map</span>
+</a>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-center gap-3 mb-4">
+<span class="text-xs font-bold text-gray-400 uppercase tracking-tighter">Mon, Oct 28</span>
+<div class="h-px flex-1 bg-gray-100 dark:bg-gray-800"></div>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-4 border border-gray-100 dark:border-gray-800 shadow-soft">
+<div class="flex items-start justify-between">
+<div class="flex gap-4">
+<div class="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+<img alt="Property" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCW_ZpEH5giHp-RIGsIb1TvNsq_KK0wJnPNk0_Ji1x_YPuhEadFLqkVNd80JVYu_0FM3L4bQjowN2TxF0D9YSzoc4DcEuNySpNC8aRRkJGkerMODlwfh7j0lu2rO9FGS3iDEVIG0FI8x8OScn5BNYkkQy5KTpxrX4M5p6gHbE5d5zA2vsBSpKZhQ4VihxCrelQ_9WnbhCdF5B64aTAhrH_V65qS1mWii7OO2-t_R_ivzHffgBUG5EMsEkPNGNCJFDTCiDCuEPycIsc"/>
+</div>
+<div>
+<h4 class="font-bold text-sm text-primary dark:text-white">The Penthouse Loft</h4>
+<p class="text-xs text-gray-500 mt-0.5">Riverside Drive</p>
+<p class="text-[11px] font-bold text-muted-gold mt-1">09:00 AM</p>
+</div>
+</div>
+<button class="text-muted-gold">
+<span class="material-symbols-outlined">event_note</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-background-dark/95 border-t border-gray-200 dark:border-gray-800 backdrop-blur-lg max-w-md mx-auto pb-6 pt-3 px-6">
+<div class="flex justify-between items-center">
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">search</span>
+<span class="text-[10px] font-medium">Search</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">favorite</span>
+<span class="text-[10px] font-medium">Saved</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary dark:text-muted-gold">
+<span class="material-symbols-outlined filled" style="font-variation-settings: 'FILL' 1">calendar_month</span>
+<span class="text-[10px] font-bold">Schedule</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="text-[10px] font-medium">Alerts</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</button>
+</div>
+</nav>
+</div>
+
+</body></html>

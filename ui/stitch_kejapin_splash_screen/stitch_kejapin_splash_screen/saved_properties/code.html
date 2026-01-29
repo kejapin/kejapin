@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kejapin - Saved Properties</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421",
+                        "coffee-light": "#6d543e",
+                        "background-light": "#f7f7f6",
+                        "background-dark": "#1d1915",
+                        "alabaster": "#fbfbf9",
+                        "surface-dark": "#2c2825",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(74, 52, 33, 0.08)',
+                        'floating': '0 8px 30px -4px rgba(74, 52, 33, 0.12)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #4a3421;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #4a3421;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-primary dark:text-gray-100 antialiased selection:bg-primary selection:text-white">
+<div class="relative mx-auto flex h-auto min-h-screen w-full max-w-md flex-col bg-background-light dark:bg-background-dark overflow-x-hidden pb-24">
+<div class="sticky top-0 z-40 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md px-5 py-4 border-b border-gray-100 dark:border-white/5">
+<div class="flex items-center justify-between">
+<h1 class="text-2xl font-bold text-primary dark:text-white tracking-tight">Saved Homes</h1>
+<div class="flex gap-3">
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-surface-dark shadow-sm hover:bg-gray-50 transition active:scale-95">
+<span class="material-symbols-outlined text-primary dark:text-white">tune</span>
+</button>
+</div>
+</div>
+<div class="mt-4 flex gap-2 overflow-x-auto no-scrollbar pb-1">
+<button class="shrink-0 rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-white shadow-sm">All Saved</button>
+<button class="shrink-0 rounded-full bg-white dark:bg-surface-dark px-4 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10">Compare</button>
+<button class="shrink-0 rounded-full bg-white dark:bg-surface-dark px-4 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10">Price Drop</button>
+<button class="shrink-0 rounded-full bg-white dark:bg-surface-dark px-4 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10">Near Work</button>
+</div>
+</div>
+<div class="px-5 py-4 flex flex-col gap-5">
+<div class="group relative flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-surface-dark shadow-soft transition-all hover:shadow-floating">
+<div class="relative aspect-[16/9] w-full bg-gray-200 overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCDAmj8514rXMCvZkDqUc1Usb7sgC5iWHiAm9gZwv1ZJKjgPVwY_tloeeuBEy9B4OLCcsqg24hq3vYcm0xjQ_UoDy7m66GoMQhfcikkY1P5szZ8mn4UQEXrYFlUrLiLJrrX4u12zu3UMfmcUS5TfMXjSodwUw05Fgpse2-pEwcAjE6jc00_yjUUGJhnBrtLN_iuCW87pOJAfAlBohZhnoLYVghEgNcdTs6gT2VGSnzQAcCtwUPPFF6hwHhsDDML8Q65-HpyN9_KQoI');"></div>
+<div class="absolute top-3 right-3 z-10">
+<button class="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur text-red-500 shadow-sm">
+<span class="material-symbols-outlined fill-current text-[20px]">favorite</span>
+</button>
+</div>
+<div class="absolute bottom-3 left-3 z-10 flex gap-2">
+<div class="rounded-md bg-black/60 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+                        Loft
+                    </div>
+</div>
+</div>
+<div class="p-4">
+<div class="flex justify-between items-start mb-1">
+<div>
+<h3 class="text-lg font-bold text-primary dark:text-white leading-tight">The Lofts @ Westlands</h3>
+<p class="text-xs text-coffee-light dark:text-gray-400 mt-0.5">Westlands, Nairobi</p>
+</div>
+<div class="text-right">
+<span class="block text-sm font-bold text-primary dark:text-white">KES 85k</span>
+<span class="block text-[10px] text-gray-400">/mo total</span>
+</div>
+</div>
+<div class="my-3 h-px w-full bg-gray-100 dark:bg-white/5"></div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Life Pins Impact</span>
+<label class="flex items-center cursor-pointer" for="toggle1">
+<div class="relative">
+<input checked="" class="sr-only peer" id="toggle1" type="checkbox"/>
+<div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</div>
+</label>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-1">
+<div class="rounded-lg bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/20 p-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-green-600 dark:text-green-400 text-[18px]">work</span>
+<div>
+<p class="text-xs font-bold text-primary dark:text-white">22 min</p>
+<p class="text-[10px] text-green-600 dark:text-green-400">Great commute</p>
+</div>
+</div>
+<div class="rounded-lg bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/20 p-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-orange-600 dark:text-orange-400 text-[18px]">fitness_center</span>
+<div>
+<p class="text-xs font-bold text-primary dark:text-white">5 min</p>
+<p class="text-[10px] text-orange-600 dark:text-orange-400">Walking dist.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="group relative flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-surface-dark shadow-soft transition-all hover:shadow-floating opacity-90">
+<div class="relative aspect-[16/9] w-full bg-gray-200 overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBoURBVj8tA4R6X5EGaspn9TzwhO4P7wmh5pnVN0gcw3g6HPYRGJPTUa8xILELZ3O9cl28TVYawR-egZGqaGBoqm9M1GWi2I3OF1OYd8NPhF8ZMUj2MJ8FDXM2RjueXnjmvbV3rv2xIJM6yXMokjjVzKLQ1ma2zqtIn9Mo_gqc_HMS4JyMRC2CNhtMFUF_twdS7Bw_Iq2hqpUwrFXO2dY-8j4SEaixFUjjTWpNUrk86LLnWGxXPB46u0yIdBEho98tZlLKGB44-Yow');"></div>
+<div class="absolute top-3 right-3 z-10">
+<button class="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur text-red-500 shadow-sm">
+<span class="material-symbols-outlined fill-current text-[20px]">favorite</span>
+</button>
+</div>
+<div class="absolute bottom-3 left-3 z-10 flex gap-2">
+<div class="rounded-md bg-black/60 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+                        Apartment
+                    </div>
+</div>
+</div>
+<div class="p-4">
+<div class="flex justify-between items-start mb-1">
+<div>
+<h3 class="text-lg font-bold text-primary dark:text-white leading-tight">Riverside Residency</h3>
+<p class="text-xs text-coffee-light dark:text-gray-400 mt-0.5">Riverside Dr, Nairobi</p>
+</div>
+<div class="text-right">
+<span class="block text-sm font-bold text-primary dark:text-white">KES 120k</span>
+<span class="block text-[10px] text-gray-400">/mo total</span>
+</div>
+</div>
+<div class="my-3 h-px w-full bg-gray-100 dark:bg-white/5"></div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Life Pins Impact</span>
+<label class="flex items-center cursor-pointer" for="toggle2">
+<div class="relative">
+<input class="sr-only peer" id="toggle2" type="checkbox"/>
+<div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</div>
+</label>
+</div>
+<div class="hidden">
+</div>
+<div class="mt-1">
+<p class="text-[11px] text-gray-400 italic">Toggle to see commute times</p>
+</div>
+</div>
+</div>
+</div>
+<div class="group relative flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-surface-dark shadow-soft transition-all hover:shadow-floating">
+<div class="relative aspect-[16/9] w-full bg-gray-200 overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Modern townhouse with garden" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDx_-G8vTXvlYbrgAikidAD9FIAQIq0pZ_DR5mNSGzE4W6t-QihwsEyZHBNU2Zv50wYIi0PFF8A0Zr8sxRvF6MNU6ZoUILNPudLpGhZffHlhvFVQsg23TEVnRnlE9bvixsO8boVVL5qfFPE-fyOqLLJbNiV9Ij_fzHoIdxUO8lT_45PsQ87EbCHtNjH68ONcLC51dOdyh2w6nfLIRMoPMfcfXpsuPdQ4FG-J4DOkTkUM9TQQK_5973RANUJ2QLde_6jP2-Ly0mdihM');"></div>
+<div class="absolute top-3 right-3 z-10">
+<button class="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur text-red-500 shadow-sm">
+<span class="material-symbols-outlined fill-current text-[20px]">favorite</span>
+</button>
+</div>
+<div class="absolute bottom-3 left-3 z-10 flex gap-2">
+<div class="rounded-md bg-black/60 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+                        Townhouse
+                    </div>
+</div>
+</div>
+<div class="p-4">
+<div class="flex justify-between items-start mb-1">
+<div>
+<h3 class="text-lg font-bold text-primary dark:text-white leading-tight">Kilimani Garden House</h3>
+<p class="text-xs text-coffee-light dark:text-gray-400 mt-0.5">Kilimani, Nairobi</p>
+</div>
+<div class="text-right">
+<span class="block text-sm font-bold text-primary dark:text-white">KES 95k</span>
+<span class="block text-[10px] text-gray-400">/mo total</span>
+</div>
+</div>
+<div class="my-3 h-px w-full bg-gray-100 dark:bg-white/5"></div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Life Pins Impact</span>
+<label class="flex items-center cursor-pointer" for="toggle3">
+<div class="relative">
+<input checked="" class="sr-only peer" id="toggle3" type="checkbox"/>
+<div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</div>
+</label>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-1">
+<div class="rounded-lg bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-900/20 p-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-yellow-600 dark:text-yellow-500 text-[18px]">work</span>
+<div>
+<p class="text-xs font-bold text-primary dark:text-white">45 min</p>
+<p class="text-[10px] text-yellow-600 dark:text-yellow-500">Moderate traffic</p>
+</div>
+</div>
+<div class="rounded-lg bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/20 p-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-green-600 dark:text-green-400 text-[18px]">fitness_center</span>
+<div>
+<p class="text-xs font-bold text-primary dark:text-white">10 min</p>
+<p class="text-[10px] text-green-600 dark:text-green-400">Short drive</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="px-5 pb-8 text-center mt-4">
+<p class="text-sm text-gray-400">You've reached the end of your saved list.</p>
+<button class="mt-4 px-6 py-3 rounded-xl bg-primary/5 text-primary dark:text-white dark:bg-white/10 font-semibold text-sm hover:bg-primary/10 transition-colors">
+            Discover More Homes
+        </button>
+</div>
+<div class="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-background-dark/95 backdrop-blur-lg max-w-md mx-auto">
+<div class="flex justify-around items-center px-2 py-3">
+<button class="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-primary dark:hover:text-white transition">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="text-[10px] font-medium">Explore</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-primary dark:text-white transition">
+<span class="material-symbols-outlined text-[24px] fill-current">favorite</span>
+<span class="text-[10px] font-medium">Saved</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-primary dark:hover:text-white transition">
+<span class="material-symbols-outlined text-[24px]">pin_drop</span>
+<span class="text-[10px] font-medium">Life Pins</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-primary dark:hover:text-white transition">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</button>
+</div>
+<div class="h-1"></div>
+</div>
+</div>
+
+</body></html>

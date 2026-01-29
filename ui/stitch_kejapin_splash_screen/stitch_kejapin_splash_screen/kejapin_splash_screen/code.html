@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Luxurious kejapin Splash Screen</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&amp;family=Work+Sans:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "coffee-brown": "#4B3621",
+                        "ebony": "#0D0D0D",
+                        "muted-gold": "#E6AF2E",
+                    },
+                    fontFamily: {
+                        "montserrat": ["Montserrat", "sans-serif"],
+                        "work-sans": ["Work Sans", "sans-serif"]
+                    },
+                    letterSpacing: {
+                        "ultra-wide": "0.4em",
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        :root {
+            --muted-gold: #E6AF2E;
+        }
+        body {
+            background: radial-gradient(circle at center, #4B3621 0%, #0D0D0D 100%);
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+        }
+        .metallic-text {
+            background: linear-gradient(135deg, #E6AF2E 0%, #F9D976 45%, #E6AF2E 55%, #B3871D 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.5));
+        }
+        .blueprint-watermark {
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0));
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0));
+        }
+        .pulse-ring {
+            position: absolute;
+            border: 1px solid var(--muted-gold);
+            border-radius: 50%;
+            opacity: 0;
+            animation: ring-pulse 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes ring-pulse {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+        .loader-ring {
+            border: 1px solid rgba(230, 175, 46, 0.1);
+            border-top: 1px solid var(--muted-gold);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1.5s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-screen w-full flex flex-col items-center justify-center relative text-white">
+<div class="absolute inset-0 z-0 pointer-events-none opacity-[0.03] flex items-center justify-center overflow-hidden blueprint-watermark">
+<svg class="w-[150%] h-auto" fill="none" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+<path d="M50 50H750V750H50V50Z" stroke="white" stroke-width="0.5"></path>
+<path d="M400 50V750M50 400H750" stroke="white" stroke-width="0.5"></path>
+<path d="M100 100L700 700M700 100L100 700" stroke="white" stroke-width="0.5"></path>
+<circle cx="400" cy="400" r="300" stroke="white" stroke-width="0.5"></circle>
+<path d="M200 200V600H600V200H200Z" stroke="white" stroke-width="0.5"></path>
+<path d="M50 200H750M50 600H750" stroke="white" stroke-width="0.5"></path>
+<path d="M200 50V750M600 50V750" stroke="white" stroke-width="0.5"></path>
+</svg>
+</div>
+<div class="z-10 flex flex-col items-center justify-center space-y-8">
+<div class="flex items-end justify-center">
+<span class="text-7xl font-extrabold font-work-sans metallic-text tracking-tighter leading-none">keja</span>
+<div class="relative flex items-center justify-center px-1 -mb-[5px]">
+<div class="pulse-ring w-12 h-12"></div>
+<div class="pulse-ring w-12 h-12" style="animation-delay: 1s;"></div>
+<span class="material-symbols-outlined text-[68px] metallic-text leading-none select-none relative z-10" style="font-variation-settings: 'FILL' 1, 'wght' 700;">location_on</span>
+</div>
+<span class="text-7xl font-extrabold font-work-sans metallic-text tracking-tighter leading-none">in</span>
+</div>
+<div class="text-center">
+<h2 class="text-muted-gold font-montserrat text-sm md:text-base font-light tracking-ultra-wide uppercase opacity-80">
+                Don't just list it. Pin it.
+            </h2>
+</div>
+</div>
+<div class="absolute bottom-16 flex flex-col items-center space-y-4">
+<div class="loader-ring"></div>
+<span class="text-[rgba(230,175,46,0.4)] font-montserrat text-[10px] tracking-[0.3em] uppercase">Structural Intelligence</span>
+</div>
+<div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] pointer-events-none"></div>
+
+</body></html>

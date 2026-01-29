@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Listing Wizard - Location</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421",
+                        "background-light": "#f7f7f6",
+                        "background-dark": "#1d1915",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'floating': '0 10px 40px -10px rgba(74, 52, 33, 0.15)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Hide scrollbar for clean horizontal scrolling if needed */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Map texture pattern overlay */
+        .map-texture {
+            background-image: radial-gradient(#4a3421 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
+            opacity: 0.1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#161413] antialiased">
+<div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto bg-background-light dark:bg-background-dark overflow-x-hidden shadow-2xl border-x border-gray-100 dark:border-gray-800">
+<!-- Top App Bar -->
+<div class="sticky top-0 z-30 flex items-center bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm p-4 pb-2 justify-between border-b border-gray-200 dark:border-gray-800">
+<button class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 active:bg-black/10 transition-colors text-[#161413] dark:text-white">
+<span class="material-symbols-outlined" style="font-size: 24px;">arrow_back</span>
+</button>
+<h2 class="text-[#161413] dark:text-white text-base font-bold leading-tight tracking-[-0.015em] flex-1 text-center uppercase text-xs tracking-widest text-opacity-70">Add Listing</h2>
+<button class="flex h-10 items-center justify-end px-2">
+<p class="text-[#7f756c] text-sm font-bold leading-normal tracking-[0.015em] shrink-0 hover:text-primary transition-colors">Cancel</p>
+</button>
+</div>
+<!-- Stepper UI -->
+<div class="w-full bg-background-light dark:bg-background-dark px-6 pt-4 pb-6">
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-primary dark:text-white">Location</span>
+<span class="text-xs font-medium text-gray-400">Step 2 of 4</span>
+</div>
+<div class="flex w-full flex-row items-center gap-2">
+<!-- Step 1: Basics (Completed) -->
+<div class="h-1.5 flex-1 rounded-full bg-primary opacity-40"></div>
+<!-- Step 2: Location (Active) -->
+<div class="h-1.5 flex-1 rounded-full bg-primary relative">
+<div class="absolute -right-1 -top-1 size-3.5 bg-background-light dark:bg-background-dark rounded-full border-2 border-primary flex items-center justify-center"></div>
+</div>
+<!-- Step 3: Photos (Inactive) -->
+<div class="h-1.5 flex-1 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+<!-- Step 4: Financials (Inactive) -->
+<div class="h-1.5 flex-1 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+</div>
+</div>
+<!-- Main Content Scroll Area -->
+<div class="flex-1 flex flex-col pb-32">
+<!-- Headline -->
+<div class="px-6 pb-2">
+<h2 class="text-[#161413] dark:text-white tracking-tight text-[28px] font-bold leading-tight text-left">Where is the property?</h2>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-relaxed pt-2">Pin the exact location on the map to help us display nearby amenities.</p>
+</div>
+<!-- Map Component -->
+<div class="relative px-4 py-6">
+<div class="group relative w-full aspect-[4/3] rounded-xl overflow-hidden shadow-soft border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
+<!-- Map Image Background -->
+<div class="w-full h-full bg-cover bg-center opacity-80 dark:opacity-60 transition-transform duration-700 group-hover:scale-105" data-alt="Interactive map view of a city street layout" data-location="City Map View" style='background-image: url("https://placeholder.pics/svg/300");'>
+</div>
+<!-- Overlay Gradient -->
+<div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10 pointer-events-none"></div>
+<!-- Center Pin -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none drop-shadow-xl z-10">
+<span class="material-symbols-outlined text-primary text-5xl fill-current">location_on</span>
+<div class="w-3 h-1.5 bg-black/20 rounded-full blur-[2px] mt-[-6px]"></div>
+</div>
+<!-- Interactive Controls -->
+<div class="absolute top-3 right-3 flex flex-col gap-2">
+<button class="size-10 bg-white dark:bg-gray-800 rounded-lg shadow-sm flex items-center justify-center text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined text-xl">layers</span>
+</button>
+</div>
+<div class="absolute bottom-3 right-3">
+<button class="bg-white dark:bg-gray-800 text-primary dark:text-white text-xs font-bold py-2 px-3 rounded-lg shadow-md flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined text-sm">my_location</span>
+                            Use Current Location
+                        </button>
+</div>
+</div>
+</div>
+<!-- Address Form Fields -->
+<div class="px-6 flex flex-col gap-5">
+<!-- Search -->
+<div class="relative">
+<label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Search Address</label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+<span class="material-symbols-outlined text-xl">search</span>
+</span>
+<input class="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm" placeholder="Start typing address..." type="text"/>
+</div>
+</div>
+<!-- Manual Entry Section -->
+<div class="grid grid-cols-1 gap-4">
+<div>
+<label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Street Address</label>
+<input class="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="text" value="1284 Arch Street"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Unit / Apt <span class="text-gray-300 font-normal lowercase">(Optional)</span></label>
+<input class="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="e.g. 4B" type="text"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">City</label>
+<input class="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="text" value="San Francisco"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">State</label>
+<div class="relative">
+<select class="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+<option>CA</option>
+<option>NY</option>
+<option>TX</option>
+</select>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</span>
+</div>
+</div>
+<div>
+<label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Zip Code</label>
+<input class="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="text" value="94107"/>
+</div>
+</div>
+</div>
+<!-- Privacy Toggle -->
+<div class="flex items-center justify-between py-2 mt-2 bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-100 dark:border-gray-700">
+<div class="flex gap-3">
+<div class="flex items-center justify-center size-10 rounded-full bg-primary/10 text-primary shrink-0">
+<span class="material-symbols-outlined text-xl">visibility_off</span>
+</div>
+<div>
+<p class="text-sm font-bold text-gray-900 dark:text-white">Hide exact address</p>
+<p class="text-xs text-gray-500">Only show city and zip on listing</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- Fixed Bottom Actions -->
+<div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-40 bg-white/90 dark:bg-[#1d1915]/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 p-4 pb-8 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+<div class="flex gap-3">
+<button class="px-6 py-3.5 rounded-lg border border-gray-300 dark:border-gray-600 font-bold text-gray-700 dark:text-gray-200 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors w-1/3 text-sm">
+                    Back
+                </button>
+<button class="flex-1 px-6 py-3.5 rounded-lg bg-primary text-white font-bold shadow-floating hover:bg-[#3d2b1b] transition-colors flex items-center justify-center gap-2 text-sm">
+                    Continue to Photos
+                    <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>

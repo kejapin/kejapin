@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Desktop Sidebar Navigation - kejapin</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;700&amp;family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "alabaster": "#F4F1EA",
+                        "coffee": "#4B3621",
+                        "sage": "#6B8E23",
+                        "charcoal": "#333333",
+                        "muted-gold": "#E6AF2E",
+                    },
+                    fontFamily: {
+                        "sans": ["Lato", "sans-serif"],
+                        "heading": ["Montserrat", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            min-height: 100dvh;
+        }
+        .sidebar-active-indicator {
+            @apply absolute left-0 top-0 bottom-0 w-1 bg-muted-gold;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-alabaster font-sans text-charcoal antialiased flex">
+<nav class="fixed inset-y-0 left-0 w-64 bg-white border-r border-coffee/10 flex flex-col z-50">
+<div class="px-8 py-10">
+<div class="flex items-center gap-2">
+<div class="size-8 bg-coffee rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xl">domain</span>
+</div>
+<h1 class="text-coffee font-heading text-2xl font-bold tracking-tight uppercase">kejapin</h1>
+</div>
+</div>
+<div class="flex-1 px-4 space-y-1 overflow-y-auto no-scrollbar">
+<a class="relative group flex items-center gap-4 px-4 py-3 bg-alabaster/30 transition-all rounded-r-lg" href="#">
+<div class="sidebar-active-indicator"></div>
+<span class="material-symbols-outlined text-muted-gold" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="text-coffee font-heading text-sm font-semibold tracking-wide">Marketplace</span>
+</a>
+<a class="group flex items-center gap-4 px-4 py-3 text-charcoal/60 hover:text-coffee transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined group-hover:text-coffee">house</span>
+<span class="font-heading text-sm font-medium tracking-wide">My Rentals</span>
+</a>
+<a class="group flex items-center gap-4 px-4 py-3 text-charcoal/60 hover:text-coffee transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined group-hover:text-coffee">chat_bubble</span>
+<span class="font-heading text-sm font-medium tracking-wide">Messages</span>
+<span class="ml-auto bg-muted-gold text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">3</span>
+</a>
+<a class="group flex items-center gap-4 px-4 py-3 text-charcoal/60 hover:text-coffee transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined group-hover:text-coffee">account_balance_wallet</span>
+<span class="font-heading text-sm font-medium tracking-wide">Wallet</span>
+</a>
+<a class="group flex items-center gap-4 px-4 py-3 text-charcoal/60 hover:text-coffee transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined group-hover:text-coffee">settings</span>
+<span class="font-heading text-sm font-medium tracking-wide">Settings</span>
+</a>
+</div>
+<div class="p-6 border-t border-coffee/5">
+<div class="flex items-center gap-3 p-2 rounded-xl bg-alabaster/20">
+<div class="size-10 rounded-full bg-coffee/10 border border-coffee/5 relative flex-shrink-0">
+<img alt="User" class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMnQE35XEgCjMrflBVHFkheoAAKja7iTGoOn8BZwbaIbiVwJROfoUJ-5UuK3R6ICRebVLtdqhbw1ofVeU8-K9FOI6xoBN3mH9VACv0FjuXdcwwKu6MG_GTi87m3VX90-UeUry-I53_3ysRIyaYKmAWYPimTAVMsjf-3H23L7HiObmoOxnjagCCZbiCxaLufLZjLCvO6Lce0t02izeigG-_LEQn9TF6-DK9JwSuSKNwxESYtXnd4G0ASh5OZVr1HoyQ7dONrertVsw"/>
+<div class="absolute -bottom-0.5 -right-0.5 size-4 bg-muted-gold rounded-full border-2 border-white flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-size: 10px; font-weight: 800;">check</span>
+</div>
+</div>
+<div class="flex flex-col min-w-0">
+<p class="text-coffee font-heading text-xs font-bold truncate">Adrian Chambers</p>
+<div class="flex items-center gap-1">
+<span class="text-muted-gold text-[10px] font-bold uppercase tracking-wider">Verified</span>
+</div>
+</div>
+<button class="ml-auto text-charcoal/30 hover:text-coffee">
+<span class="material-symbols-outlined" style="font-size: 18px;">more_vert</span>
+</button>
+</div>
+</div>
+</nav>
+<main class="flex-1 ml-64 p-12 bg-alabaster">
+<header class="mb-8">
+<h2 class="text-3xl font-heading font-bold text-coffee mb-2">Marketplace</h2>
+<p class="text-charcoal/60">Discover premium architectural properties for your next stay.</p>
+</header>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="bg-white rounded-xl h-64 border border-coffee/5 shadow-sm"></div>
+<div class="bg-white rounded-xl h-64 border border-coffee/5 shadow-sm"></div>
+<div class="bg-white rounded-xl h-64 border border-coffee/5 shadow-sm"></div>
+</div>
+</main>
+
+</body></html>

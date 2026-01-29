@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kejapin - Property Analytics</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421",
+                        "primary-dark": "#362618",
+                        "coffee-light": "#8c6b5d",
+                        "accent": "#d4a373",
+                        "success": "#4caf50",
+                        "background-light": "#f7f7f6",
+                        "background-dark": "#1d1915",
+                        "alabaster": "#fbfbf9",
+                        "surface-dark": "#2c2825",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 8px 30px -4px rgba(74, 52, 33, 0.08)',
+                        'inner-light': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .chart-bar {
+            transition: height 0.5s ease-out;
+        }
+    </style>
+<style>
+        body {
+          min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-primary dark:text-gray-100 antialiased selection:bg-primary selection:text-white">
+<div class="relative mx-auto flex h-auto min-h-screen w-full max-w-md flex-col bg-background-light dark:bg-background-dark overflow-x-hidden shadow-2xl pb-24">
+<div class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 max-w-md mx-auto">
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 dark:bg-black/40 backdrop-blur-md shadow-sm transition active:scale-95 border border-white/20">
+<span class="material-symbols-outlined text-primary dark:text-white">arrow_back</span>
+</button>
+<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 dark:bg-black/40 backdrop-blur-md shadow-sm border border-white/20">
+<span class="text-xs font-semibold text-primary dark:text-white uppercase tracking-wider">Analytics</span>
+</div>
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 dark:bg-black/40 backdrop-blur-md shadow-sm transition active:scale-95 border border-white/20">
+<span class="material-symbols-outlined text-primary dark:text-white">calendar_month</span>
+</button>
+</div>
+<div class="relative w-full h-64 bg-gray-200 dark:bg-gray-800">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Modern loft interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCDAmj8514rXMCvZkDqUc1Usb7sgC5iWHiAm9gZwv1ZJKjgPVwY_tloeeuBEy9B4OLCcsqg24hq3vYcm0xjQ_UoDy7m66GoMQhfcikkY1P5szZ8mn4UQEXrYFlUrLiLJrrX4u12zu3UMfmcUS5TfMXjSodwUw05Fgpse2-pEwcAjE6jc00_yjUUGJhnBrtLN_iuCW87pOJAfAlBohZhnoLYVghEgNcdTs6gT2VGSnzQAcCtwUPPFF6hwHhsDDML8Q65-HpyN9_KQoI');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-background-light dark:from-background-dark via-transparent to-black/30"></div>
+</div>
+<div class="relative -mt-10 z-10 flex flex-col gap-6 px-5">
+<div class="flex flex-col gap-1">
+<div class="inline-flex self-start items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/60 dark:bg-black/40 backdrop-blur border border-white/20 mb-2">
+<div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+<span class="text-[10px] font-bold uppercase tracking-wide text-primary dark:text-white">Live Data</span>
+</div>
+<h1 class="text-2xl font-bold text-primary dark:text-white tracking-tight">The Lofts @ Westlands</h1>
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium text-coffee-light dark:text-gray-400">Unit 4B • Premium Lease</span>
+<span class="text-xs font-medium text-gray-400">Last updated: 2m ago</span>
+</div>
+</div>
+<div class="flex p-1 bg-gray-200/50 dark:bg-white/5 rounded-xl">
+<button class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-gray-500 dark:text-gray-400 hover:text-primary transition">1M</button>
+<button class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-gray-500 dark:text-gray-400 hover:text-primary transition">3M</button>
+<button class="flex-1 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-surface-dark text-primary dark:text-white shadow-sm transition">YTD</button>
+<button class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-gray-500 dark:text-gray-400 hover:text-primary transition">ALL</button>
+</div>
+<div class="rounded-2xl bg-white dark:bg-surface-dark p-5 shadow-soft border border-primary/5 dark:border-white/5">
+<div class="flex justify-between items-start mb-6">
+<div>
+<p class="text-xs font-bold uppercase tracking-widest text-coffee-light dark:text-gray-400 mb-1">Total Revenue</p>
+<div class="flex items-baseline gap-1">
+<span class="text-sm font-medium text-primary/60 dark:text-gray-400">KES</span>
+<h2 class="text-3xl font-bold text-primary dark:text-white">2.4M</h2>
+</div>
+</div>
+<div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-xs font-bold">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                    +12.5%
+                </div>
+</div>
+<div class="h-40 w-full flex items-end justify-between gap-2">
+<div class="w-full flex flex-col justify-end group gap-1">
+<div class="w-full bg-primary/20 dark:bg-white/10 rounded-t-sm h-[40%] group-hover:bg-primary/30 transition-all relative"></div>
+<span class="text-[10px] text-center text-gray-400 font-medium">J</span>
+</div>
+<div class="w-full flex flex-col justify-end group gap-1">
+<div class="w-full bg-primary/20 dark:bg-white/10 rounded-t-sm h-[55%] group-hover:bg-primary/30 transition-all relative"></div>
+<span class="text-[10px] text-center text-gray-400 font-medium">F</span>
+</div>
+<div class="w-full flex flex-col justify-end group gap-1">
+<div class="w-full bg-primary/20 dark:bg-white/10 rounded-t-sm h-[45%] group-hover:bg-primary/30 transition-all relative"></div>
+<span class="text-[10px] text-center text-gray-400 font-medium">M</span>
+</div>
+<div class="w-full flex flex-col justify-end group gap-1">
+<div class="w-full bg-primary/20 dark:bg-white/10 rounded-t-sm h-[70%] group-hover:bg-primary/30 transition-all relative"></div>
+<span class="text-[10px] text-center text-gray-400 font-medium">A</span>
+</div>
+<div class="w-full flex flex-col justify-end group gap-1">
+<div class="w-full bg-primary dark:bg-white rounded-t-sm h-[90%] shadow-lg shadow-primary/20 transition-all relative">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                            850k
+                        </div>
+</div>
+<span class="text-[10px] text-center text-primary font-bold">M</span>
+</div>
+<div class="w-full flex flex-col justify-end group gap-1">
+<div class="w-full bg-primary/20 dark:bg-white/10 rounded-t-sm h-[75%] group-hover:bg-primary/30 transition-all relative"></div>
+<span class="text-[10px] text-center text-gray-400 font-medium">J</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<div class="rounded-2xl bg-white dark:bg-surface-dark p-5 shadow-soft border border-primary/5 dark:border-white/5 relative overflow-hidden">
+<div class="relative z-10 flex justify-between items-start">
+<div>
+<p class="text-xs font-bold uppercase tracking-widest text-coffee-light dark:text-gray-400 mb-1">Occupancy Rate</p>
+<h2 class="text-3xl font-bold text-primary dark:text-white">96%</h2>
+<p class="text-xs text-gray-500 mt-1">Avg 92% in your area</p>
+</div>
+<div class="h-10 w-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined">pie_chart</span>
+</div>
+</div>
+<div class="mt-6 relative h-24 w-full">
+<div class="absolute inset-0 flex flex-col justify-between opacity-10">
+<div class="border-t border-primary"></div>
+<div class="border-t border-primary"></div>
+<div class="border-t border-primary"></div>
+</div>
+<svg class="w-full h-full drop-shadow-md overflow-visible" preserveAspectRatio="none" viewBox="0 0 300 100">
+<defs>
+<linearGradient id="gradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#4a3421;stop-opacity:0.2"></stop>
+<stop offset="100%" style="stop-color:#4a3421;stop-opacity:0"></stop>
+</linearGradient>
+</defs>
+<path d="M0,80 C50,80 50,40 100,40 C150,40 150,60 200,50 C250,40 250,10 300,20 L300,100 L0,100 Z" fill="url(#gradient)"></path>
+<path d="M0,80 C50,80 50,40 100,40 C150,40 150,60 200,50 C250,40 250,10 300,20" fill="none" stroke="#4a3421" stroke-width="3" vector-effect="non-scaling-stroke"></path>
+<circle cx="300" cy="20" fill="#4a3421" r="4" stroke="#fff" stroke-width="2"></circle>
+</svg>
+</div>
+</div>
+</div>
+<div>
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-lg font-bold text-primary dark:text-white">Tenant Feedback</h3>
+<span class="text-xs font-semibold text-primary/60 dark:text-gray-400 cursor-pointer">View All Reviews</span>
+</div>
+<div class="rounded-2xl bg-white dark:bg-surface-dark p-5 shadow-soft border border-primary/5 dark:border-white/5">
+<div class="flex items-center gap-4 mb-6">
+<div class="flex flex-col items-center justify-center h-16 w-16 rounded-2xl bg-primary text-white shadow-lg">
+<span class="text-2xl font-bold">4.8</span>
+<div class="flex text-[8px] gap-0.5 text-yellow-300">
+<span class="material-symbols-outlined text-[10px] fill-current">star</span>
+<span class="material-symbols-outlined text-[10px] fill-current">star</span>
+<span class="material-symbols-outlined text-[10px] fill-current">star</span>
+<span class="material-symbols-outlined text-[10px] fill-current">star</span>
+<span class="material-symbols-outlined text-[10px] fill-current">star_half</span>
+</div>
+</div>
+<div>
+<p class="text-sm font-semibold text-primary dark:text-white">Excellent</p>
+<p class="text-xs text-gray-500 dark:text-gray-400">Based on 12 tenant reviews</p>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<div>
+<div class="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+<span>Maintenance</span>
+<span class="text-primary font-bold">4.9</span>
+</div>
+<div class="h-2 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 98%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+<span>Responsiveness</span>
+<span class="text-primary font-bold">4.7</span>
+</div>
+<div class="h-2 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-coffee-light rounded-full" style="width: 94%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+<span>Value for Money</span>
+<span class="text-primary font-bold">4.5</span>
+</div>
+<div class="h-2 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-accent rounded-full" style="width: 90%"></div>
+</div>
+</div>
+</div>
+<div class="mt-5 pt-4 border-t border-dashed border-gray-200 dark:border-gray-700">
+<div class="flex gap-3">
+<div class="h-8 w-8 rounded-full bg-gray-200 shrink-0 overflow-hidden">
+<span class="material-symbols-outlined text-gray-400 p-1">person</span>
+</div>
+<div>
+<p class="text-xs text-gray-600 dark:text-gray-300 italic">"The maintenance team was incredibly fast fixing the plumbing issue last week. Really appreciate the app updates."</p>
+<p class="text-[10px] text-gray-400 mt-1 font-medium">— Sarah M., Unit 4B • 2 days ago</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 pb-6">
+<button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-sm active:scale-95 transition">
+<span class="material-symbols-outlined text-primary dark:text-white">request_quote</span>
+<span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Financial Report</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-sm active:scale-95 transition">
+<span class="material-symbols-outlined text-primary dark:text-white">build</span>
+<span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Maintenance Log</span>
+</button>
+</div>
+</div>
+<div class="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-background-dark/95 px-5 py-4 backdrop-blur-lg max-w-md mx-auto">
+<div class="flex gap-3">
+<button class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark text-primary dark:text-white shadow-sm active:scale-95 transition">
+<span class="material-symbols-outlined">ios_share</span>
+</button>
+<button class="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-primary text-white shadow-lg active:scale-[0.98] transition font-semibold text-base">
+<span class="material-symbols-outlined text-[20px]">download</span>
+                Download Report
+            </button>
+</div>
+<div class="h-1"></div>
+</div>
+</div>
+
+</body></html>

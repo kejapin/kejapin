@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Payment Success - kejapin</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;700&amp;family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "alabaster": "#F4F1EA",
+                        "coffee": "#4B3621",
+                        "sage": "#6B8E23",
+                        "charcoal": "#333333",
+                        "muted-gold": "#E6AF2E",
+                    },
+                    fontFamily: {
+                        "sans": ["Lato", "sans-serif"],
+                        "heading": ["Montserrat", "sans-serif"]
+                    },
+                    borderRadius: { 
+                        "DEFAULT": "8px", 
+                        "lg": "8px", 
+                        "xl": "12px", 
+                        "full": "9999px" 
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            min-height: 100dvh;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-alabaster font-sans text-charcoal antialiased">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto bg-alabaster shadow-2xl border-x border-coffee/5">
+<div class="flex items-center p-4 pb-2 justify-between sticky top-0 z-10 bg-alabaster/95 backdrop-blur-md">
+<div class="flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-coffee/5 transition-colors cursor-pointer text-coffee">
+<span class="material-symbols-outlined" style="font-size: 24px;">close</span>
+</div>
+<h2 class="text-coffee font-heading text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-12">Payment Success</h2>
+</div>
+<div class="flex-1 flex flex-col items-center px-6 pt-8 pb-4">
+<div class="mb-6">
+<div class="flex items-center justify-center size-24 rounded-full bg-sage/10 border border-sage/20">
+<span class="material-symbols-outlined text-sage" style="font-size: 48px; font-weight: 600;">check_circle</span>
+</div>
+</div>
+<h1 class="text-coffee font-heading tracking-tight text-[28px] font-bold leading-tight text-center mb-2">Rent Paid Successfully</h1>
+<h2 class="text-coffee font-heading text-[32px] font-bold leading-tight tracking-tight text-center mb-8">$2,450.00</h2>
+<div class="w-full bg-white rounded-xl p-6 border border-coffee/10 shadow-sm mb-6">
+<div class="flex items-center gap-4 mb-6 pb-6 border-b border-alabaster">
+<div class="size-14 rounded-lg bg-center bg-cover shrink-0 relative overflow-hidden shadow-sm" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCRGJW1fgS6mWGstczZCZgIyxQeu6hHUjJT5OubJhXFxwMNFS6_DC2bwa5JVaUuQ6TIr6flg-rFMXj3yUJa_1JmIWAvH7six4jXkSBk7GYq4mAAavF3izyxBS7YSpiayAL6c_h6Hvrkp6Nmso2agftnxWz_VLCJK_7OLZlx-rEsdjrSaU_hyOYVve9p-o9uzfdu5WXF4a_KY0e2wMmXJro0AIFbiCIdzm363iptplpN014mfjaislkeF-ui7H2KkCjwUQoyc0TXnk4");'>
+<div class="absolute inset-0 bg-coffee/5"></div>
+</div>
+<div>
+<p class="text-charcoal/60 text-xs font-bold uppercase tracking-widest mb-1">Property</p>
+<p class="text-coffee font-heading text-base font-semibold leading-tight">The Loft at 5th Ave</p>
+</div>
+</div>
+<div class="grid grid-cols-1 gap-5">
+<div class="flex justify-between items-center">
+<p class="text-charcoal text-sm font-medium">Payment Method</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-charcoal" style="font-size: 20px;">credit_card</span>
+<p class="text-charcoal text-sm font-semibold">Visa •••• 4242</p>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<p class="text-charcoal text-sm font-medium">Date</p>
+<p class="text-charcoal text-sm font-semibold">Oct 24, 2023, 10:42 AM</p>
+</div>
+<div class="flex justify-between items-center">
+<p class="text-charcoal text-sm font-medium">Transaction ID</p>
+<div class="flex items-center gap-2 bg-alabaster px-2 py-1 rounded border border-coffee/5">
+<p class="text-coffee text-xs font-mono font-medium">#KJ-9928102</p>
+<span class="material-symbols-outlined text-charcoal/50 cursor-pointer hover:text-sage transition-colors" style="font-size: 14px;">content_copy</span>
+</div>
+</div>
+</div>
+</div>
+<div class="w-full flex items-center justify-between p-4 rounded-xl bg-white border border-coffee/10 hover:border-sage/30 transition-all cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="size-10 flex items-center justify-center rounded-lg bg-alabaster text-coffee">
+<span class="material-symbols-outlined" style="font-size: 24px;">description</span>
+</div>
+<div class="flex flex-col">
+<span class="text-charcoal font-heading text-sm font-semibold group-hover:text-sage transition-colors">Oct_Rent_Receipt.pdf</span>
+<span class="text-charcoal/60 text-xs">1.2 MB</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-charcoal/40 group-hover:text-sage transition-colors" style="font-size: 20px;">download</span>
+</div>
+</div>
+<div class="p-6 bg-alabaster mt-auto space-y-3">
+<button class="w-full h-12 flex items-center justify-center rounded-[8px] bg-sage hover:opacity-90 text-white text-base font-bold font-heading tracking-wide transition-all shadow-md active:scale-[0.98]">
+                Back to Home
+            </button>
+<button class="w-full h-12 flex items-center justify-center rounded-[8px] bg-transparent hover:bg-coffee/5 text-charcoal text-sm font-semibold transition-colors">
+                View Transaction History
+            </button>
+</div>
+</div>
+
+</body></html>

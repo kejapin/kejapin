@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Onboarding - Discovery</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&amp;family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4B3621", // Coffee Brown
+                        "accent": "#E6AF2E", // Muted Gold
+                        "alabaster": "#F4F1EA", // Alabaster Background
+                    },
+                    fontFamily: {
+                        "heading": ["Montserrat", "sans-serif"],
+                        "body": ["Lato", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "btn": "8px", 
+                        "card": "12px",
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-alabaster font-body text-primary antialiased overflow-hidden">
+<div class="relative flex h-screen w-full flex-col overflow-hidden">
+<div class="absolute inset-0 w-full h-full z-0">
+<div class="w-full h-full bg-cover bg-center bg-no-repeat" data-alt="Modern minimalist home interior with sunlight streaming through large windows" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBoCyigi73-PdPHiavh7iU0O_eZY-qSXli91eyTIYVJBdYDhueW8XuSUyvDek82fMmY2cXeKAaD-v9sc8dt0ki3srvOgXIaxmKywhhdWS7RJkC8n_zfDa6Rc00VQb9KsMa49fsAUTqLafYU8130oyHFODUTRcQZNmMwqbGK0DAyC8yhYeJECfkCd_UuDn51NKT5YUH4yF4NPFAF9gaoPTeWbp6xeA5sYoVP7FEjMoMBez7AbgYBkYWAFiu9vCFAm_VkxibykyE2Beg');">
+</div>
+<div class="absolute inset-0 bg-gradient-to-b from-primary/30 via-transparent to-transparent h-40"></div>
+</div>
+<div class="absolute top-0 right-0 z-20 p-6 pt-12">
+<button class="flex items-center justify-center px-5 py-2.5 rounded-btn bg-alabaster/90 backdrop-blur-md text-primary hover:bg-white transition-colors shadow-sm border border-transparent hover:border-accent/20">
+<span class="text-sm font-bold tracking-wide font-heading">Skip</span>
+</button>
+</div>
+<div class="flex-grow"></div>
+<div class="relative z-10 w-full bg-alabaster rounded-t-[12px] shadow-[0_-10px_40px_-15px_rgba(75,54,33,0.15)]">
+<div class="flex flex-col px-8 pt-12 pb-10">
+<h1 class="text-primary text-[32px] md:text-4xl font-extrabold font-heading leading-tight tracking-tight text-center mb-6">
+                    Find Your Perfect Fit
+                </h1>
+<p class="text-primary/80 text-base md:text-lg font-normal leading-relaxed text-center mb-14 max-w-sm mx-auto">
+                    Discover homes curated by data and design. We analyze structural integrity and architectural beauty to match you with properties that last.
+                </p>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex flex-row gap-3 items-center">
+<div class="h-2 w-8 rounded-full bg-accent transition-all duration-300"></div>
+<div class="h-2 w-2 rounded-full bg-primary/20"></div>
+<div class="h-2 w-2 rounded-full bg-primary/20"></div>
+</div>
+<button aria-label="Next" class="group flex items-center justify-center px-8 py-4 rounded-btn bg-primary hover:bg-primary/90 text-alabaster shadow-lg shadow-primary/20 transition-all active:scale-95">
+<span class="font-heading font-bold text-sm uppercase tracking-wider mr-2">Next</span>
+<span class="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+<div class="h-8 w-full"></div>
+</div>
+</div>
+</div>
+
+</body></html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kejapin - Maintenance Log</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421",
+                        "coffee-brown": "#4a3421",
+                        "coffee-light": "#6d543e",
+                        "sage-green": "#7e8d77",
+                        "sage-light": "#f1f3f0",
+                        "background-light": "#f7f7f6",
+                        "alabaster": "#fbfbf9",
+                        "surface-dark": "#2c2825",
+                        "background-dark": "#1d1915",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(74, 52, 33, 0.08)',
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            left: 19px;
+            top: 40px;
+            bottom: 0;
+            width: 1px;
+            background-color: #e5e7eb;
+        }
+        .dark .timeline-line::before {
+            background-color: #374151;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-alabaster dark:bg-background-dark font-display text-primary dark:text-gray-100 antialiased selection:bg-primary selection:text-white">
+<div class="relative mx-auto flex h-auto min-h-screen w-full max-w-md flex-col bg-alabaster dark:bg-background-dark overflow-x-hidden pb-24">
+<div class="sticky top-0 z-30 bg-alabaster/95 dark:bg-background-dark/95 backdrop-blur-md px-5 pt-12 pb-4 border-b border-gray-200/50 dark:border-gray-800">
+<div class="flex items-center justify-between mb-4">
+<h1 class="text-2xl font-bold text-primary dark:text-white">Maintenance Log</h1>
+<button class="w-10 h-10 flex items-center justify-center bg-white dark:bg-surface-dark rounded-full shadow-soft border border-gray-100 dark:border-gray-800">
+<span class="material-symbols-outlined text-primary dark:text-gray-300">add</span>
+</button>
+</div>
+<div class="flex gap-2 overflow-x-auto no-scrollbar py-1">
+<button class="flex-shrink-0 px-4 py-2 rounded-full bg-primary text-white text-xs font-bold shadow-soft">All Properties</button>
+<button class="flex-shrink-0 px-4 py-2 rounded-full bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-800 text-coffee-light dark:text-gray-400 text-xs font-bold">The Glass House</button>
+<button class="flex-shrink-0 px-4 py-2 rounded-full bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-800 text-coffee-light dark:text-gray-400 text-xs font-bold">Azure Towers</button>
+</div>
+</div>
+<div class="px-5 mt-6 grid grid-cols-2 gap-3">
+<div class="bg-white dark:bg-surface-dark p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft">
+<span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Pending</span>
+<div class="flex items-end gap-2 mt-1">
+<span class="text-2xl font-bold text-coffee-brown dark:text-white">08</span>
+<span class="text-[10px] text-coffee-light mb-1.5 font-medium">+2 this week</span>
+</div>
+</div>
+<div class="bg-white dark:bg-surface-dark p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft">
+<span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Resolved</span>
+<div class="flex items-end gap-2 mt-1">
+<span class="text-2xl font-bold text-sage-green">24</span>
+<span class="text-[10px] text-sage-green mb-1.5 font-medium">92% efficiency</span>
+</div>
+</div>
+</div>
+<div class="mt-8 px-5">
+<h2 class="text-lg font-bold text-primary dark:text-white mb-6">Recent Activity</h2>
+<div class="relative flex flex-col gap-8 timeline-line">
+<div class="relative flex gap-4">
+<div class="z-10 flex-shrink-0 w-10 h-10 rounded-full bg-coffee-brown flex items-center justify-center text-white ring-4 ring-alabaster dark:ring-background-dark">
+<span class="material-symbols-outlined text-[20px]">plumbing</span>
+</div>
+<div class="flex-1 pb-2">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-bold text-coffee-light dark:text-gray-400 uppercase tracking-widest">Oct 24 • 09:45 AM</span>
+<span class="px-2 py-0.5 rounded-md bg-orange-100 text-orange-700 text-[10px] font-bold">URGENT</span>
+</div>
+<h3 class="font-bold text-primary dark:text-white text-base">Kitchen Leakage</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">The Glass House • Unit 4B</p>
+<div class="mt-3 bg-white dark:bg-surface-dark p-3 rounded-xl border border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-gray-400 text-[18px]">engineering</span>
+</div>
+<div class="flex-1">
+<p class="text-xs font-bold text-primary dark:text-white">Assigned: John Maina</p>
+<p class="text-[10px] text-gray-400">Status: Dispatched</p>
+</div>
+<div class="px-2 py-1 rounded bg-coffee-light/10 text-coffee-brown dark:text-coffee-light text-[10px] font-bold">
+                                PENDING
+                            </div>
+</div>
+</div>
+</div>
+</div>
+<div class="relative flex gap-4">
+<div class="z-10 flex-shrink-0 w-10 h-10 rounded-full bg-sage-green flex items-center justify-center text-white ring-4 ring-alabaster dark:ring-background-dark">
+<span class="material-symbols-outlined text-[20px]">electrical_services</span>
+</div>
+<div class="flex-1 pb-2">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-bold text-coffee-light dark:text-gray-400 uppercase tracking-widest">Oct 22 • 02:15 PM</span>
+<span class="px-2 py-0.5 rounded-md bg-sage-light text-sage-green text-[10px] font-bold uppercase tracking-wide">Resolved</span>
+</div>
+<h3 class="font-bold text-primary dark:text-white text-base">HVAC Filter Change</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Azure Towers • Penthouse 1</p>
+<div class="mt-3 flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-gray-200 border border-white dark:border-gray-800 overflow-hidden">
+<img alt="avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtJYoXid12PJI3CMj0uMfA-W9M_ABRGSnKXjyXDLoHfCo-shbGsMJnjqTLwGQprchFqZGuxibT9KAr19pYtdbZ118o54k_ACOQmrO-4DWfGIks5btglZjr9jz1JYA9zA7tQ5b13kxz7RTCSZJy_fufPCrOKVI2kstGydBy2pCvGMCsQndrWl0xT3buZwvk9D6u7LYAgC3NUVdzUcI5DjJj4ZGR4uafA_jPkJN-Re2WdK1Wr30pElmDWB8DskdfbTpJ76yFZunwbUI"/>
+</div>
+<span class="text-[11px] text-gray-500 italic">"Full system check completed. Filter replaced."</span>
+</div>
+</div>
+</div>
+<div class="relative flex gap-4">
+<div class="z-10 flex-shrink-0 w-10 h-10 rounded-full bg-sage-green flex items-center justify-center text-white ring-4 ring-alabaster dark:ring-background-dark">
+<span class="material-symbols-outlined text-[20px]">door_front</span>
+</div>
+<div class="flex-1 pb-2">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-bold text-coffee-light dark:text-gray-400 uppercase tracking-widest">Oct 20 • 11:00 AM</span>
+<span class="px-2 py-0.5 rounded-md bg-sage-light text-sage-green text-[10px] font-bold uppercase tracking-wide">Resolved</span>
+</div>
+<h3 class="font-bold text-primary dark:text-white text-base">Smart Lock Calibration</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">The Glass House • Unit 12A</p>
+</div>
+</div>
+<div class="relative flex gap-4">
+<div class="z-10 flex-shrink-0 w-10 h-10 rounded-full bg-coffee-brown flex items-center justify-center text-white ring-4 ring-alabaster dark:ring-background-dark">
+<span class="material-symbols-outlined text-[20px]">format_paint</span>
+</div>
+<div class="flex-1 pb-2">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-bold text-coffee-light dark:text-gray-400 uppercase tracking-widest">Oct 19 • 04:30 PM</span>
+<span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wide">Scheduled</span>
+</div>
+<h3 class="font-bold text-primary dark:text-white text-base">Wall Touch-up</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Azure Towers • Unit 8C</p>
+<div class="mt-3 bg-alabaster dark:bg-black/20 p-3 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-gray-400">calendar_today</span>
+<span class="text-[11px] font-medium text-gray-600 dark:text-gray-400">Scheduled for Oct 27</span>
+</div>
+<button class="text-[10px] font-bold text-primary dark:text-white underline">Edit</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-background-dark/95 border-t border-gray-200 dark:border-gray-800 backdrop-blur-lg max-w-md mx-auto pb-6 pt-3 px-6">
+<div class="flex justify-between items-center">
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-medium">Dashboard</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">domain</span>
+<span class="text-[10px] font-medium">Properties</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary dark:text-white">
+<span class="material-symbols-outlined fill-1" style="font-variation-settings: 'FILL' 1">history</span>
+<span class="text-[10px] font-bold">Logs</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-[10px] font-medium">Finance</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">more_horiz</span>
+<span class="text-[10px] font-medium">Menu</span>
+</button>
+</div>
+</div>
+</div>
+
+</body></html>

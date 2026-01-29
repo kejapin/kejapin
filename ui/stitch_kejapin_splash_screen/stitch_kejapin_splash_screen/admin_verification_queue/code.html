@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Admin Verification Queue</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421", // Coffee Brown
+                        "background-light": "#f7f7f6",
+                        "background-dark": "#1d1915",
+                        "sage": "#8A9A5B",
+                        "muted-red": "#C24641",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem", 
+                        "lg": "0.5rem", 
+                        "xl": "0.75rem", 
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#161413] dark:text-[#edeceb]">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Header: Coffee Brown -->
+<div class="sticky top-0 z-50 flex items-center bg-primary px-4 py-4 justify-between shadow-md">
+<div class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer text-white">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-white text-lg font-bold leading-tight tracking-tight flex-1 text-center">Verification Queue</h2>
+<div class="flex size-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer text-white">
+<span class="material-symbols-outlined">filter_list</span>
+</div>
+</div>
+<!-- Stats Bar -->
+<div class="grid grid-cols-3 gap-3 p-4 bg-white dark:bg-[#2a2622] border-b border-[#e3e0de] dark:border-[#3e3a36]">
+<div class="flex flex-col items-center justify-center gap-1">
+<p class="text-[#7f756c] dark:text-[#a09a93] text-xs font-medium uppercase tracking-wider">Pending</p>
+<p class="text-primary dark:text-[#d4c5b9] text-2xl font-bold leading-none">12</p>
+</div>
+<div class="flex flex-col items-center justify-center gap-1 border-x border-[#e3e0de] dark:border-[#3e3a36]">
+<p class="text-[#7f756c] dark:text-[#a09a93] text-xs font-medium uppercase tracking-wider">Today</p>
+<p class="text-primary dark:text-[#d4c5b9] text-2xl font-bold leading-none">45</p>
+</div>
+<div class="flex flex-col items-center justify-center gap-1">
+<p class="text-[#7f756c] dark:text-[#a09a93] text-xs font-medium uppercase tracking-wider text-muted-red">Urgent</p>
+<p class="text-muted-red text-2xl font-bold leading-none">3</p>
+</div>
+</div>
+<!-- Main Content: Queue List -->
+<div class="flex flex-col gap-3 p-4">
+<!-- Date Separator -->
+<div class="flex items-center gap-2 pb-1 pt-2">
+<p class="text-[#7f756c] dark:text-[#a09a93] text-sm font-semibold tracking-wide uppercase">Today, 24 Oct</p>
+<div class="h-[1px] flex-1 bg-[#e3e0de] dark:bg-[#3e3a36]"></div>
+</div>
+<!-- List Item 1 -->
+<div class="flex flex-col gap-3 rounded-lg bg-white dark:bg-[#2a2622] p-4 shadow-sm border border-[#e3e0de] dark:border-[#3e3a36]">
+<div class="flex items-start gap-4">
+<!-- Thumbnail with Overlay Icon -->
+<div class="relative shrink-0 group cursor-pointer">
+<div class="bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-md w-20 h-16 shadow-inner border border-gray-100 dark:border-gray-700" data-alt="Closeup of an Indonesian ID card with text and photo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDQWG6NgSniwA2vtpUN6bSo3R_BxZ2saFmB4khhiKJn-nGKa_nKE1WSgUofDfJzrT3khVUBjWdVn-5qUB3DsdAkJ3WmZ4tyc9rBEx6RxSBpAF6tz2wNKah7F6g49cMlT6T1U6hMGmz0WOeqNWwLn4UoUmW7Mq8TKB0lIr9MX3-0Vi3o81By6NjFeGghmkAZcUb7zA4_k0Vf-DTiLZCUzE8G_ryhhV_PqVBgQ7c2FO4SdLiT2Awft47lQfuLU8VfFYKNaUz_pfZoqBE");'>
+</div>
+<div class="absolute inset-0 bg-black/20 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-lg">visibility</span>
+</div>
+</div>
+<!-- Content -->
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-primary dark:text-[#d4c5b9] text-base font-bold leading-tight truncate pr-2">Arjuna Wijaya</h3>
+<span class="text-[10px] font-medium text-[#7f756c] dark:text-[#a09a93] bg-[#f2f0ee] dark:bg-[#3e3a36] px-1.5 py-0.5 rounded">2m ago</span>
+</div>
+<p class="text-[#7f756c] dark:text-[#a09a93] text-xs font-mono mt-1 truncate">ID: REF-8829-AX</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-200 ring-1 ring-inset ring-amber-600/20">
+                                Pending
+                            </span>
+<span class="text-xs text-[#7f756c] dark:text-[#a09a93]">• Agent Profile</span>
+</div>
+</div>
+</div>
+<!-- Actions Row -->
+<div class="flex items-center gap-3 mt-1 pt-3 border-t border-[#f2f0ee] dark:border-[#3e3a36]">
+<button class="flex-1 flex items-center justify-center gap-2 h-10 rounded-md border border-muted-red text-muted-red hover:bg-muted-red/10 active:bg-muted-red/20 transition-colors font-medium text-sm">
+<span class="material-symbols-outlined text-[20px]">close</span>
+                        Reject
+                    </button>
+<button class="flex-1 flex items-center justify-center gap-2 h-10 rounded-md bg-sage text-white shadow-sm hover:bg-[#78884d] active:bg-[#687642] transition-colors font-bold text-sm">
+<span class="material-symbols-outlined text-[20px]">check</span>
+                        Approve
+                    </button>
+</div>
+</div>
+<!-- List Item 2 -->
+<div class="flex flex-col gap-3 rounded-lg bg-white dark:bg-[#2a2622] p-4 shadow-sm border border-[#e3e0de] dark:border-[#3e3a36]">
+<div class="flex items-start gap-4">
+<div class="relative shrink-0 group cursor-pointer">
+<div class="bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-md w-20 h-16 shadow-inner border border-gray-100 dark:border-gray-700" data-alt="Blurred driver's license document on a table" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDIlPIjU9vU2O8puziFvjWMp4-23rh93z0Sprex3E_Smp33y6FU2UcCsvXm4yYLxM8cfsdyIjbZD_EfpY9EHLl3hY_lX8luSre0sYWdqzes5660nUnA4J9kisdI2DEgskNjITmLrZJ0Z1e6DoVcaJHKQpPkcxGB-eGSUii13-DJwYWoR6Lpfmo_ZdL6eB8lHwDMCPOT_ObjatfGPQkfhhx95LGQmgZCorQ6y88ZnG6YSIXDNAa-Nc4wjAtD1K7rLDUdEkvXbm1qC4E");'>
+</div>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-primary dark:text-[#d4c5b9] text-base font-bold leading-tight truncate pr-2">Sarah Chen</h3>
+<span class="text-[10px] font-medium text-[#7f756c] dark:text-[#a09a93] bg-[#f2f0ee] dark:bg-[#3e3a36] px-1.5 py-0.5 rounded">15m ago</span>
+</div>
+<p class="text-[#7f756c] dark:text-[#a09a93] text-xs font-mono mt-1 truncate">ID: REF-9921-BB</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-200 ring-1 ring-inset ring-amber-600/20">
+                                Pending
+                            </span>
+<span class="text-xs text-[#7f756c] dark:text-[#a09a93]">• User Profile</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3 mt-1 pt-3 border-t border-[#f2f0ee] dark:border-[#3e3a36]">
+<button class="flex-1 flex items-center justify-center gap-2 h-10 rounded-md border border-muted-red text-muted-red hover:bg-muted-red/10 active:bg-muted-red/20 transition-colors font-medium text-sm">
+<span class="material-symbols-outlined text-[20px]">close</span>
+                        Reject
+                    </button>
+<button class="flex-1 flex items-center justify-center gap-2 h-10 rounded-md bg-sage text-white shadow-sm hover:bg-[#78884d] active:bg-[#687642] transition-colors font-bold text-sm">
+<span class="material-symbols-outlined text-[20px]">check</span>
+                        Approve
+                    </button>
+</div>
+</div>
+<!-- List Item 3 (Urgent) -->
+<div class="flex flex-col gap-3 rounded-lg bg-white dark:bg-[#2a2622] p-4 shadow-sm border-l-4 border-l-muted-red border-y border-r border-y-[#e3e0de] border-r-[#e3e0de] dark:border-y-[#3e3a36] dark:border-r-[#3e3a36]">
+<div class="flex items-start gap-4">
+<div class="relative shrink-0 group cursor-pointer">
+<div class="bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-md w-20 h-16 shadow-inner border border-gray-100 dark:border-gray-700" data-alt="Detail of a passport identification page" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBeR3kmLEBcTXAVng1m6vZ99cLQY1-L1LJa-IebkNVlEOPTMOuLEI_jWeOWTO4N26rkG3IDcAf7i2njHt3df8oiqVxjlGt6bP-oCP8oF8kdJ42CuILvkPv7GvcCh1BMF4ia0ZC4R3BSxUN3l4Nbb1DIqkFM3ohZcWEbJSqlYK6wokPYTPDdmOthg_8OJEvSsdSZFqexQ6UWF-VbluzyGb79VbyClGCTTu3NQvp5_Ypglo-vH8FDizTnm5yn5iC3yaVvIkoDZCuKiVc");'>
+</div>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-primary dark:text-[#d4c5b9] text-base font-bold leading-tight truncate pr-2">Michael Torres</h3>
+<span class="text-[10px] font-medium text-white bg-muted-red px-1.5 py-0.5 rounded">Urgent</span>
+</div>
+<p class="text-[#7f756c] dark:text-[#a09a93] text-xs font-mono mt-1 truncate">ID: REF-3310-XY</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-200 ring-1 ring-inset ring-amber-600/20">
+                                Pending
+                            </span>
+<span class="text-xs text-[#7f756c] dark:text-[#a09a93]">• Property Owner</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3 mt-1 pt-3 border-t border-[#f2f0ee] dark:border-[#3e3a36]">
+<button class="flex-1 flex items-center justify-center gap-2 h-10 rounded-md border border-muted-red text-muted-red hover:bg-muted-red/10 active:bg-muted-red/20 transition-colors font-medium text-sm">
+<span class="material-symbols-outlined text-[20px]">close</span>
+                        Reject
+                    </button>
+<button class="flex-1 flex items-center justify-center gap-2 h-10 rounded-md bg-sage text-white shadow-sm hover:bg-[#78884d] active:bg-[#687642] transition-colors font-bold text-sm">
+<span class="material-symbols-outlined text-[20px]">check</span>
+                        Approve
+                    </button>
+</div>
+</div>
+<!-- Date Separator -->
+<div class="flex items-center gap-2 pb-1 pt-4">
+<p class="text-[#7f756c] dark:text-[#a09a93] text-sm font-semibold tracking-wide uppercase">Yesterday</p>
+<div class="h-[1px] flex-1 bg-[#e3e0de] dark:bg-[#3e3a36]"></div>
+</div>
+<!-- List Item 4 -->
+<div class="flex flex-col gap-3 rounded-lg bg-white dark:bg-[#2a2622] p-4 shadow-sm border border-[#e3e0de] dark:border-[#3e3a36] opacity-60">
+<div class="flex items-start gap-4">
+<div class="relative shrink-0 group cursor-pointer">
+<div class="bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-md w-20 h-16 shadow-inner border border-gray-100 dark:border-gray-700 grayscale" data-alt="Grayscale image of a business permit document" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAYZKc9q77ie5OJMcyzTYJ0fTMpOqqZkOvCKDcWzITKtrHC8n1mff245QB404tgXYYYR9UZKKNzGvjOvQUPfQBynmo81IrLq-hnNz2Be8uxFaPregJjPlBeoxJnGy-rc7KAn8fllu0I6ic_xbBapa-OmqyCdo9lFdb0lEF0Any17nEaipQXTwoJdu7VXDUia7_Dfb1hhaAiJ_Oovsye-1jElaKcWEFTR0sUS5m3gDF5rPzjlaJL5SL5srakZEvJemSfDeq4L8CEM6s");'>
+</div>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-primary dark:text-[#d4c5b9] text-base font-bold leading-tight truncate pr-2">Priya Patel</h3>
+<span class="text-[10px] font-medium text-[#7f756c] dark:text-[#a09a93] bg-[#f2f0ee] dark:bg-[#3e3a36] px-1.5 py-0.5 rounded">22h ago</span>
+</div>
+<p class="text-[#7f756c] dark:text-[#a09a93] text-xs font-mono mt-1 truncate">ID: REF-1029-ZZ</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-xs font-medium text-gray-600 dark:text-gray-400 ring-1 ring-inset ring-gray-500/10">
+                                Escalated
+                            </span>
+<span class="text-xs text-[#7f756c] dark:text-[#a09a93]">• Agent Profile</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-end gap-3 mt-1 pt-3 border-t border-[#f2f0ee] dark:border-[#3e3a36]">
+<button class="text-xs font-bold text-primary dark:text-white uppercase tracking-wider">
+                        View Details
+                    </button>
+</div>
+</div>
+</div>
+<!-- Floating Action Button (Batch) - Optional but good for "queue" context -->
+<div class="fixed bottom-6 right-6 z-40">
+<button class="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg hover:bg-[#3d2b1b] active:scale-95 transition-all">
+<span class="material-symbols-outlined">checklist</span>
+</button>
+</div>
+</div>
+</body></html>

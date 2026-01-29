@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UI Component Library - kejapin</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;700&amp;family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "alabaster": "#F4F1EA",
+                        "coffee": "#4B3621",
+                        "sage": "#6B8E23",
+                        "charcoal": "#333333",
+                        "gold": "#E6AF2E",
+                    },
+                    fontFamily: {
+                        "sans": ["Lato", "sans-serif"],
+                        "heading": ["Montserrat", "sans-serif"]
+                    },
+                    borderRadius: { 
+                        "lg": "8px", 
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-alabaster text-charcoal antialiased;
+            }
+        }
+        .input-focus-ring:focus {
+            @apply ring-2 ring-coffee/20 border-coffee/40 outline-none transition-all;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-sans">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto bg-alabaster shadow-2xl border-x border-[#EBEBE5]">
+<header class="sticky top-0 z-10 bg-alabaster/95 backdrop-blur-md px-6 py-6 border-b border-[#EBEBE5]">
+<div class="flex items-center justify-between mb-2">
+<span class="text-coffee font-heading text-[10px] font-bold uppercase tracking-[0.2em]">Design System</span>
+<span class="material-symbols-outlined text-coffee/40" style="font-size: 20px;">architecture</span>
+</div>
+<h1 class="text-coffee font-heading text-2xl font-bold tracking-tight">Buttons &amp; Inputs</h1>
+</header>
+<main class="flex-1 px-6 py-10 space-y-16">
+<section class="space-y-8">
+<div class="flex items-center justify-between">
+<h2 class="text-coffee font-heading text-xs font-bold uppercase tracking-widest">Button Styles</h2>
+<div class="h-[1px] flex-1 bg-coffee/10 ml-4"></div>
+</div>
+<div class="space-y-3">
+<p class="text-[10px] text-charcoal/50 font-bold uppercase tracking-tighter">Primary — #4B3621</p>
+<button class="w-full h-[54px] bg-coffee text-white font-heading font-bold text-sm tracking-wide rounded-lg shadow-sm active:scale-[0.98] transition-all">
+                        PRIMARY ACTION
+                    </button>
+</div>
+<div class="space-y-3">
+<p class="text-[10px] text-charcoal/50 font-bold uppercase tracking-tighter">Secondary — Bordered</p>
+<button class="w-full h-[54px] bg-transparent border-2 border-coffee text-coffee font-heading font-bold text-sm tracking-wide rounded-lg active:bg-coffee/5 transition-all">
+                        SECONDARY ACTION
+                    </button>
+</div>
+<div class="space-y-3">
+<p class="text-[10px] text-charcoal/50 font-bold uppercase tracking-tighter">Success — #6B8E23</p>
+<button class="w-full h-[54px] bg-sage text-white font-heading font-bold text-sm tracking-wide rounded-lg shadow-sm active:scale-[0.98] transition-all">
+                        CONFIRM SUCCESS
+                    </button>
+</div>
+<div class="space-y-3">
+<p class="text-[10px] text-charcoal/50 font-bold uppercase tracking-tighter">Accent Badge — #E6AF2E</p>
+<div class="flex">
+<span class="inline-flex items-center gap-2 px-4 py-1.5 bg-gold/10 border border-gold/20 rounded-full">
+<span class="material-symbols-outlined text-gold" style="font-size: 16px; font-variation-settings: 'FILL' 1;">stars</span>
+<span class="text-gold text-[10px] font-bold uppercase tracking-[0.1em] font-heading">Premium Tier</span>
+</span>
+</div>
+</div>
+</section>
+<section class="space-y-8">
+<div class="flex items-center justify-between">
+<h2 class="text-coffee font-heading text-xs font-bold uppercase tracking-widest">Input Fields</h2>
+<div class="h-[1px] flex-1 bg-coffee/10 ml-4"></div>
+</div>
+<div class="space-y-3">
+<label class="text-[10px] text-charcoal/50 font-bold uppercase tracking-tighter block">Default Input</label>
+<input class="w-full h-14 bg-white border border-[#E6E2D8] rounded-lg px-4 font-sans text-charcoal placeholder:text-charcoal/30 input-focus-ring" placeholder="Enter property address..." type="text"/>
+</div>
+<div class="space-y-3">
+<label class="text-[10px] text-charcoal/50 font-bold uppercase tracking-tighter block">Search Input</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-charcoal/30" style="font-size: 20px;">search</span>
+<input class="w-full h-14 bg-white border border-[#E6E2D8] rounded-lg pl-12 pr-4 font-sans text-charcoal placeholder:text-charcoal/30 input-focus-ring" placeholder="Search by neighborhood..." type="text"/>
+</div>
+</div>
+<div class="space-y-3">
+<label class="text-[10px] text-charcoal/50 font-bold uppercase tracking-tighter block">Disabled State</label>
+<input class="w-full h-14 bg-[#F0EFEC] border border-[#E6E2D8] rounded-lg px-4 font-sans text-charcoal/40 cursor-not-allowed" disabled="" type="text" value="System protected value"/>
+</div>
+</section>
+<section class="pt-8 border-t border-[#EBEBE5]">
+<p class="text-[11px] text-charcoal/40 leading-relaxed text-center font-medium italic">
+                    Designed for kejapin Architecture &amp; Real Estate Marketplace.<br/>
+                    All components utilize an 8px corner radius and high-contrast typography.
+                </p>
+</section>
+</main>
+<nav class="p-6 bg-white border-t border-[#EBEBE5] flex justify-around items-center">
+<span class="material-symbols-outlined text-coffee" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="material-symbols-outlined text-charcoal/30">explore</span>
+<span class="material-symbols-outlined text-charcoal/30">bookmark</span>
+<span class="material-symbols-outlined text-charcoal/30">person</span>
+</nav>
+</div>
+
+</body></html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kejapin - Tenant Directory</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421",
+                        "coffee-light": "#6d543e",
+                        "background-light": "#f7f7f6",
+                        "background-dark": "#1d1915",
+                        "alabaster": "#fbfbf9",
+                        "surface-dark": "#2c2825",
+                        "sage-green": "#7a907e",
+                        "sage-light": "#eef3ef",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(74, 52, 33, 0.08)',
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-alabaster dark:bg-background-dark font-display text-primary dark:text-gray-100 antialiased selection:bg-primary selection:text-white">
+<div class="relative mx-auto flex h-auto min-h-screen w-full max-w-md flex-col bg-alabaster dark:bg-background-dark overflow-x-hidden pb-24">
+<div class="sticky top-0 z-30 bg-alabaster/95 dark:bg-background-dark/95 backdrop-blur-md px-5 pt-12 pb-4 border-b border-gray-200/50 dark:border-gray-800">
+<div class="flex items-center justify-between mb-4">
+<h1 class="text-2xl font-bold text-primary dark:text-white">Tenant Directory</h1>
+<button class="w-10 h-10 rounded-full bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[22px]">add</span>
+</button>
+</div>
+<div class="flex items-center gap-3 bg-white dark:bg-surface-dark p-3 rounded-xl shadow-soft border border-gray-200/50 dark:border-gray-700 transition-all focus-within:ring-2 focus-within:ring-primary/20">
+<span class="material-symbols-outlined text-gray-400">search</span>
+<input class="flex-1 bg-transparent border-none p-0 text-primary dark:text-white placeholder-gray-400 focus:ring-0 text-sm font-medium" placeholder="Search by name, property or unit..." type="text"/>
+<button class="flex items-center justify-center text-primary dark:text-gray-300">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+</button>
+</div>
+</div>
+<div class="flex gap-3 overflow-x-auto no-scrollbar px-5 py-6">
+<div class="min-w-[120px] flex-shrink-0 p-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-sm">
+<p class="text-[10px] uppercase font-bold text-coffee-light dark:text-gray-400 tracking-wider mb-1">Total Tenants</p>
+<p class="text-xl font-bold text-primary dark:text-white">124</p>
+</div>
+<div class="min-w-[120px] flex-shrink-0 p-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-sm">
+<p class="text-[10px] uppercase font-bold text-coffee-light dark:text-gray-400 tracking-wider mb-1">Occupancy</p>
+<p class="text-xl font-bold text-primary dark:text-white">98%</p>
+</div>
+<div class="min-w-[120px] flex-shrink-0 p-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-sm">
+<p class="text-[10px] uppercase font-bold text-coffee-light dark:text-gray-400 tracking-wider mb-1">Overdue</p>
+<p class="text-xl font-bold text-red-600">3</p>
+</div>
+</div>
+<div class="px-5">
+<h2 class="text-xs font-bold text-coffee-light dark:text-gray-400 uppercase tracking-widest mb-4">All Active Tenants</h2>
+<div class="flex flex-col gap-4">
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-soft border border-gray-100 dark:border-gray-800">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYOyp7hBs2ZcA09hI8hdF4CCJBI2zE7a4-5MQZMO1xmgHCt5c4LhnFz2m1YSU1YXK3qKwCMM4PiUOwcGhB6ITqHn5p0qcGJvHsGaR_BjjK_7kDU6WwRB8RUA3S7r8AnzlDUuNnB28Xc1Uq-O8X2NE9WxjgMBieJ44UMMl-fPQCltFQPrkxij6zrPD_z-PXq-WdSyzpGnogObGRHbVd5bh84OnNnrN3GG8v5gAzJDUMZC-wPa_imf3REnnMaGMCn--W6KmMXCycBG0"/>
+</div>
+<div>
+<h3 class="font-bold text-primary dark:text-white">Sarah Jenkins</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400">Unit 4B • 2 Bedroom</p>
+</div>
+</div>
+<span class="bg-sage-light text-sage-green text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Active</span>
+</div>
+<div class="bg-alabaster dark:bg-black/10 rounded-xl p-3 mb-4 border border-gray-100 dark:border-gray-800/50">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] text-gray-500 font-medium">Property</span>
+<span class="text-xs font-bold text-primary dark:text-white">The Glass House</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] text-gray-500 font-medium">Lease Ends</span>
+<span class="text-xs font-medium text-primary dark:text-white">Oct 12, 2024</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 bg-primary text-white text-xs font-bold py-2.5 rounded-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">chat_bubble</span>
+                        Message
+                    </button>
+<button class="px-3 border border-gray-200 dark:border-gray-700 rounded-lg text-primary dark:text-gray-300 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+</div>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-soft border border-gray-100 dark:border-gray-800 opacity-90">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjLX07WW0RPBsAmyCkrWrTUDG5C09kKzfgIuSgATWvzEqdrIFyeINZJeElgdkj-ZVqlz7vQa8fX1scZCF3ypAgcI7QoOhwNwdwqmi6sfw_SgJzNL6YXuaHoO8yuPUcfTLMOyfK8CESrTUxVtta1NFMtYYk4wEiYZyYRlMFU_WHUR54_u9sVBtb1ms-Zd252k-iRulznsL9HUguVMVCB7FFlZAAey22KLSwMYl_xnpvdKqWkD_BFLhjIXQdiMujB8UKyhcLO7hIbzo"/>
+</div>
+<div>
+<h3 class="font-bold text-primary dark:text-white">Marcus Thorne</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400">Penthouse A • 4 Bedroom</p>
+</div>
+</div>
+<span class="bg-sage-light text-sage-green text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Active</span>
+</div>
+<div class="bg-alabaster dark:bg-black/10 rounded-xl p-3 mb-4 border border-gray-100 dark:border-gray-800/50">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] text-gray-500 font-medium">Property</span>
+<span class="text-xs font-bold text-primary dark:text-white">Azure Towers</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] text-gray-500 font-medium">Lease Ends</span>
+<span class="text-xs font-medium text-primary dark:text-white">Jan 05, 2025</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 bg-primary text-white text-xs font-bold py-2.5 rounded-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">chat_bubble</span>
+                        Message
+                    </button>
+<button class="px-3 border border-gray-200 dark:border-gray-700 rounded-lg text-primary dark:text-gray-300 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+</div>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-soft border border-gray-100 dark:border-gray-800">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAje4wwSD4LVy-nr12ZkH_VPR90ZYiExdzZa88Clp5qad0E1W4FEJPz3GUMhPXnf8upGOiNysb28QU2CnvrnSLxIvtJAiQ_I9ixhcWv2h9bxv4wlJIS3-IsyfCrcfRGGHYtsSu_KOLsm1llibZavl4uamQtIg_--MCRTFF6EL8qjh31XcM7qmFYqEb8-5TD7RZy4icKFPE9MbE1GZX-dG4NvAV5nZb0UrgbLHEbhe5QG5ImIzI6_qs6Fv_L14YzALhRE77I45X1JoU"/>
+</div>
+<div>
+<h3 class="font-bold text-primary dark:text-white">Aria Montgomery</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400">Unit 12C • 1 Bedroom</p>
+</div>
+</div>
+<span class="bg-orange-100 text-orange-600 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Expiring</span>
+</div>
+<div class="bg-alabaster dark:bg-black/10 rounded-xl p-3 mb-4 border border-gray-100 dark:border-gray-800/50">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] text-gray-500 font-medium">Property</span>
+<span class="text-xs font-bold text-primary dark:text-white">Riverside Lofts</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] text-gray-500 font-medium">Lease Ends</span>
+<span class="text-xs font-medium text-orange-600">In 14 days</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 bg-primary text-white text-xs font-bold py-2.5 rounded-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">chat_bubble</span>
+                        Message
+                    </button>
+<button class="px-3 border border-gray-200 dark:border-gray-700 rounded-lg text-primary dark:text-gray-300 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-background-dark/95 border-t border-gray-200 dark:border-gray-800 backdrop-blur-lg max-w-md mx-auto pb-6 pt-3 px-6">
+<div class="flex justify-between items-center">
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-medium">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">apartment</span>
+<span class="text-[10px] font-medium">Properties</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary dark:text-white">
+<span class="material-symbols-outlined font-variation-fill-1">group</span>
+<span class="text-[10px] font-bold">Tenants</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="text-[10px] font-medium">Finances</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-medium">More</span>
+</button>
+</div>
+</div>
+</div>
+
+</body></html>

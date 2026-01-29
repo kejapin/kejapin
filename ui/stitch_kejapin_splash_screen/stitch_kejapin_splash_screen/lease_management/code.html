@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kejapin - Lease Management</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421",
+                        "coffee-light": "#6d543e",
+                        "background-light": "#f7f7f6",
+                        "background-dark": "#1d1915",
+                        "alabaster": "#fbfbf9",
+                        "surface-dark": "#2c2825",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(74, 52, 33, 0.08)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body {
+            min-height: 100dvh;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-alabaster dark:bg-background-dark font-display text-primary dark:text-gray-100 antialiased selection:bg-primary selection:text-white">
+<div class="relative mx-auto flex h-auto min-h-screen w-full max-w-md flex-col bg-alabaster dark:bg-background-dark overflow-x-hidden pb-24">
+<div class="sticky top-0 z-30 bg-alabaster/95 dark:bg-background-dark/95 backdrop-blur-md px-6 pt-12 pb-6">
+<div class="flex items-center gap-4">
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800">
+<span class="material-symbols-outlined text-[20px]">arrow_back_ios_new</span>
+</button>
+<h1 class="text-2xl font-bold text-primary dark:text-white">Active Lease</h1>
+</div>
+</div>
+<div class="px-6 mt-2">
+<div class="relative overflow-hidden rounded-[2rem] bg-white dark:bg-surface-dark shadow-soft border border-gray-100 dark:border-gray-800 p-6">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-16 -mt-16"></div>
+<div class="flex items-start justify-between mb-8">
+<div>
+<h2 class="text-xl font-bold text-primary dark:text-white">The Glass House</h2>
+<p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Unit 4B • Kileleshwa</p>
+</div>
+<div class="h-12 w-12 rounded-xl bg-gray-50 dark:bg-white/5 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary dark:text-white">apartment</span>
+</div>
+</div>
+<div class="space-y-6">
+<div class="flex items-center gap-4">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-alabaster dark:bg-white/5">
+<span class="material-symbols-outlined text-[20px] text-coffee-light">calendar_today</span>
+</div>
+<div>
+<p class="text-[10px] uppercase font-bold text-gray-400 tracking-widest">Lease Period</p>
+<p class="text-sm font-semibold text-primary dark:text-white">Jan 2024 — Dec 2024</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-alabaster dark:bg-white/5">
+<span class="material-symbols-outlined text-[20px] text-coffee-light">contact_phone</span>
+</div>
+<div class="flex-1">
+<p class="text-[10px] uppercase font-bold text-gray-400 tracking-widest">Landlord Contact</p>
+<p class="text-sm font-semibold text-primary dark:text-white">Sarah Montgomery</p>
+</div>
+<button class="text-primary dark:text-white">
+<span class="material-symbols-outlined text-[20px]">chat_bubble</span>
+</button>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 dark:bg-green-900/20">
+<span class="material-symbols-outlined text-[20px] text-green-600">verified_user</span>
+</div>
+<div>
+<p class="text-[10px] uppercase font-bold text-gray-400 tracking-widest">Status</p>
+<div class="flex items-center gap-1.5">
+<p class="text-sm font-semibold text-primary dark:text-white">Digital Signature Verified</p>
+</div>
+</div>
+</div>
+</div>
+<button class="mt-8 w-full bg-primary py-4 rounded-xl text-white font-bold text-sm tracking-wide shadow-lg shadow-primary/20 hover:bg-coffee-light transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">description</span>
+                View Digital Lease
+            </button>
+</div>
+</div>
+<div class="mt-10 px-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-lg font-bold text-primary dark:text-white">Monthly Invoices</h3>
+<button class="text-[10px] font-bold text-coffee-light dark:text-gray-400 uppercase tracking-widest">See History</button>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-lg bg-alabaster dark:bg-white/5 flex items-center justify-center text-primary dark:text-white">
+<span class="material-symbols-outlined">receipt_long</span>
+</div>
+<div>
+<p class="text-sm font-bold text-primary dark:text-white">March 2024</p>
+<p class="text-[11px] text-gray-500">Paid on Mar 01</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-sm font-bold text-primary dark:text-white">125k</span>
+<button class="text-coffee-light hover:text-primary transition-colors">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-lg bg-alabaster dark:bg-white/5 flex items-center justify-center text-primary dark:text-white">
+<span class="material-symbols-outlined">receipt_long</span>
+</div>
+<div>
+<p class="text-sm font-bold text-primary dark:text-white">February 2024</p>
+<p class="text-[11px] text-gray-500">Paid on Feb 02</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-sm font-bold text-primary dark:text-white">125k</span>
+<button class="text-coffee-light hover:text-primary transition-colors">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 opacity-60">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-lg bg-alabaster dark:bg-white/5 flex items-center justify-center text-primary dark:text-white">
+<span class="material-symbols-outlined">receipt_long</span>
+</div>
+<div>
+<p class="text-sm font-bold text-primary dark:text-white">January 2024</p>
+<p class="text-[11px] text-gray-500">Paid on Jan 01</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-sm font-bold text-primary dark:text-white">125k</span>
+<button class="text-coffee-light hover:text-primary transition-colors">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="h-20"></div>
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-background-dark/95 border-t border-gray-200 dark:border-gray-800 backdrop-blur-lg max-w-md mx-auto pb-6 pt-3 px-6">
+<div class="flex justify-between items-center">
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">search</span>
+<span class="text-[10px] font-medium">Search</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary dark:text-white">
+<span class="material-symbols-outlined fill-1 font-variation-fill">contract_edit</span>
+<span class="text-[10px] font-bold">Lease</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">notifications</span>
+<span class="text-[10px] font-medium">Alerts</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</button>
+</div>
+</div>
+</div>
+
+</body></html>

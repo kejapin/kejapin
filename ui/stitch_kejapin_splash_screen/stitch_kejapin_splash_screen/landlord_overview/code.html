@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Landlord Overview - kejapin</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421",
+                        "secondary": "#8A9A5B", // Sage Green
+                        "accent": "#C06C5D", // Terracotta
+                        "background-light": "#f7f7f6", // Alabaster
+                        "background-dark": "#1d1915",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#2c2824",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&amp;family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Hide scrollbar for horizontal scroll areas */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-primary dark:text-gray-100 font-display transition-colors duration-200">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden pb-24">
+<!-- Header -->
+<header class="sticky top-0 z-20 flex items-center justify-between bg-background-light/95 dark:bg-background-dark/95 p-4 backdrop-blur-sm">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-primary/60 dark:text-gray-400">Welcome back</span>
+<h2 class="text-primary dark:text-white text-2xl font-bold leading-tight tracking-tight">Overview</h2>
+</div>
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-surface-dark shadow-sm border border-stone-200 dark:border-stone-700 hover:bg-stone-50 transition-colors">
+<span class="material-symbols-outlined text-primary dark:text-white">account_circle</span>
+</button>
+</header>
+<!-- Stats Section (Horizontal Scroll on Mobile) -->
+<section class="w-full px-4 pt-2 pb-6">
+<div class="flex overflow-x-auto gap-4 no-scrollbar pb-2 snap-x snap-mandatory">
+<!-- Revenue Card -->
+<div class="min-w-[160px] flex-1 flex flex-col justify-between gap-4 rounded-xl bg-white dark:bg-surface-dark p-5 border border-stone-200 dark:border-stone-700 shadow-sm snap-start">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-primary/60 dark:text-gray-400 text-2xl">payments</span>
+<div class="flex items-center gap-1 text-xs font-semibold text-secondary bg-secondary/10 px-2 py-1 rounded-full">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>5.2%</span>
+</div>
+</div>
+<div>
+<p class="text-primary/60 dark:text-gray-400 text-sm font-medium">Total Revenue</p>
+<p class="text-primary dark:text-white text-2xl font-bold tracking-tight mt-1">$12,450</p>
+</div>
+</div>
+<!-- Occupancy Card -->
+<div class="min-w-[160px] flex-1 flex flex-col justify-between gap-4 rounded-xl bg-white dark:bg-surface-dark p-5 border border-stone-200 dark:border-stone-700 shadow-sm snap-start">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-primary/60 dark:text-gray-400 text-2xl">apartment</span>
+<div class="flex items-center gap-1 text-xs font-semibold text-secondary bg-secondary/10 px-2 py-1 rounded-full">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+<span>2.0%</span>
+</div>
+</div>
+<div>
+<p class="text-primary/60 dark:text-gray-400 text-sm font-medium">Occupancy Rate</p>
+<p class="text-primary dark:text-white text-2xl font-bold tracking-tight mt-1">90%</p>
+</div>
+</div>
+<!-- Pending Requests Card -->
+<div class="min-w-[160px] flex-1 flex flex-col justify-between gap-4 rounded-xl bg-white dark:bg-surface-dark p-5 border border-stone-200 dark:border-stone-700 shadow-sm snap-start">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-primary/60 dark:text-gray-400 text-2xl">pending_actions</span>
+<div class="h-2 w-2 rounded-full bg-accent animate-pulse"></div>
+</div>
+<div>
+<p class="text-primary/60 dark:text-gray-400 text-sm font-medium">Pending Requests</p>
+<p class="text-primary dark:text-white text-2xl font-bold tracking-tight mt-1">4</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Portfolio List Section -->
+<section class="flex flex-col px-4 gap-4">
+<div class="flex items-center justify-between">
+<h3 class="text-primary dark:text-white text-xl font-bold tracking-tight">Your Portfolio</h3>
+<button class="text-sm font-semibold text-primary/70 dark:text-white/70 hover:text-primary transition-colors flex items-center gap-1">
+                    See All <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+</button>
+</div>
+<div class="flex flex-col gap-4">
+<!-- Property Card 1: Occupied -->
+<div class="group flex flex-col sm:flex-row gap-0 sm:gap-4 bg-white dark:bg-surface-dark rounded-xl border border-stone-200 dark:border-stone-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="relative h-48 sm:h-auto sm:w-40 w-full shrink-0">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Modern loft interior with large windows and brick wall" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDCtwOQ7Ntnqb3znu-3sfIdWTMqD3pMTOnVifRfCvVpi85H5MkVV8nz6Ggbhaql9wecmVRfCqsbANADo8WzneM0WgCL2CJoyystyFKxnZ7BJBF78jONZVBzPeWJMvjIi1-aUHzEkQoiWpieyVvW6jE0bbzlsIMiXL5KeF60J2c_yxuO7RiLEP7R4L5lAs173ljh9kDuPqUyEpe3b9W8um7f2DdnS8JF6XrZ5xXxmrwFskRIIiG-UXL2sY_SU_Q0sJMc2Wp8RI4hW5A");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent sm:hidden"></div>
+<span class="absolute bottom-3 left-3 sm:hidden inline-flex items-center gap-1 rounded-full bg-secondary text-white px-2.5 py-0.5 text-xs font-semibold shadow-sm">
+<span class="material-symbols-outlined text-[10px] filled">check_circle</span>
+                            Occupied
+                        </span>
+</div>
+<div class="flex flex-1 flex-col justify-center p-4">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="text-primary dark:text-white text-lg font-bold leading-tight">Unit 402, The Skyline Lofts</h4>
+<p class="text-primary/60 dark:text-gray-400 text-sm font-medium mt-1">Downtown District</p>
+</div>
+<span class="hidden sm:inline-flex items-center gap-1 rounded-full bg-secondary/15 text-secondary border border-secondary/20 px-2.5 py-1 text-xs font-semibold">
+                                Occupied
+                            </span>
+</div>
+<div class="mt-4 flex flex-wrap gap-y-2 gap-x-4 text-xs font-medium text-primary/50 dark:text-gray-500">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">bed</span> 2 Bed
+                            </div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">shower</span> 2 Bath
+                            </div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">square_foot</span> 1,200 sqft
+                            </div>
+</div>
+<div class="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="h-6 w-6 rounded-full bg-stone-200 dark:bg-stone-700 bg-cover bg-center" data-alt="Portrait of Tenant Sarah J." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuARZmQRP_HYfV7Zj32jYv-9vYjn00DnSiWyQNV8InTvarqhI5_cZwoKU64u0MPQvmlT39Z0YJ8qQUMUF4SkfceEWyHOwEkmDLvd3u1v1_ejxazHF2MsXlZzuF1ja3D9E9j8cVCW4InP2Xc1_yF9c_nep3xzvCXZ9Q5KzlUNRhdCRb2p-h-prRTE65Y-K5dRgGA3sSoG-K1EdnloMtiPrJLZragcFOR9Rybxk7RTTnnVe8bSA4yJtkdbG2fpalx910YXqiYRQiDJJio");'></div>
+<span class="text-sm text-primary dark:text-gray-300">Tenant: <span class="font-semibold">Sarah J.</span></span>
+</div>
+<button class="text-primary/40 hover:text-primary dark:text-gray-500 dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Property Card 2: Vacant -->
+<div class="group flex flex-col sm:flex-row gap-0 sm:gap-4 bg-white dark:bg-surface-dark rounded-xl border border-stone-200 dark:border-stone-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="relative h-48 sm:h-auto sm:w-40 w-full shrink-0">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Cozy heritage apartment interior with wooden beams" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCJlDQzCcm2trHKbth-xsOgoPdGsgxvag8nvY77lVkR3uOU-4TzrmheJHkhSbvURgaY-7B983xVHa7W0LujuBzYGcrNamkBnqwYCSCimfxGrRowPqS6iyINxR1iS_I8tTZJCVwRq95emrEaeJQ4yaIT6B-GM35XBQUYxOvfXBMTFVYQWZxOqZGoGgyd1YcV2kgjCKXTlZXWtVTpKzonj6yHLyOjSfObnd6LaFp1qJLr9hxOR_sT4gdcPIeW7GqoIXCV506MBy2-uGs");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent sm:hidden"></div>
+<span class="absolute bottom-3 left-3 sm:hidden inline-flex items-center gap-1 rounded-full bg-accent text-white px-2.5 py-0.5 text-xs font-semibold shadow-sm">
+<span class="material-symbols-outlined text-[10px]">error</span>
+                            Vacant
+                        </span>
+</div>
+<div class="flex flex-1 flex-col justify-center p-4">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="text-primary dark:text-white text-lg font-bold leading-tight">Unit 12B, Heritage Block</h4>
+<p class="text-primary/60 dark:text-gray-400 text-sm font-medium mt-1">Old Town</p>
+</div>
+<span class="hidden sm:inline-flex items-center gap-1 rounded-full bg-accent/15 text-accent border border-accent/20 px-2.5 py-1 text-xs font-semibold">
+                                Vacant
+                            </span>
+</div>
+<div class="mt-4 flex flex-wrap gap-y-2 gap-x-4 text-xs font-medium text-primary/50 dark:text-gray-500">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">bed</span> 1 Bed
+                            </div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">shower</span> 1 Bath
+                            </div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">square_foot</span> 850 sqft
+                            </div>
+</div>
+<div class="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between">
+<span class="text-sm text-accent font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span> Listed 3 days ago
+                            </span>
+<button class="text-primary/40 hover:text-primary dark:text-gray-500 dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Property Card 3: Occupied -->
+<div class="group flex flex-col sm:flex-row gap-0 sm:gap-4 bg-white dark:bg-surface-dark rounded-xl border border-stone-200 dark:border-stone-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="relative h-48 sm:h-auto sm:w-40 w-full shrink-0">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Minimalist modern apartment living room" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAYnSgTicGZFlZvbL-hX2WZYooi7poNsYET9-C2TyQtX-G6IR59ZDN-T8_va9AovTNGn-x2Fp-PdP9MFMy0vhrrvBX4xLTjaq4mhRTPw_dgkARZEu_gZzFZSON2E6fkSnZUmU2P3uamCAwV3sA5FSBxNsKUszyZCwyNOBQhC-vo3_gYBCmcNEbI-Q2hwyxUCA3-t6snG7Uq7iWtGb_-uHIKcJPLv1JfjhOIPyA4vgynQ6bcdasIgyV1LKNh6IEnLaydFHmqXoEnuiI");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent sm:hidden"></div>
+<span class="absolute bottom-3 left-3 sm:hidden inline-flex items-center gap-1 rounded-full bg-secondary text-white px-2.5 py-0.5 text-xs font-semibold shadow-sm">
+<span class="material-symbols-outlined text-[10px] filled">check_circle</span>
+                            Occupied
+                        </span>
+</div>
+<div class="flex flex-1 flex-col justify-center p-4">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="text-primary dark:text-white text-lg font-bold leading-tight">Unit 5A, Riverview Apts</h4>
+<p class="text-primary/60 dark:text-gray-400 text-sm font-medium mt-1">Riverside</p>
+</div>
+<span class="hidden sm:inline-flex items-center gap-1 rounded-full bg-secondary/15 text-secondary border border-secondary/20 px-2.5 py-1 text-xs font-semibold">
+                                Occupied
+                            </span>
+</div>
+<div class="mt-4 flex flex-wrap gap-y-2 gap-x-4 text-xs font-medium text-primary/50 dark:text-gray-500">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">bed</span> 3 Bed
+                            </div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">shower</span> 2 Bath
+                            </div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">square_foot</span> 1,500 sqft
+                            </div>
+</div>
+<div class="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="h-6 w-6 rounded-full bg-stone-200 dark:bg-stone-700 bg-cover bg-center" data-alt="Portrait of Tenant Mark R." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC4iV7coNG2iTn6cFIy7pUVF1GsT6In_C-fcRfvNHes2Qm5FPjnrkz6D_ZNgdiFtHAAOeEGdQLA8sUBSGz-MtJ1WAyZWllVM1RdH1ZSgld-2mCcI3ik-h73A_FAe43ky2puUnONO8ItdxvUwI9y-f0zfP5mZDSwzCaARquQuE_LkT0KD37Myz8XqoEN2Cd2X-PiQMGiQRXAG5m2d1c-Ok5JWnrzeUdC5soSOwm3wN0uoKvKp7zwTei4SCl7Ok4CmHTLul_j5II9fio");'></div>
+<span class="text-sm text-primary dark:text-gray-300">Tenant: <span class="font-semibold">Mark R.</span></span>
+</div>
+<button class="text-primary/40 hover:text-primary dark:text-gray-500 dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Floating Action Button -->
+<div class="fixed bottom-24 right-4 z-10">
+<button class="group flex items-center justify-center gap-2 h-14 bg-primary hover:bg-primary/90 text-white rounded-full shadow-lg hover:shadow-xl px-5 transition-all">
+<span class="material-symbols-outlined">add</span>
+<span class="font-semibold pr-1">Add Property</span>
+</button>
+</div>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 z-30 w-full bg-white dark:bg-surface-dark border-t border-stone-200 dark:border-stone-700 pb-safe">
+<div class="flex items-center justify-around h-16 sm:h-20">
+<button class="flex flex-col items-center justify-center w-full h-full gap-1 text-primary dark:text-white">
+<span class="material-symbols-outlined text-[24px]">dashboard</span>
+<span class="text-[10px] font-medium">Overview</span>
+</button>
+<button class="flex flex-col items-center justify-center w-full h-full gap-1 text-primary/40 dark:text-gray-500 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[24px]">apartment</span>
+<span class="text-[10px] font-medium">Properties</span>
+</button>
+<button class="flex flex-col items-center justify-center w-full h-full gap-1 text-primary/40 dark:text-gray-500 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[24px]">chat_bubble</span>
+<span class="text-[10px] font-medium">Messages</span>
+</button>
+<button class="flex flex-col items-center justify-center w-full h-full gap-1 text-primary/40 dark:text-gray-500 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+<span class="text-[10px] font-medium">Wallet</span>
+</button>
+</div>
+</nav>
+</div>
+</body></html>

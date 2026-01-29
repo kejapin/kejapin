@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kejapin - Help &amp; Support Center</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421",
+                        "coffee-light": "#6d543e",
+                        "background-light": "#f7f7f6",
+                        "background-dark": "#1d1915",
+                        "alabaster": "#fbfbf9",
+                        "surface-dark": "#2c2825",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(74, 52, 33, 0.08)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-alabaster dark:bg-background-dark font-display text-primary dark:text-gray-100 antialiased selection:bg-primary selection:text-white">
+<div class="relative mx-auto flex h-auto min-h-screen w-full max-w-md flex-col bg-alabaster dark:bg-background-dark overflow-x-hidden pb-32">
+<div class="sticky top-0 z-30 bg-alabaster/95 dark:bg-background-dark/95 backdrop-blur-md px-5 pt-12 pb-4 border-b border-gray-200/50 dark:border-gray-800">
+<div class="flex items-center gap-4 mb-4">
+<button class="flex items-center justify-center -ml-2 p-2">
+<span class="material-symbols-outlined text-primary dark:text-white">arrow_back_ios_new</span>
+</button>
+<h1 class="text-2xl font-bold text-primary dark:text-white">Help Center</h1>
+</div>
+<div class="flex items-center gap-3 bg-white dark:bg-surface-dark p-3 rounded-xl shadow-soft border border-gray-200/50 dark:border-gray-700 transition-all focus-within:ring-2 focus-within:ring-primary/20">
+<span class="material-symbols-outlined text-gray-400">search</span>
+<input class="flex-1 bg-transparent border-none p-0 text-primary dark:text-white placeholder-gray-400 focus:ring-0 text-base font-medium" placeholder="Search FAQ, topics..." type="text"/>
+</div>
+</div>
+<div class="mt-8 px-5">
+<h2 class="text-sm font-bold text-coffee-light dark:text-gray-400 uppercase tracking-widest mb-6">Support Topics</h2>
+<div class="grid grid-cols-2 gap-4">
+<button class="flex flex-col items-start p-5 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-soft active:scale-95 transition-transform text-left">
+<div class="w-10 h-10 rounded-xl bg-primary/5 dark:bg-white/5 flex items-center justify-center text-primary dark:text-white mb-4">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<p class="font-bold text-sm text-primary dark:text-white">Payments</p>
+<p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Billing, refunds &amp; rent deposits</p>
+</button>
+<button class="flex flex-col items-start p-5 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-soft active:scale-95 transition-transform text-left">
+<div class="w-10 h-10 rounded-xl bg-primary/5 dark:bg-white/5 flex items-center justify-center text-primary dark:text-white mb-4">
+<span class="material-symbols-outlined">push_pin</span>
+</div>
+<p class="font-bold text-sm text-primary dark:text-white">Life Pins Help</p>
+<p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Commute &amp; lifestyle data</p>
+</button>
+<button class="flex flex-col items-start p-5 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-soft active:scale-95 transition-transform text-left">
+<div class="w-10 h-10 rounded-xl bg-primary/5 dark:bg-white/5 flex items-center justify-center text-primary dark:text-white mb-4">
+<span class="material-symbols-outlined">verified_user</span>
+</div>
+<p class="font-bold text-sm text-primary dark:text-white">Account Safety</p>
+<p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Privacy &amp; verification</p>
+</button>
+<button class="flex flex-col items-start p-5 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-soft active:scale-95 transition-transform text-left">
+<div class="w-10 h-10 rounded-xl bg-primary/5 dark:bg-white/5 flex items-center justify-center text-primary dark:text-white mb-4">
+<span class="material-symbols-outlined">foundation</span>
+</div>
+<p class="font-bold text-sm text-primary dark:text-white">Structural Info</p>
+<p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Building quality metrics</p>
+</button>
+<button class="flex flex-col items-start p-5 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-soft active:scale-95 transition-transform text-left">
+<div class="w-10 h-10 rounded-xl bg-primary/5 dark:bg-white/5 flex items-center justify-center text-primary dark:text-white mb-4">
+<span class="material-symbols-outlined">apartment</span>
+</div>
+<p class="font-bold text-sm text-primary dark:text-white">Leasing</p>
+<p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Contracts &amp; viewing pins</p>
+</button>
+<button class="flex flex-col items-start p-5 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-soft active:scale-95 transition-transform text-left">
+<div class="w-10 h-10 rounded-xl bg-primary/5 dark:bg-white/5 flex items-center justify-center text-primary dark:text-white mb-4">
+<span class="material-symbols-outlined">travel_explore</span>
+</div>
+<p class="font-bold text-sm text-primary dark:text-white">Discovery</p>
+<p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Using search filters</p>
+</button>
+</div>
+</div>
+<div class="mt-10 px-5">
+<h2 class="text-lg font-bold text-primary dark:text-white mb-4">Frequently Asked</h2>
+<div class="space-y-4">
+<div class="p-4 bg-white dark:bg-surface-dark rounded-xl border border-gray-100 dark:border-gray-800 flex items-center justify-between">
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">How do I verify a structural report?</span>
+<span class="material-symbols-outlined text-gray-400">chevron_right</span>
+</div>
+<div class="p-4 bg-white dark:bg-surface-dark rounded-xl border border-gray-100 dark:border-gray-800 flex items-center justify-between">
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">What is the Commute Score?</span>
+<span class="material-symbols-outlined text-gray-400">chevron_right</span>
+</div>
+<div class="p-4 bg-white dark:bg-surface-dark rounded-xl border border-gray-100 dark:border-gray-800 flex items-center justify-between">
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Setting up custom alerts</span>
+<span class="material-symbols-outlined text-gray-400">chevron_right</span>
+</div>
+</div>
+</div>
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-background-dark/95 border-t border-gray-200 dark:border-gray-800 backdrop-blur-lg max-w-md mx-auto p-5">
+<button class="w-full bg-primary hover:bg-coffee-light text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 shadow-lg transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span>Chat with Support</span>
+</button>
+</div>
+<div class="h-10"></div>
+</div>
+
+</body></html>

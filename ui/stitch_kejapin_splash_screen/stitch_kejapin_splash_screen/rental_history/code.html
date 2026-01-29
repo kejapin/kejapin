@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kejapin - Rental History</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421",
+                        "coffee-light": "#6d543e",
+                        "background-light": "#f7f7f6",
+                        "background-dark": "#1d1915",
+                        "alabaster": "#fbfbf9",
+                        "surface-dark": "#2c2825",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(74, 52, 33, 0.08)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-primary dark:text-gray-100 antialiased selection:bg-primary selection:text-white">
+<div class="relative mx-auto flex h-auto min-h-screen w-full max-w-md flex-col bg-background-light dark:bg-background-dark overflow-x-hidden shadow-2xl">
+<div class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 py-4 max-w-md mx-auto bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-primary/5 dark:border-white/5">
+<div class="flex items-center gap-4">
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-sm transition active:scale-95 group">
+<span class="material-symbols-outlined text-primary dark:text-white group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+</button>
+<h1 class="text-lg font-bold text-primary dark:text-white tracking-tight">Rental History</h1>
+</div>
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-sm transition active:scale-95 text-coffee-light dark:text-gray-400">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+<div class="flex-1 px-5 pt-24 pb-12 flex flex-col gap-10">
+<div>
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xs font-bold uppercase tracking-widest text-coffee-light dark:text-gray-400">Current Residence</h2>
+<span class="inline-flex items-center gap-1.5 rounded-full bg-green-100 dark:bg-green-900/30 px-2.5 py-1 text-[10px] font-bold text-green-700 dark:text-green-400 uppercase tracking-wide border border-green-200 dark:border-green-800">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-green-600"></span>
+</span>
+                        Active Lease
+                    </span>
+</div>
+<div class="group relative overflow-hidden rounded-2xl bg-white dark:bg-surface-dark shadow-soft border border-primary/5 dark:border-white/5 transition-all hover:shadow-lg">
+<div class="relative h-44 w-full overflow-hidden">
+<div class="h-full w-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCDAmj8514rXMCvZkDqUc1Usb7sgC5iWHiAm9gZwv1ZJKjgPVwY_tloeeuBEy9B4OLCcsqg24hq3vYcm0xjQ_UoDy7m66GoMQhfcikkY1P5szZ8mn4UQEXrYFlUrLiLJrrX4u12zu3UMfmcUS5TfMXjSodwUw05Fgpse2-pEwcAjE6jc00_yjUUGJhnBrtLN_iuCW87pOJAfAlBohZhnoLYVghEgNcdTs6gT2VGSnzQAcCtwUPPFF6hwHhsDDML8Q65-HpyN9_KQoI');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4 text-white">
+<div class="flex items-start justify-between">
+<div>
+<h3 class="text-xl font-bold leading-tight mb-1">The Lofts @ Westlands</h3>
+<div class="flex items-center gap-1 opacity-90">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span class="text-xs font-medium">Westlands, Nairobi</span>
+</div>
+</div>
+<div class="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
+<span class="material-symbols-outlined text-white">apartment</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-5">
+<div class="flex items-center gap-3 mb-6">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase text-gray-400 font-bold tracking-wider mb-0.5">Moved In</span>
+<span class="text-sm font-bold text-primary dark:text-white">Aug 15, 2023</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-1">
+<div class="w-full h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-coffee-light w-2/3 rounded-full"></div>
+</div>
+<span class="text-[10px] text-coffee-light dark:text-gray-400 font-medium">10 Months</span>
+</div>
+<div class="flex flex-col text-right">
+<span class="text-[10px] uppercase text-gray-400 font-bold tracking-wider mb-0.5">Renew Date</span>
+<span class="text-sm font-bold text-primary dark:text-white">Aug 14, 2024</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex items-center justify-center gap-2 rounded-xl bg-background-light dark:bg-white/5 py-3 text-xs font-bold text-primary dark:text-white hover:bg-primary/10 transition-colors border border-transparent hover:border-primary/10">
+<span class="material-symbols-outlined text-[18px]">description</span>
+                                Lease Agreement
+                            </button>
+<button class="flex items-center justify-center gap-2 rounded-xl bg-background-light dark:bg-white/5 py-3 text-xs font-bold text-primary dark:text-white hover:bg-primary/10 transition-colors border border-transparent hover:border-primary/10">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                                Payment History
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<div>
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-xs font-bold uppercase tracking-widest text-coffee-light dark:text-gray-400">Past Tenancy</h2>
+<span class="text-xs font-medium text-gray-400">2 Records</span>
+</div>
+<div class="relative pl-3 ml-2 border-l-[2px] border-dashed border-gray-200 dark:border-gray-800 space-y-10">
+<div class="relative pl-8">
+<span class="absolute -left-[7px] top-1.5 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-background-dark bg-gray-300 dark:bg-gray-600 shadow-sm z-10"></span>
+<div class="flex flex-col gap-3 group">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="text-base font-bold text-primary dark:text-white group-hover:text-coffee-light transition-colors">Riverside Park Apts</h3>
+<div class="flex items-center gap-1 text-gray-500 dark:text-gray-400 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<p class="text-xs">Riverside Drive</p>
+</div>
+</div>
+<span class="text-[10px] font-bold text-gray-500 border border-gray-200 dark:border-gray-700 bg-white dark:bg-white/5 px-2 py-1 rounded-md shadow-sm">2021 - 2023</span>
+</div>
+<div class="bg-white dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 hover:border-primary/20 transition-colors">
+<div class="flex items-center gap-4 mb-4">
+<div class="h-12 w-12 rounded-lg bg-gray-200 dark:bg-gray-700 bg-cover bg-center shrink-0 grayscale opacity-80" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBoURBVj8tA4R6X5EGaspn9TzwhO4P7wmh5pnVN0gcw3g6HPYRGJPTUa8xILELZ3O9cl28TVYawR-egZGqaGBoqm9M1GWi2I3OF1OYd8NPhF8ZMUj2MJ8FDXM2RjueXnjmvbV3rv2xIJM6yXMokjjVzKLQ1ma2zqtIn9Mo_gqc_HMS4JyMRC2CNhtMFUF_twdS7Bw_Iq2hqpUwrFXO2dY-8j4SEaixFUjjTWpNUrk86LLnWGxXPB46u0yIdBEho98tZlLKGB44-Yow');"></div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs font-bold text-primary dark:text-white">Unit 12A</span>
+<span class="h-1 w-1 rounded-full bg-gray-300"></span>
+<span class="text-xs text-gray-500">2 Bed</span>
+</div>
+<p class="text-[10px] leading-relaxed text-gray-400 line-clamp-2">
+                                            Monthly Rent: KES 65,000 • Security Deposit Refunded
+                                        </p>
+</div>
+</div>
+<div class="flex gap-2 border-t border-gray-50 dark:border-white/5 pt-3">
+<a class="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-semibold text-coffee-light dark:text-gray-300 hover:text-primary transition" href="#">
+<span class="material-symbols-outlined text-[16px]">download</span>
+                                        Lease
+                                    </a>
+<div class="w-px bg-gray-200 dark:bg-gray-700"></div>
+<a class="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-semibold text-coffee-light dark:text-gray-300 hover:text-primary transition" href="#">
+<span class="material-symbols-outlined text-[16px]">history</span>
+                                        Receipts
+                                    </a>
+</div>
+</div>
+</div>
+</div>
+<div class="relative pl-8">
+<span class="absolute -left-[7px] top-1.5 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-background-dark bg-gray-300 dark:bg-gray-600 shadow-sm z-10"></span>
+<div class="flex flex-col gap-3 group">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="text-base font-bold text-primary dark:text-white group-hover:text-coffee-light transition-colors">Kileleshwa Heights</h3>
+<div class="flex items-center gap-1 text-gray-500 dark:text-gray-400 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<p class="text-xs">Othaya Road</p>
+</div>
+</div>
+<span class="text-[10px] font-bold text-gray-500 border border-gray-200 dark:border-gray-700 bg-white dark:bg-white/5 px-2 py-1 rounded-md shadow-sm">2019 - 2021</span>
+</div>
+<div class="bg-white dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 hover:border-primary/20 transition-colors">
+<div class="flex items-center gap-4 mb-4">
+<div class="h-12 w-12 rounded-lg bg-primary/5 dark:bg-white/5 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary/30 dark:text-white/30">home_work</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs font-bold text-primary dark:text-white">Unit 5C</span>
+<span class="h-1 w-1 rounded-full bg-gray-300"></span>
+<span class="text-xs text-gray-500">1 Bed</span>
+</div>
+<p class="text-[10px] leading-relaxed text-gray-400 line-clamp-2">
+                                            Monthly Rent: KES 45,000 • Fully Serviced
+                                        </p>
+</div>
+</div>
+<div class="flex gap-2 border-t border-gray-50 dark:border-white/5 pt-3">
+<a class="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-semibold text-coffee-light dark:text-gray-300 hover:text-primary transition" href="#">
+<span class="material-symbols-outlined text-[16px]">download</span>
+                                        Lease
+                                    </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-center py-6 opacity-50">
+<span class="text-[10px] uppercase tracking-widest text-gray-400">End of History</span>
+</div>
+</div>
+</div>
+
+</body></html>

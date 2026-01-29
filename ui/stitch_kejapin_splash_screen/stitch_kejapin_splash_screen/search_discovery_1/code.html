@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kejapin - Search &amp; Discovery</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421",
+                        "coffee-light": "#6d543e",
+                        "background-light": "#f7f7f6",
+                        "background-dark": "#1d1915",
+                        "alabaster": "#fbfbf9",
+                        "surface-dark": "#2c2825",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(74, 52, 33, 0.08)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-alabaster dark:bg-background-dark font-display text-primary dark:text-gray-100 antialiased selection:bg-primary selection:text-white">
+<div class="relative mx-auto flex h-auto min-h-screen w-full max-w-md flex-col bg-alabaster dark:bg-background-dark overflow-x-hidden pb-24">
+<div class="sticky top-0 z-30 bg-alabaster/95 dark:bg-background-dark/95 backdrop-blur-md px-5 pt-12 pb-4 border-b border-gray-200/50 dark:border-gray-800">
+<h1 class="text-2xl font-bold text-primary dark:text-white mb-4">Discovery</h1>
+<div class="flex items-center gap-3 bg-white dark:bg-surface-dark p-3 rounded-xl shadow-soft border border-gray-200/50 dark:border-gray-700 transition-all focus-within:ring-2 focus-within:ring-primary/20">
+<span class="material-symbols-outlined text-gray-400">search</span>
+<input class="flex-1 bg-transparent border-none p-0 text-primary dark:text-white placeholder-gray-400 focus:ring-0 text-base font-medium" placeholder="Search location, building..." type="text"/>
+<div class="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+<button class="flex items-center justify-center text-primary dark:text-gray-300">
+<span class="material-symbols-outlined text-[22px]">tune</span>
+</button>
+</div>
+</div>
+<div class="mt-6">
+<div class="flex items-center justify-between px-5 mb-3">
+<h2 class="text-lg font-bold text-primary dark:text-white">Saved Searches</h2>
+<button class="text-xs font-bold text-coffee-light dark:text-gray-400 uppercase tracking-wide">View All</button>
+</div>
+<div class="flex gap-3 overflow-x-auto no-scrollbar px-5 pb-4">
+<button class="min-w-[150px] flex-shrink-0 text-left p-4 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-sm group active:scale-95 transition-transform">
+<div class="flex items-center justify-between mb-2">
+<div class="p-2 rounded-full bg-primary/5 dark:bg-white/5 text-primary dark:text-white group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">bookmark</span>
+</div>
+<span class="bg-red-100 text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded-md">3 NEW</span>
+</div>
+<p class="font-bold text-primary dark:text-white text-sm">Westlands Lofts</p>
+<p class="text-xs text-gray-500 mt-1">2 Bed • &lt; 120k</p>
+</button>
+<button class="min-w-[150px] flex-shrink-0 text-left p-4 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-sm group active:scale-95 transition-transform">
+<div class="flex items-center justify-between mb-2">
+<div class="p-2 rounded-full bg-primary/5 dark:bg-white/5 text-primary dark:text-white group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">fitness_center</span>
+</div>
+</div>
+<p class="font-bold text-primary dark:text-white text-sm">Near Gym Pin</p>
+<p class="text-xs text-gray-500 mt-1">&lt; 15 min walk</p>
+</button>
+<button class="min-w-[150px] flex-shrink-0 text-left p-4 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-sm group active:scale-95 transition-transform">
+<div class="flex items-center justify-between mb-2">
+<div class="p-2 rounded-full bg-primary/5 dark:bg-white/5 text-primary dark:text-white group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">work</span>
+</div>
+</div>
+<p class="font-bold text-primary dark:text-white text-sm">Near Work Pin</p>
+<p class="text-xs text-gray-500 mt-1">&lt; 30 min drive</p>
+</button>
+</div>
+</div>
+<div class="mt-2 px-5">
+<h2 class="text-lg font-bold text-primary dark:text-white mb-3">Recent</h2>
+<div class="flex flex-col">
+<button class="flex items-center gap-3 py-3 border-b border-gray-100 dark:border-gray-800 active:bg-gray-50 dark:active:bg-white/5 transition-colors -mx-2 px-2 rounded-lg">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</div>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">2BHK in Kilimani</span>
+<span class="material-symbols-outlined ml-auto text-gray-300 text-[20px]">north_west</span>
+</button>
+<button class="flex items-center gap-3 py-3 border-b border-gray-100 dark:border-gray-800 active:bg-gray-50 dark:active:bg-white/5 transition-colors -mx-2 px-2 rounded-lg">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</div>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Near Work Pin</span>
+<span class="material-symbols-outlined ml-auto text-gray-300 text-[20px]">north_west</span>
+</button>
+<button class="flex items-center gap-3 py-3 border-b border-gray-100 dark:border-gray-800 active:bg-gray-50 dark:active:bg-white/5 transition-colors -mx-2 px-2 rounded-lg">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</div>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Riverside Drive</span>
+<span class="material-symbols-outlined ml-auto text-gray-300 text-[20px]">north_west</span>
+</button>
+</div>
+</div>
+<div class="mt-8 px-5">
+<h2 class="text-lg font-bold text-primary dark:text-white mb-4">Recommended for You</h2>
+<div class="flex flex-col gap-6">
+<div class="group relative flex flex-col rounded-2xl bg-white dark:bg-surface-dark overflow-hidden shadow-soft border border-gray-100 dark:border-gray-800 transition-all active:scale-[0.99]">
+<div class="relative aspect-[4/3] w-full overflow-hidden bg-gray-200">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCDAmj8514rXMCvZkDqUc1Usb7sgC5iWHiAm9gZwv1ZJKjgPVwY_tloeeuBEy9B4OLCcsqg24hq3vYcm0xjQ_UoDy7m66GoMQhfcikkY1P5szZ8mn4UQEXrYFlUrLiLJrrX4u12zu3UMfmcUS5TfMXjSodwUw05Fgpse2-pEwcAjE6jc00_yjUUGJhnBrtLN_iuCW87pOJAfAlBohZhnoLYVghEgNcdTs6gT2VGSnzQAcCtwUPPFF6hwHhsDDML8Q65-HpyN9_KQoI');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+<div class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-bold text-primary shadow-sm">
+                            PREMIUM
+                        </div>
+<div class="absolute bottom-3 left-3 text-white">
+<p class="text-lg font-bold">The Glass House</p>
+<div class="flex items-center gap-1 text-sm text-gray-200">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                                Kileleshwa
+                            </div>
+</div>
+<button class="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 transition-colors">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+</button>
+</div>
+<div class="p-4">
+<div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">bed</span>
+<span>3 Bed</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">shower</span>
+<span>3 Bath</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">square_foot</span>
+<span>2100 sqft</span>
+</div>
+</div>
+<div class="bg-alabaster dark:bg-black/20 rounded-xl p-3 border border-dashed border-primary/20 dark:border-white/10 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase font-bold text-coffee-light dark:text-gray-400 tracking-wider">Total Cost (Rent + Commute)</span>
+<span class="text-xs text-gray-400 dark:text-gray-500">Rent: 110k • Commute: ~15k</span>
+</div>
+<div class="text-right">
+<span class="block text-lg font-bold text-primary dark:text-white">125k</span>
+<span class="text-[10px] text-gray-400">/month</span>
+</div>
+</div>
+</div>
+</div>
+<div class="group relative flex flex-col rounded-2xl bg-white dark:bg-surface-dark overflow-hidden shadow-soft border border-gray-100 dark:border-gray-800 transition-all active:scale-[0.99]">
+<div class="relative aspect-[4/3] w-full overflow-hidden bg-gray-200">
+<div class="absolute inset-0 bg-cover bg-center grayscale-[20%] transition-transform duration-700 group-hover:scale-105" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBoURBVj8tA4R6X5EGaspn9TzwhO4P7wmh5pnVN0gcw3g6HPYRGJPTUa8xILELZ3O9cl28TVYawR-egZGqaGBoqm9M1GWi2I3OF1OYd8NPhF8ZMUj2MJ8FDXM2RjueXnjmvbV3rv2xIJM6yXMokjjVzKLQ1ma2zqtIn9Mo_gqc_HMS4JyMRC2CNhtMFUF_twdS7Bw_Iq2hqpUwrFXO2dY-8j4SEaixFUjjTWpNUrk86LLnWGxXPB46u0yIdBEho98tZlLKGB44-Yow');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+<div class="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-bold text-white shadow-sm">
+                            NEW LISTING
+                        </div>
+<div class="absolute bottom-3 left-3 text-white">
+<p class="text-lg font-bold">Azure Towers</p>
+<div class="flex items-center gap-1 text-sm text-gray-200">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                                Westlands
+                            </div>
+</div>
+<button class="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 transition-colors">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+</button>
+</div>
+<div class="p-4">
+<div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">bed</span>
+<span>2 Bed</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">shower</span>
+<span>2 Bath</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">square_foot</span>
+<span>1400 sqft</span>
+</div>
+</div>
+<div class="bg-alabaster dark:bg-black/20 rounded-xl p-3 border border-dashed border-primary/20 dark:border-white/10 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase font-bold text-coffee-light dark:text-gray-400 tracking-wider">Total Cost (Rent + Commute)</span>
+<span class="text-xs text-gray-400 dark:text-gray-500">Rent: 85k • Commute: ~5k</span>
+</div>
+<div class="text-right">
+<span class="block text-lg font-bold text-primary dark:text-white">90k</span>
+<span class="text-[10px] text-gray-400">/month</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-background-dark/95 border-t border-gray-200 dark:border-gray-800 backdrop-blur-lg max-w-md mx-auto pb-6 pt-3 px-6">
+<div class="flex justify-between items-center">
+<button class="flex flex-col items-center gap-1 text-primary dark:text-white">
+<span class="material-symbols-outlined filled">search</span>
+<span class="text-[10px] font-bold">Search</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined">favorite</span>
+<span class="text-[10px] font-medium">Saved</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="text-[10px] font-medium">Alerts</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</button>
+</div>
+</div>
+</div>
+
+</body></html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kejapin - Profile &amp; Settings</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4a3421",
+                        "coffee-light": "#6d543e",
+                        "background-light": "#f7f7f6",
+                        "background-dark": "#1d1915",
+                        "alabaster": "#fbfbf9",
+                        "surface-dark": "#2c2825",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(74, 52, 33, 0.08)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-primary dark:text-gray-100 antialiased selection:bg-primary selection:text-white">
+<div class="relative mx-auto flex h-auto min-h-screen w-full max-w-md flex-col bg-background-light dark:bg-background-dark overflow-x-hidden shadow-2xl pb-6">
+<div class="sticky top-0 z-50 flex items-center justify-between px-5 py-4 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-primary/5 dark:border-white/5">
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800 transition active:scale-95 text-primary dark:text-white hover:bg-gray-50">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+</button>
+<h1 class="text-sm font-bold text-primary dark:text-white tracking-widest uppercase">Profile &amp; Settings</h1>
+<div class="w-10"></div> 
+</div>
+<div class="flex flex-col items-center pt-8 pb-10 px-6 text-center">
+<div class="relative mb-5 group cursor-pointer">
+<div class="h-28 w-28 rounded-full p-1 bg-white dark:bg-surface-dark shadow-soft">
+<img alt="User Profile" class="h-full w-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4gQQ3uZC7Asv5m5Ekgp0X3_LF7HCBmI5-RpKndTPEmrec_qDjeoHz3ohs8EAl5GWHhNyykEc9sfLLqigSYLekw-aQUBGmm8OsMp-khmgdHjqBGjGUonDW0KMJqqKTd8g2mBok_uerDZlRrKfQlQnOgwFqec8Mbf70N-vBdNRrDLCVgfVjg9zgZYjbAKdJnvMdEhAJIKi_sPtcs2doCL04m47sGhyQ8GFsi0d0OqTjamInk8nSBsT0vL4qdkylumWoEOdkK2h1SYU"/>
+</div>
+<div class="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white ring-4 ring-background-light dark:ring-background-dark shadow-sm">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</div>
+</div>
+<h2 class="text-2xl font-bold text-primary dark:text-white mb-1.5">Sarah Jennings</h2>
+<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/5 dark:bg-white/5 border border-primary/5 dark:border-white/5">
+<span class="material-symbols-outlined text-[16px] text-coffee-light dark:text-gray-400">verified_user</span>
+<span class="text-xs font-semibold text-coffee-light dark:text-gray-400 uppercase tracking-wide">Verified Member</span>
+</div>
+</div>
+<div class="px-5 flex-1">
+<div class="flex flex-col gap-4">
+<div class="rounded-2xl bg-white dark:bg-surface-dark p-2 shadow-soft border border-primary/5 dark:border-white/5">
+<button class="w-full flex items-center justify-between p-3 rounded-xl hover:bg-background-light dark:hover:bg-white/5 transition-all group">
+<div class="flex items-center gap-4">
+<div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/5 dark:bg-white/5 text-primary dark:text-white group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-[20px]">lock</span>
+</div>
+<span class="font-medium text-primary dark:text-white text-base">Account Security</span>
+</div>
+<span class="material-symbols-outlined text-gray-300 dark:text-gray-600 group-hover:text-primary dark:group-hover:text-white transition-colors">chevron_right</span>
+</button>
+<div class="mx-16 h-px bg-gray-50 dark:bg-white/5"></div>
+<button class="w-full flex items-center justify-between p-3 rounded-xl hover:bg-background-light dark:hover:bg-white/5 transition-all group">
+<div class="flex items-center gap-4">
+<div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/5 dark:bg-white/5 text-primary dark:text-white group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-[20px]">notifications_active</span>
+</div>
+<span class="font-medium text-primary dark:text-white text-base">Notification Preferences</span>
+</div>
+<span class="material-symbols-outlined text-gray-300 dark:text-gray-600 group-hover:text-primary dark:group-hover:text-white transition-colors">chevron_right</span>
+</button>
+<div class="mx-16 h-px bg-gray-50 dark:bg-white/5"></div>
+<button class="w-full flex items-center justify-between p-3 rounded-xl hover:bg-background-light dark:hover:bg-white/5 transition-all group">
+<div class="flex items-center gap-4">
+<div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/5 dark:bg-white/5 text-primary dark:text-white group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-[20px]">credit_card</span>
+</div>
+<span class="font-medium text-primary dark:text-white text-base">Payment Methods</span>
+</div>
+<span class="material-symbols-outlined text-gray-300 dark:text-gray-600 group-hover:text-primary dark:group-hover:text-white transition-colors">chevron_right</span>
+</button>
+</div>
+<div class="rounded-2xl bg-white dark:bg-surface-dark p-2 shadow-soft border border-primary/5 dark:border-white/5">
+<button class="w-full flex items-center justify-between p-3 rounded-xl hover:bg-background-light dark:hover:bg-white/5 transition-all group">
+<div class="flex items-center gap-4">
+<div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/5 dark:bg-white/5 text-primary dark:text-white group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-[20px]">support_agent</span>
+</div>
+<span class="font-medium text-primary dark:text-white text-base">Help &amp; Support</span>
+</div>
+<span class="material-symbols-outlined text-gray-300 dark:text-gray-600 group-hover:text-primary dark:group-hover:text-white transition-colors">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<div class="mt-8 mb-6 px-5">
+<button class="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-transparent hover:bg-gray-200/50 dark:hover:bg-white/5 transition-colors group">
+<span class="material-symbols-outlined text-[20px] text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300">logout</span>
+<span class="text-sm font-semibold text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300">Log Out</span>
+</button>
+<div class="mt-8 flex justify-center opacity-50">
+<p class="text-[10px] font-bold text-gray-300 dark:text-gray-700 tracking-widest uppercase">Kejapin v2.4.0</p>
+</div>
+</div>
+</div>
+
+</body></html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Registration - kejapin</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&amp;family=Lato:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "alabaster": "#F4F1EA",
+                        "coffee-brown": "#4B3621",
+                        "coffee-brown-hover": "#3a2a1a",
+                        "text-primary": "#181311",
+                        "text-secondary": "#886f63",
+                        "field-border": "#e5dfdc",
+                    },
+                    fontFamily: {
+                        "heading": ["Montserrat", "sans-serif"],
+                        "body": ["Lato", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "md": "0.375rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-alabaster font-body antialiased text-text-primary">
+<div class="relative flex min-h-screen w-full flex-col justify-center overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
+<div class="flex flex-col items-center justify-center pb-8 pt-4">
+<div class="mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-4xl text-coffee-brown">domain</span>
+<span class="text-2xl font-bold tracking-tight font-heading text-coffee-brown">kejapin</span>
+</div>
+<h1 class="text-coffee-brown tracking-tight text-[32px] font-bold leading-tight text-center font-heading">Join kejapin</h1>
+<p class="text-text-secondary text-base font-normal leading-normal pt-2 text-center max-w-xs mx-auto font-body">Find your structural masterpiece.</p>
+</div>
+<div class="mx-auto w-full max-w-md">
+<div class="mb-8 flex justify-center">
+<div class="flex h-12 w-full max-w-[320px] items-center justify-center rounded-lg bg-white p-1 shadow-sm border border-field-border">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-coffee-brown has-[:checked]:shadow-sm has-[:checked]:text-white text-text-secondary text-sm font-semibold leading-normal transition-all duration-200">
+<span class="truncate font-body">Tenant</span>
+<input checked="" class="invisible w-0 absolute" name="role" type="radio" value="Tenant"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-coffee-brown has-[:checked]:shadow-sm has-[:checked]:text-white text-text-secondary text-sm font-semibold leading-normal transition-all duration-200">
+<span class="truncate font-body">Landlord</span>
+<input class="invisible w-0 absolute" name="role" type="radio" value="Landlord"/>
+</label>
+</div>
+</div>
+<form action="#" class="space-y-5" method="POST">
+<div class="group relative">
+<label class="block text-sm font-medium leading-6 text-coffee-brown mb-1.5 ml-1 font-body" for="fullname">Full Name</label>
+<div class="relative rounded-lg shadow-sm">
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+<span class="material-symbols-outlined text-text-secondary text-[20px]">person</span>
+</div>
+<input class="block w-full rounded-lg border-0 py-3.5 pl-10 pr-3 text-text-primary shadow-sm ring-1 ring-inset ring-field-border placeholder:text-text-secondary/60 focus:ring-2 focus:ring-inset focus:ring-coffee-brown sm:text-sm sm:leading-6 bg-white font-body" id="fullname" name="fullname" placeholder="Enter your full name" type="text"/>
+</div>
+</div>
+<div class="group relative">
+<label class="block text-sm font-medium leading-6 text-coffee-brown mb-1.5 ml-1 font-body" for="email">Email Address</label>
+<div class="relative rounded-lg shadow-sm">
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+<span class="material-symbols-outlined text-text-secondary text-[20px]">mail</span>
+</div>
+<input class="block w-full rounded-lg border-0 py-3.5 pl-10 pr-3 text-text-primary shadow-sm ring-1 ring-inset ring-field-border placeholder:text-text-secondary/60 focus:ring-2 focus:ring-inset focus:ring-coffee-brown sm:text-sm sm:leading-6 bg-white font-body" id="email" name="email" placeholder="name@example.com" type="email"/>
+</div>
+</div>
+<div class="group relative">
+<label class="block text-sm font-medium leading-6 text-coffee-brown mb-1.5 ml-1 font-body" for="phone">Phone Number</label>
+<div class="relative rounded-lg shadow-sm">
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+<span class="material-symbols-outlined text-text-secondary text-[20px]">call</span>
+</div>
+<input class="block w-full rounded-lg border-0 py-3.5 pl-10 pr-3 text-text-primary shadow-sm ring-1 ring-inset ring-field-border placeholder:text-text-secondary/60 focus:ring-2 focus:ring-inset focus:ring-coffee-brown sm:text-sm sm:leading-6 bg-white font-body" id="phone" name="phone" placeholder="+1 (555) 000-0000" type="tel"/>
+</div>
+</div>
+<div class="group relative">
+<label class="block text-sm font-medium leading-6 text-coffee-brown mb-1.5 ml-1 font-body" for="password">Password</label>
+<div class="relative rounded-lg shadow-sm">
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+<span class="material-symbols-outlined text-text-secondary text-[20px]">lock</span>
+</div>
+<input class="block w-full rounded-lg border-0 py-3.5 pl-10 pr-10 text-text-primary shadow-sm ring-1 ring-inset ring-field-border placeholder:text-text-secondary/60 focus:ring-2 focus:ring-inset focus:ring-coffee-brown sm:text-sm sm:leading-6 bg-white font-body" id="password" name="password" placeholder="••••••••" type="password"/>
+<button class="absolute inset-y-0 right-0 flex items-center pr-3 text-text-secondary hover:text-coffee-brown transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+</div>
+<div class="pt-4">
+<button class="flex w-full justify-center rounded-lg bg-coffee-brown px-3 py-4 text-sm font-bold leading-6 text-white shadow-md hover:bg-coffee-brown-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coffee-brown transition-all active:scale-[0.98] font-body tracking-wide" style="border-radius: 8px;" type="button">
+                    Create Account
+                </button>
+</div>
+</form>
+<div class="mt-8">
+<div class="relative">
+<div aria-hidden="true" class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-gray-300/60"></div>
+</div>
+<div class="relative flex justify-center text-sm font-medium leading-6">
+<span class="bg-alabaster px-6 text-text-secondary font-body">Or continue with</span>
+</div>
+</div>
+<div class="mt-6 grid grid-cols-2 gap-4">
+<a class="flex w-full items-center justify-center gap-3 rounded-lg bg-white px-3 py-3 text-sm font-semibold text-text-primary shadow-sm ring-1 ring-inset ring-field-border hover:bg-gray-50 focus-visible:ring-transparent transition-colors font-body" href="#">
+<img alt="Google logo" class="h-5 w-5" data-alt="Google G logo in color" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1AYCM2XWACA4LMS30gd8gmFzmLJJ0VoibbGwLs0OZyejhzcsHsEbCH8DRhbpOwh5UvLhtH_r0N44UwenpdbxREVb8UUmMaEwB8UX0ljCUdr_UiGyPahBdIhJTnB1tU7oQ5JnhaR8tBZZrBQQPgNBe-leCd6MUMvGyG5DUKdAYusRhxZgnEbqAp1Uku_4uc1G-556bMYSZEhBy3uWs6pUmBtRJpHm8hBxkSbtDNmoIpKe2d271x1w6j8pZhfbVX4gPg65kZ7VhpYM"/>
+<span class="text-sm">Google</span>
+</a>
+<a class="flex w-full items-center justify-center gap-3 rounded-lg bg-white px-3 py-3 text-sm font-semibold text-text-primary shadow-sm ring-1 ring-inset ring-field-border hover:bg-gray-50 focus-visible:ring-transparent transition-colors font-body" href="#">
+<span class="material-symbols-outlined text-[22px]">ios</span>
+<span class="text-sm">Apple</span>
+</a>
+</div>
+</div>
+<p class="mt-8 text-center text-sm text-text-secondary font-body">
+            Already have an account?
+            <a class="font-bold text-coffee-brown hover:text-coffee-brown-hover transition-colors underline decoration-2 underline-offset-2 decoration-coffee-brown/30 hover:decoration-coffee-brown" href="#">Log in</a>
+</p>
+</div>
+</div>
+
+</body></html>
