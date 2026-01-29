@@ -14,6 +14,8 @@ import 'features/tenant_dashboard/presentation/screens/life_pins_screen.dart';
 import 'features/messages/presentation/screens/messages_screen.dart';
 import 'features/messages/presentation/screens/notifications_screen.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
+import 'features/auth/presentation/forgot_password_screen.dart';
+import 'features/auth/presentation/reset_password_screen.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'features/search/data/repositories/search_repository.dart';
@@ -41,15 +43,32 @@ void main() async {
   runApp(const KejapinApp());
 }
 
-class KejapinApp extends StatelessWidget {
+class KejapinApp extends StatefulWidget {
   const KejapinApp({super.key});
+
+  @override
+  State<KejapinApp> createState() => _KejapinAppState();
+}
+
+class _KejapinAppState extends State<KejapinApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Listen for auth state changes
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final AuthChangeEvent event = data.event;
+      if (event == AuthChangeEvent.passwordRecovery) {
+        _router.go('/reset-password');
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return RepositoryProvider(
-      create: (context) => MockSearchRepository(),
+      create: (context) => SupabaseSearchRepository(),
       child: BlocProvider(
-        create: (context) => SearchBloc(context.read<MockSearchRepository>()),
+        create: (context) => SearchBloc(context.read<SupabaseSearchRepository>()),
         child: MaterialApp.router(
           title: 'kejapin',
           theme: AppTheme.lightTheme,
@@ -85,6 +104,14 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/register',
       builder: (context, state) => const RegisterScreen(),
+    ),
+    GoRoute(
+      path: '/forgot-password',
+      builder: (context, state) => const ForgotPasswordScreen(),
+    ),
+    GoRoute(
+      path: '/reset-password',
+      builder: (context, state) => const ResetPasswordScreen(),
     ),
     ShellRoute(
       builder: (context, state, child) => MainLayout(child: child),

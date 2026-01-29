@@ -1,42 +1,25 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/constants/api_endpoints.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'messaging_model.dart';
 
 class MessagingRepository {
-  Future<String?> _getUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('user_id');
-  }
+  final SupabaseClient _supabase = Supabase.instance.client;
 
   Future<List<MessageModel>> getMessages() async {
     try {
-      final userId = await _getUserId();
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
 
-      final response = await http.get(
-        Uri.parse(ApiEndpoints.messages),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId, // Temporary auth header
-        },
-      );
+      // Fetch messages where user is either sender or recipient
+      final response = await _supabase
+          .from('messages')
+          .select()
+          .or('sender_id.eq.${user.id},recipient_id.eq.${user.id}')
+          .order('created_at', ascending: false);
 
-      print('Messages response: ${response.statusCode} - ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final List<dynamic> messagesJson = data['data'] ?? [];
-        return messagesJson.map((json) => MessageModel.fromJson(json)).toList();
-      } else {
-        throw Exception('Failed to load messages');
-      }
+      final List<dynamic> messagesJson = response as List<dynamic>;
+      return messagesJson.map((json) => MessageModel.fromJson(json)).toList();
     } catch (e) {
       print('Error fetching messages: $e');
-      // Return empty list for now
       return [];
     }
   }
@@ -47,27 +30,16 @@ class MessagingRepository {
     String? propertyID,
   }) async {
     try {
-      final userId = await _getUserId();
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
 
-      final response = await http.post(
-        Uri.parse(ApiEndpoints.messages),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId,
-        },
-        body: jsonEncode({
-          'recipient_id': recipientID,
-          'content': content,
-          'property_id': propertyID,
-        }),
-      );
-
-      if (response.statusCode != 201) {
-        throw Exception('Failed to send message');
-      }
+      await _supabase.from('messages').insert({
+        'sender_id': user.id,
+        'recipient_id': recipientID,
+        'content': content,
+        'property_id': propertyID,
+        'is_read': false,
+      });
     } catch (e) {
       print('Error sending message: $e');
       rethrow;
@@ -76,34 +48,34 @@ class MessagingRepository {
 
   Future<List<NotificationModel>> getNotifications() async {
     try {
-      final userId = await _getUserId();
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
 
-      final response = await http.get(
-        Uri.parse(ApiEndpoints.notifications),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId,
-        },
-      );
+      final response = await _supabase
+          .from('notifications')
+          .select()
+          .eq('user_id', user.id)
+          .order('created_at', ascending: false);
 
-      print('Notifications response: ${response.statusCode} - ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final List<dynamic> notificationsJson = data['data'] ?? [];
-        return notificationsJson
-            .map((json) => NotificationModel.fromJson(json))
-            .toList();
-      } else {
-        throw Exception('Failed to load notifications');
-      }
+      final List<dynamic> notificationsJson = response as List<dynamic>;
+      return notificationsJson
+          .map((json) => NotificationModel.fromJson(json))
+          .toList();
     } catch (e) {
       print('Error fetching notifications: $e');
-      // Return empty list for now
       return [];
     }
+  }
+
+  // Real-time listener for messages
+  Stream<List<MessageModel>> watchMessages() {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return const Stream.empty();
+
+    return _supabase
+        .from('messages')
+        .stream(primaryKey: ['id'])
+        .order('created_at')
+        .map((data) => data.map((json) => MessageModel.fromJson(json)).toList());
   }
 }

@@ -330,32 +330,64 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: ElevatedButton(
               onPressed: _isLoading ? null : _register,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.mutedGold, // Changed to Gold
-                foregroundColor: AppColors.structuralBrown, // Dark text on Gold
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                backgroundColor: AppColors.mutedGold,
+                foregroundColor: AppColors.structuralBrown,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 2,
               ),
               child: _isLoading
                   ? const CircularProgressIndicator(color: AppColors.structuralBrown)
                   : const Text(
                       "Sign Up",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                     ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(child: Divider(color: Colors.white24)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text("OR", style: TextStyle(color: Colors.white38, fontSize: 12)),
+              ),
+              Expanded(child: Divider(color: Colors.white24)),
+            ],
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: OutlinedButton.icon(
+              onPressed: () async {
+                try {
+                  await _authRepository.signInWithGoogle();
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                }
+              },
+              icon: Image.network(
+                'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_\"G\"_Logo.svg',
+                height: 24,
+                errorBuilder: (context, error, stackTrace) => const Icon(Icons.login, color: Colors.white),
+              ),
+              label: const Text(
+                "Continue with Google",
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.white24),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
             ),
           ),
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              const Text(
                 "Already have an account?",
-                style: TextStyle(color: Colors.white70), // Changed to white70
+                style: TextStyle(color: Colors.white70),
               ),
               TextButton(
                 onPressed: () => context.go('/login'),

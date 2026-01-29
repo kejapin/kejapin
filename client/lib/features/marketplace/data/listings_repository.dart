@@ -19,9 +19,7 @@ class ListingsRepository {
       }
 
       if (searchQuery != null && searchQuery.isNotEmpty) {
-        // Simple search on title or description using ilike
-        // query = query.or('title.ilike.%$searchQuery%,description.ilike.%$searchQuery%');
-        query = query.ilike('title', '%$searchQuery%'); // PostgREST has limitations on OR across columns in simpler syntax often
+        query = query.ilike('title', '%$searchQuery%');
       }
 
       if (filters != null) {
@@ -34,20 +32,30 @@ class ListingsRepository {
         if (filters['propertyTypes'] != null && (filters['propertyTypes'] as List).isNotEmpty) {
           query = query.inFilter('property_type', (filters['propertyTypes'] as List));
         }
-        // Amenities filtering would require array column support or specific logic
-        // For now, we'll skip complex array filtering unless using specific PG operators
       }
       
-      // Order by latest
-      query = query.order('created_at', ascending: false);
-
-      final response = await query;
+      final response = await query.order('created_at', ascending: false);
       
       final data = response as List<dynamic>;
       return data.map((json) => ListingModel.fromJson(json)).toList();
     } catch (e) {
       print('Error fetching listings: $e');
       throw Exception('Supabase error: $e');
+    }
+  }
+
+  Future<ListingEntity> fetchListingById(String id) async {
+    try {
+      final response = await _supabase
+          .from('properties')
+          .select()
+          .eq('id', id)
+          .single();
+      
+      return ListingModel.fromJson(response);
+    } catch (e) {
+      print('Error fetching listing $id: $e');
+      throw Exception('Failed to load listing details');
     }
   }
 }

@@ -1,77 +1,66 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/search_result.dart';
 
 abstract class SearchRepository {
   Future<List<SearchResult>> searchUniversal(String query);
   Future<List<SearchResult>> searchListings(String query);
   Future<List<SearchResult>> searchLocations(String query);
+  Future<List<SearchResult>> searchMarketplace(String query);
 }
 
-class MockSearchRepository implements SearchRepository {
+class SupabaseSearchRepository implements SearchRepository {
+  final SupabaseClient _supabase = Supabase.instance.client;
+
   @override
   Future<List<SearchResult>> searchUniversal(String query) async {
-    await Future.delayed(const Duration(milliseconds: 500)); // Simulate network delay
-    
     if (query.isEmpty) return [];
 
-    final lowerQuery = query.toLowerCase();
-    
-    // Mock Data
-    final allResults = [
-      // Listings
-      SearchResult(
-        id: '1',
-        title: 'Modern Studio Apartment',
-        subtitle: 'Westlands, Nairobi',
-        type: SearchResultType.listing,
-        imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80',
-        metadata: {'price': 25000, 'beds': 1},
-      ),
-      SearchResult(
-        id: '2',
-        title: 'Luxury 2BR Penthouse',
-        subtitle: 'Kilimani, Nairobi',
-        type: SearchResultType.listing,
-        imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80',
-        metadata: {'price': 85000, 'beds': 2},
-      ),
+    try {
+      // 1. Search Properties (Listings)
+      final propertyResults = await _supabase
+          .from('properties')
+          .select()
+          .ilike('title', '%$query%')
+          .limit(5);
+
+      final List<SearchResult> results = [];
+
+      for (var p in (propertyResults as List)) {
+        results.add(SearchResult(
+          id: p['id'].toString(),
+          title: p['title'],
+          subtitle: '${p['city']}, ${p['county']}',
+          type: SearchResultType.listing,
+          imageUrl: (p['photos'] != null && (p['photos'] as List).isNotEmpty) 
+              ? p['photos'][0] 
+              : null,
+          metadata: {'price': p['price_amount'], 'beds': p['bedrooms']},
+        ));
+      }
+
+      // 2. Search Landlords (Users with role LANDLORD)
+      final landlordResults = await _supabase
+          .from('users')
+          .select()
+          .eq('role', 'LANDLORD')
+          .ilike('first_name', '%$query%')
+          .limit(3);
       
-      // Landlords
-      SearchResult(
-        id: 'l1',
-        title: 'John Doe',
-        subtitle: 'Verified Landlord • 4.8 ★',
-        type: SearchResultType.landlord,
-        imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      ),
-      SearchResult(
-        id: 'l2',
-        title: 'Alice Smith',
-        subtitle: 'Super Host • 5.0 ★',
-        type: SearchResultType.landlord,
-        imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      ),
+      for (var u in (landlordResults as List)) {
+        results.add(SearchResult(
+          id: u['id'].toString(),
+          title: '${u['first_name']} ${u['last_name']}',
+          subtitle: 'Verified Landlord',
+          type: SearchResultType.landlord,
+          imageUrl: u['profile_picture'],
+        ));
+      }
 
-      // Locations
-      SearchResult(
-        id: 'loc1',
-        title: 'Westlands',
-        subtitle: 'Nairobi, Kenya',
-        type: SearchResultType.location,
-        metadata: {'lat': -1.2683, 'lng': 36.8111},
-      ),
-      SearchResult(
-        id: 'loc2',
-        title: 'Kilimani',
-        subtitle: 'Nairobi, Kenya',
-        type: SearchResultType.location,
-        metadata: {'lat': -1.2921, 'lng': 36.7871},
-      ),
-    ];
-
-    return allResults.where((result) {
-      return result.title.toLowerCase().contains(lowerQuery) ||
-             result.subtitle.toLowerCase().contains(lowerQuery);
-    }).toList();
+      return results;
+    } catch (e) {
+      print('Search error: $e');
+      return [];
+    }
   }
 
   @override
@@ -82,12 +71,28 @@ class MockSearchRepository implements SearchRepository {
 
   @override
   Future<List<SearchResult>> searchLocations(String query) async {
+    // For now, we search properties and extract locations or use a geo-coding service
+    // Simple implementation: filter location type results
     final results = await searchUniversal(query);
-    return results.where((r) => r.type == SearchResultType.location || r.type == SearchResultType.coordinate).toList();
+    return results.where((r) => r.type == SearchResultType.location).toList();
   }
 
+  @override
   Future<List<SearchResult>> searchMarketplace(String query) async {
     final results = await searchUniversal(query);
     return results.where((r) => r.type == SearchResultType.listing || r.type == SearchResultType.location).toList();
   }
+}
+
+// Keep the mock for compatibility or testing if needed
+class MockSearchRepository implements SearchRepository {
+  // ... (previous implementation can be moved here or deleted)
+  @override
+  Future<List<SearchResult>> searchUniversal(String query) async => [];
+  @override
+  Future<List<SearchResult>> searchListings(String query) async => [];
+  @override
+  Future<List<SearchResult>> searchLocations(String query) async => [];
+  @override
+  Future<List<SearchResult>> searchMarketplace(String query) async => [];
 }

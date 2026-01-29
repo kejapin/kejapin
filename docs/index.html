@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Verified | Kejapin</title>
+    <style>
+        :root {
+            --brown: #2C180F;
+            --gold: #C4A154;
+            --alabaster: #F7F7F7;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--alabaster);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--brown);
+        }
+        .card {
+            background: white;
+            padding: 48px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            border-top: 8px solid var(--gold);
+        }
+        .logo {
+            height: 40px;
+            margin-bottom: 32px;
+        }
+        h1 {
+            font-size: 28px;
+            margin: 0 0 16px 0;
+            font-weight: 800;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: var(--brown);
+            color: var(--gold);
+            padding: 18px 36px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 10px 20px rgba(44, 24, 15, 0.2);
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            background: var(--gold);
+            color: var(--brown);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 24px auto;
+            font-size: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img src="https://raw.githubusercontent.com/kejapin/kejapin/main/images/logo%20and%20bgs/wordmarkwithpicon.png" alt="Kejapin" class="logo">
+        <div class="checkmark">✓</div>
+        <h1>Verified!</h1>
+        <p>Your account has been successfully verified. You can now return to the Kejapin app to continue your search.</p>
+        <a href="io.supabase.kejapin://login-callback/" class="btn">Launch Kejapin App</a>
+    </div>
+
+    <script>
+        // Optional: Auto-redirect to app after 3 seconds
+        setTimeout(() => {
+            window.location.href = "io.supabase.kejapin://login-callback/";
+        }, 3000);
+    </script>
+</body>
+</html>

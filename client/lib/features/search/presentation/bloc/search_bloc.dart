@@ -84,7 +84,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
     try {
       // Use the repository method
-      final results = await (_repository as MockSearchRepository).searchMarketplace(event.query);
+      final results = await _repository.searchMarketplace(event.query);
       emit(SearchLoaded(results, isUniversal: false));
     } catch (e) {
       emit(SearchError("Failed to search: $e"));

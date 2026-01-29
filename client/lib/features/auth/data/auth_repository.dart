@@ -14,7 +14,6 @@ class AuthRepository {
       if (response.user != null) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('user_id', response.user!.id);
-        // Token management is handled automatically by Supabase SDK
       }
       
       return response;
@@ -28,9 +27,43 @@ class AuthRepository {
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
-        data: {'role': role}, // Store role in user_metadata
+        data: {'role': role},
+        emailRedirectTo: 'io.supabase.kejapin://login-callback/',
       );
       
+      return response;
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      await _supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'io.supabase.kejapin://login-callback/',
+      );
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  Future<void> resetPasswordForEmail(String email) async {
+    try {
+      await _supabase.auth.resetPasswordForEmail(
+        email,
+        redirectTo: 'io.supabase.kejapin://reset-password/',
+      );
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  Future<UserResponse> updatePassword(String newPassword) async {
+    try {
+      final response = await _supabase.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
       return response;
     } catch (e) {
       throw Exception(e.toString());

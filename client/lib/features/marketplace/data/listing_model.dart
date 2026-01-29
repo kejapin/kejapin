@@ -9,9 +9,12 @@ class ListingModel extends ListingEntity {
     required super.listingType,
     required super.priceAmount,
     required super.locationName,
+    required super.city,
+    required super.county,
     required super.latitude,
     required super.longitude,
     required super.photos,
+    required super.amenities,
     required super.bedrooms,
     required super.bathrooms,
   });
@@ -24,14 +27,26 @@ class ListingModel extends ListingEntity {
       if (photosData is List) {
         return List<String>.from(photosData.map((e) => e.toString()));
       } else if (photosData is String && photosData.isNotEmpty) {
-        // If it's a comma-separated string or just a URL
         if (photosData.contains(',')) {
           return photosData.split(',').map((e) => e.trim()).toList();
         }
-        // Basic validation to check if it looks like a URL
         if (photosData.startsWith('http')) {
            return [photosData];
         }
+      }
+      return [];
+    }
+
+    // Helper to parse amenities
+    List<String> parseAmenities(dynamic amenitiesData) {
+      if (amenitiesData == null) return [];
+      if (amenitiesData is List) {
+        return List<String>.from(amenitiesData.map((e) => e.toString()));
+      } else if (amenitiesData is String && amenitiesData.isNotEmpty) {
+        if (amenitiesData.contains(',')) {
+          return amenitiesData.split(',').map((e) => e.trim()).toList();
+        }
+        return [amenitiesData];
       }
       return [];
     }
@@ -43,10 +58,13 @@ class ListingModel extends ListingEntity {
       propertyType: json['property_type'] ?? '',
       listingType: json['listing_type'] ?? 'RENT',
       priceAmount: (json['price_amount'] as num?)?.toDouble() ?? 0.0,
-      locationName: '${json['address_line_1'] ?? ''}, ${json['city'] ?? ''}', // Better location format
+      locationName: '${json['address_line_1'] ?? ''}, ${json['city'] ?? ''}',
+      city: json['city'] ?? '',
+      county: json['county'] ?? '',
       latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
       longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
       photos: parsePhotos(json['photos']),
+      amenities: parseAmenities(json['amenities']),
       bedrooms: json['bedrooms'] ?? 0,
       bathrooms: json['bathrooms'] ?? 0,
     );

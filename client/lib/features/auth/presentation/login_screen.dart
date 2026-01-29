@@ -256,15 +256,26 @@ class _LoginScreenState extends State<LoginScreen> {
               return null;
             },
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => context.push('/forgot-password'),
+              child: const Text(
+                "Forgot Password?",
+                style: TextStyle(color: AppColors.mutedGold, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
             height: 56,
             child: ElevatedButton(
               onPressed: _isLoading ? null : _login,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.mutedGold, // Changed to Gold for contrast
-                foregroundColor: AppColors.structuralBrown, // Dark text on Gold
+                backgroundColor: AppColors.mutedGold,
+                foregroundColor: AppColors.structuralBrown,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -284,18 +295,56 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           const SizedBox(height: 24),
           Row(
+            children: [
+              Expanded(child: Divider(color: Colors.white24)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text("OR", style: TextStyle(color: Colors.white38, fontSize: 12)),
+              ),
+              Expanded(child: Divider(color: Colors.white24)),
+            ],
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: OutlinedButton.icon(
+              onPressed: () async {
+                try {
+                  await _authRepository.signInWithGoogle();
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                }
+              },
+              icon: Image.network(
+                'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_\"G\"_Logo.svg',
+                height: 24,
+                errorBuilder: (context, error, stackTrace) => const Icon(Icons.login, color: Colors.white),
+              ),
+              label: const Text(
+                "Continue with Google",
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.white24),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              const Text(
                 "Don't have an account?",
-                style: TextStyle(color: Colors.white70), // Changed to white70
+                style: TextStyle(color: Colors.white70),
               ),
               TextButton(
                 onPressed: () => context.push('/register'),
                 child: const Text(
                   "Sign Up",
                   style: TextStyle(
-                    color: AppColors.mutedGold, // Changed to Gold
+                    color: AppColors.mutedGold,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
