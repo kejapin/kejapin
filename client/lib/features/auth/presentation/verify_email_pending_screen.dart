@@ -130,16 +130,20 @@ class _VerifyEmailPendingScreenState extends State<VerifyEmailPendingScreen> {
                       SizedBox(
                         width: double.infinity,
                         height: 56,
-                        child: ElevatedButton(
+                        child: ElevatedButton.icon(
                           onPressed: _isResending ? null : _resendEmail,
+                          icon: _isResending 
+                            ? const SizedBox.shrink()
+                            : const Icon(Icons.send_rounded, size: 18),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.mutedGold,
                             foregroundColor: AppColors.structuralBrown,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
+                            elevation: 4,
                           ),
-                          child: _isResending
+                          label: _isResending
                               ? const SizedBox(
                                   height: 20,
                                   width: 20,
@@ -156,11 +160,34 @@ class _VerifyEmailPendingScreenState extends State<VerifyEmailPendingScreen> {
                       ),
                       const SizedBox(height: 16),
                       
-                      // Back to Login
+                      // I've Verified Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: OutlinedButton(
+                          onPressed: () => context.go('/login'),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: AppColors.mutedGold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            "I've Verified My Email",
+                            style: TextStyle(
+                              color: AppColors.mutedGold,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      
+                      // Back to Login / Wrong Email
                       TextButton(
                         onPressed: () => context.go('/login'),
                         child: const Text(
-                          "Wait, I used the wrong email",
+                          "Wrong email? Go back",
                           style: TextStyle(color: Colors.white38),
                         ),
                       ),

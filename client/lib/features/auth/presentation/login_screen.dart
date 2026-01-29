@@ -36,12 +36,12 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } catch (e) {
         if (mounted) {
-          final errorStr = e.toString();
-          if (errorStr.contains('email not confirmed')) {
+          final errorStr = e.toString().toLowerCase();
+          if (errorStr.contains('email not confirmed') || errorStr.contains('email_not_confirmed')) {
             context.push('/verify-email-pending?email=${_emailController.text}');
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(errorStr.replaceAll('Exception: ', ''))),
+              SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
             );
           }
         }
