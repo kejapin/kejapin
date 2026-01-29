@@ -70,6 +70,18 @@ class AuthRepository {
     }
   }
 
+  Future<void> resendVerificationEmail(String email) async {
+    try {
+      await _supabase.auth.resend(
+        type: OtpType.signup,
+        email: email,
+        emailRedirectTo: 'io.supabase.kejapin://login-callback/',
+      );
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   Future<void> logout() async {
     await _supabase.auth.signOut();
     final prefs = await SharedPreferences.getInstance();

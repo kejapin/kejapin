@@ -16,6 +16,7 @@ import 'features/messages/presentation/screens/notifications_screen.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
 import 'features/auth/presentation/forgot_password_screen.dart';
 import 'features/auth/presentation/reset_password_screen.dart';
+import 'features/auth/presentation/verify_email_pending_screen.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'features/search/data/repositories/search_repository.dart';
@@ -112,6 +113,13 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/reset-password',
       builder: (context, state) => const ResetPasswordScreen(),
+    ),
+    GoRoute(
+      path: '/verify-email-pending',
+      builder: (context, state) {
+        final email = state.uri.queryParameters['email'] ?? '';
+        return VerifyEmailPendingScreen(email: email);
+      },
     ),
     ShellRoute(
       builder: (context, state, child) => MainLayout(child: child),

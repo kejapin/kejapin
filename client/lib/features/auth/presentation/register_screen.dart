@@ -37,10 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'TENANT', 
         );
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registration successful! Please login.')),
-          );
-          context.go('/login');
+          context.push('/verify-email-pending?email=${_emailController.text}');
         }
       } catch (e) {
         if (mounted) {
