@@ -1,6 +1,6 @@
 module github.com/kejapin/server
 
-go 1.25.5
+go 1.23.0
 
 require (
 	github.com/glebarez/sqlite v1.11.0
