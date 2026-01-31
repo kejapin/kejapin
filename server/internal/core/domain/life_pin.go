@@ -33,4 +33,5 @@ type CommuteRequest struct {
 type CommuteResponse struct {
 	DurationSeconds float64 `json:"duration_seconds"`
 	DistanceMeters  float64 `json:"distance_meters"`
+	Polyline        string  `json:"polyline"`
 }

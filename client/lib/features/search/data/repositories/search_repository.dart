@@ -1,4 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../../../../core/constants/api_endpoints.dart';
 import '../models/search_result.dart';
 
 abstract class SearchRepository {
@@ -56,6 +59,10 @@ class SupabaseSearchRepository implements SearchRepository {
         ));
       }
 
+      // 3. Search Locations (Via Go API -> Turso)
+      final locationResults = await searchLocations(query);
+      results.addAll(locationResults);
+
       return results;
     } catch (e) {
       print('Search error: $e');
@@ -71,10 +78,32 @@ class SupabaseSearchRepository implements SearchRepository {
 
   @override
   Future<List<SearchResult>> searchLocations(String query) async {
-    // For now, we search properties and extract locations or use a geo-coding service
-    // Simple implementation: filter location type results
-    final results = await searchUniversal(query);
-    return results.where((r) => r.type == SearchResultType.location).toList();
+    if (query.isEmpty) return [];
+
+    try {
+      final response = await http.get(
+        Uri.parse('${ApiEndpoints.locationSearch}?query=$query'),
+      );
+
+      if (response.statusCode == 200) {
+        final List data = json.decode(response.body);
+        return data.map((item) => SearchResult(
+          id: item['id'].toString(),
+          title: item['name'] ?? 'Unknown Location',
+          subtitle: item['category'] ?? 'Location',
+          type: SearchResultType.location,
+          metadata: {
+            'lat': item['lat'],
+            'lon': item['lon'],
+            'category': item['category'],
+          },
+        )).toList();
+      }
+      return [];
+    } catch (e) {
+      print('Location search error: $e');
+      return [];
+    }
   }
 
   @override

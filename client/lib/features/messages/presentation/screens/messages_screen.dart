@@ -2,15 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
+import '../../data/messages_repository.dart';
+import '../../../auth/data/auth_repository.dart';  // For current user check if needed
 
-class MessagesScreen extends StatelessWidget {
+class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
+
+  @override
+  State<MessagesScreen> createState() => _MessagesScreenState();
+}
+
+class _MessagesScreenState extends State<MessagesScreen> {
+  final MessagesRepository _repository = MessagesRepository();
+  List<MessageEntity> _conversations = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMessages();
+  }
+
+  Future<void> _loadMessages() async {
+    setState(() => _isLoading = true);
+    final messages = await _repository.fetchMessages();
+    
+    // Group by conversation (otherUserId) and keep only the latest message
+    final Map<String, MessageEntity> latestMessages = {};
+    for (var msg in messages) {
+        // Create a unique key for conversation, e.g., combine user and property or just user
+        // For simple chat, just otherUserId is usually enough.
+        if (!latestMessages.containsKey(msg.otherUserId)) {
+            latestMessages[msg.otherUserId] = msg;
+        }
+    }
+    
+    setState(() {
+      _conversations = latestMessages.values.toList();
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
-      appBar: const CustomAppBar(title: 'Messages', showSearch: false),
+      appBar: CustomAppBar(
+        title: 'Messages',
+        showSearch: false,
+      ),
       body: Column(
         children: [
           // Search Bar
@@ -34,40 +74,46 @@ class MessagesScreen extends StatelessWidget {
           
           // Messages List
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                _buildMessageTile(
-                  name: 'Sarah Jenkins',
-                  time: '9:41 AM',
-                  property: 'The Lofts @ Westlands',
-                  message: "I've confirmed the appointment for tomorrow at 2 PM. See you there!",
-                  avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCFJYdunEc08i3_8k4U7Sci8l_X-oMDmnPh8ms72SkSbLsCsrojyjLTsEfNApj_zDT3KVUg-61TJyb6BrXQFPfIV5LM46zDj5TFDUdm1FFhI6ZBtJhpjwSLB7-1EYO1MTUrtsUw3gIgBEmBSyd8A9p-ym8enYp5mBJnm07w-waJeLSFSUgnyiAJUoXOSHepp9evfAjPzHcCq5DPxa3NzcW4HWpbBFtN8i1njL3TB3P6eGlpc0nojHiTzvzOVB5T4zg7IhXw0aYDQ9Q',
-                  isUnread: true,
-                ),
-                const SizedBox(height: 8),
-                _buildMessageTile(
-                  name: 'David Kimani',
-                  time: 'Yesterday',
-                  property: 'Riverside Park Apts',
-                  message: "Thanks for your interest. The service charge covers security...",
-                  avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDhRwsGchV2b3D2Q8tyUPVmZHqfVzxUo8uTuPNI1CsnXwfLfqONt-euHU-1Zr0VYZb7s5Kf5UxoEACvKu_BvwPpQHrUdxzGjPXIY8C_SyphK7XR3PYIEtkbVxv_5pcF4E3GhhPNnY191zYdUcVa8MORFkP99oT7B5mw1WVIEZEN-wUtKg1KVxR6wefEswTjvF7UajikJIC6m-PMnvMRoGFr1Oz-lHa_ElTDEbkpW5EEi19Gtyq7jcxqSSxgZO1MjvgVLEjnrPeXwgc',
-                  isUnread: true,
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                  child: Divider(height: 1, color: Colors.black12),
-                ),
-                _buildMessageTile(
-                  name: 'Olive Tree Housing',
-                  time: 'Tue',
-                  property: 'Kileleshwa Heights',
-                  message: "Let me know if you have any other questions regarding the lease agreement.",
-                  initials: 'OT',
-                  isUnread: false,
-                ),
-              ],
-            ),
+            child: _isLoading 
+                ? const Center(child: CircularProgressIndicator(color: AppColors.structuralBrown))
+                : _conversations.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[300]),
+                            const SizedBox(height: 16),
+                            Text(
+                              "No messages yet",
+                              style: GoogleFonts.workSans(
+                                fontSize: 18,
+                                color: Colors.grey[400],
+                                fontWeight: FontWeight.w600
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: _conversations.length,
+                        separatorBuilder: (context, index) => const SizedBox(height: 8),
+                        itemBuilder: (context, index) {
+                          final msg = _conversations[index];
+                          // Format time logic could be better (e.g. today/yesterday)
+                          final timeStr = "${msg.createdAt.hour}:${msg.createdAt.minute.toString().padLeft(2, '0')}";
+                          
+                          return _buildMessageTile(
+                            name: msg.otherUserName,
+                            time: timeStr,
+                            property: msg.propertyTitle ?? 'General Inquiry',
+                            message: msg.content,
+                            avatarUrl: msg.otherUserAvatar,
+                            initials: msg.otherUserName.isNotEmpty ? msg.otherUserName[0] : '?',
+                            isUnread: !msg.isRead, // Need to check if I am the recipient to count as unread
+                          );
+                        },
+                      ),
           ),
         ],
       ),

@@ -5,8 +5,13 @@ import 'package:latlong2/latlong.dart';
 class CommuteResult {
   final double durationSeconds;
   final double distanceMeters;
+  final String? polyline;
 
-  CommuteResult({required this.durationSeconds, required this.distanceMeters});
+  CommuteResult({
+    required this.durationSeconds,
+    required this.distanceMeters,
+    this.polyline,
+  });
 
   String get formattedDuration {
     final minutes = (durationSeconds / 60).round();
@@ -39,7 +44,7 @@ class CommuteService {
     if (mode == 'CYCLE') osrmProfile = 'cycling';
     // Note: OSRM public doesn't support 'public_transport' easily without a complex engine
 
-    final url = '$baseUrl/route/v1/$osrmProfile/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=false';
+    final url = '$baseUrl/route/v1/$osrmProfile/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline';
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -51,6 +56,7 @@ class CommuteService {
           return CommuteResult(
             durationSeconds: (route['duration'] as num).toDouble(),
             distanceMeters: (route['distance'] as num).toDouble(),
+            polyline: route['geometry'] as String?,
           );
         }
       }

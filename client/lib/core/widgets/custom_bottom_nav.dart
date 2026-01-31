@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'animated_map_background.dart';
 import '../constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'glass_container.dart';
@@ -19,20 +20,34 @@ class CustomBottomNav extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       child: GlassContainer(
         borderRadius: BorderRadius.circular(30),
-        blur: 20,
-        opacity: 0.8,
-        color: Colors.white,
-        child: SizedBox(
-          height: 70,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(0, Icons.explore, 'Discovery'),
-              _buildNavItem(1, Icons.location_on, 'Life Pins'),
-              _buildNavItem(2, Icons.chat_bubble_outline, 'Messages'),
-              _buildNavItem(3, Icons.account_circle, 'Profile'),
-            ],
-          ),
+        blur: 40,
+        opacity: 0.75, // Frosted glass effect
+        color: AppColors.structuralBrown,
+        borderColor: AppColors.champagne.withOpacity(0.1),
+        // borderColor duplicated removed
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: const AnimatedMapBackground(
+                animate: true,
+                opacity: 0.1,
+                patternColor: AppColors.champagne,
+                child: SizedBox(),
+              ),
+            ),
+            SizedBox(
+              height: 70,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(0, Icons.explore, 'Discovery'),
+                  _buildNavItem(1, Icons.location_on, 'Life Pins'),
+                  _buildNavItem(2, Icons.chat_bubble_outline, 'Messages'),
+                  _buildNavItem(3, Icons.account_circle, 'Profile'),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -55,11 +70,11 @@ class CustomBottomNav extends StatelessWidget {
                   width: 32,
                   height: 2,
                   decoration: BoxDecoration(
-                    color: AppColors.mutedGold,
+                    color: AppColors.champagne,
                     borderRadius: BorderRadius.circular(2),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.mutedGold.withOpacity(0.3),
+                        color: AppColors.champagne.withOpacity(0.3),
                         blurRadius: 15,
                         spreadRadius: 2,
                       ),
@@ -73,7 +88,7 @@ class CustomBottomNav extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  color: isSelected ? AppColors.structuralBrown : Colors.grey[400],
+                  color: isSelected ? AppColors.champagne : AppColors.champagne.withOpacity(0.5),
                   size: 24,
                 ),
                 const SizedBox(height: 4),
@@ -81,8 +96,7 @@ class CustomBottomNav extends StatelessWidget {
                   label,
                   style: GoogleFonts.montserrat(
                     fontSize: 10,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    color: isSelected ? AppColors.structuralBrown : Colors.grey[400],
+                    color: isSelected ? AppColors.champagne : AppColors.champagne.withOpacity(0.5),
                     letterSpacing: 0.2,
                   ),
                 ),

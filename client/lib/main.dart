@@ -14,6 +14,8 @@ import 'features/tenant_dashboard/presentation/screens/life_pins_screen.dart';
 import 'features/messages/presentation/screens/messages_screen.dart';
 import 'features/messages/presentation/screens/notifications_screen.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
+import 'features/profile/presentation/screens/settings_screen.dart';
+import 'features/marketplace/presentation/screens/saved_listings_screen.dart';
 import 'features/auth/presentation/forgot_password_screen.dart';
 import 'features/auth/presentation/reset_password_screen.dart';
 import 'features/auth/presentation/verify_email_pending_screen.dart';
@@ -39,7 +41,7 @@ void main() async {
   );
 
   // Initialize SharedPreferences
-  final prefs = await SharedPreferences.getInstance();
+  await SharedPreferences.getInstance();
 
   runApp(const KejapinApp());
 }
@@ -147,6 +149,14 @@ final GoRouter _router = GoRouter(
           path: '/profile',
           builder: (context, state) => const ProfileScreen(),
         ),
+        GoRoute(
+          path: '/saved',
+          builder: (context, state) => const SavedListingsScreen(),
+        ),
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) => const SettingsScreen(),
+        ),
       ],
     ),
     GoRoute(
@@ -169,11 +179,16 @@ final GoRouter _router = GoRouter(
       },
     ),
     GoRoute(
-      path: '/listings/:id',
+      path: '/marketplace/listing/:id',
       builder: (context, state) {
         final id = state.pathParameters['id']!;
-        final extra = state.extra as SearchResult?;
-        return ListingDetailsScreen(id: id, extra: extra);
+        final map = state.extra as Map<String, dynamic>?;
+        // final listing = map?['listing']; // We might pass entities too eventually
+        final initialView = map?['initialView'] as String? ?? 'image';
+        return ListingDetailsScreen(
+          id: id, 
+          activeViewMode: initialView
+        );
       },
     ),
     GoRoute(

@@ -38,10 +38,11 @@ func main() {
 	msgRepo := repositories.NewMessageRepository(cfg.DB)
 	notifRepo := repositories.NewNotificationRepository(cfg.DB)
 	lifePinRepo := repositories.NewLifePinRepository(cfg.DB)
+	geoRepo := repositories.NewGeoRepository(cfg.GeoDB)
 
 	authService := services.NewAuthService(userRepo)
 	marketplaceService := services.NewMarketplaceService(propertyRepo)
-	geoService := services.NewGeoService("") // Use default OSRM URL
+	geoService := services.NewGeoService("", geoRepo) // Use default OSRM URL
 
 	authHandler := handlers.NewAuthHandler(authService)
 	marketplaceHandler := handlers.NewMarketplaceHandler(marketplaceService)
@@ -101,7 +102,9 @@ func main() {
 
 	// Geo & Life Pins
 	geo := api.Group("/geo")
-	geo.Post("/commute", geoHandler.CalculateCommute) // Public or protected? Let's keep public for now or protect if needed.
+	geo.Post("/commute", geoHandler.CalculateCommute)
+	geo.Get("/search", geoHandler.SearchLocations)
+	geo.Post("/nearby", geoHandler.GetNearbyAmenities)
 
 	lifePins := api.Group("/lifepins")
 	lifePins.Use(authMiddleware)

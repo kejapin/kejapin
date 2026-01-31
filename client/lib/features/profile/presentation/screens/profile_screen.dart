@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../features/auth/data/auth_repository.dart';
+import '../../../../features/auth/data/auth_repository.dart';
 import '../../data/profile_repository.dart';
+import '../../../../core/globals.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -41,8 +43,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 backgroundColor: AppColors.alabaster.withOpacity(0.9),
                 pinned: true,
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: AppColors.structuralBrown),
-                  onPressed: () => context.go('/marketplace'),
+                  icon: const Icon(Icons.menu, color: AppColors.structuralBrown),
+                  onPressed: () => rootScaffoldKey.currentState?.openDrawer(),
                 ),
                 title: Text(
                   'PROFILE & SETTINGS',

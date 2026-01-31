@@ -58,4 +58,64 @@ class ListingsRepository {
       throw Exception('Failed to load listing details');
     }
   }
+
+  Future<void> toggleSaveListing(String propertyId, bool isSaved) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) throw Exception('Must be logged in to save listings');
+
+    try {
+      if (isSaved) {
+        await _supabase.from('saved_listings').delete().match({
+          'user_id': userId,
+          'property_id': propertyId,
+        });
+      } else {
+        await _supabase.from('saved_listings').insert({
+          'user_id': userId,
+          'property_id': propertyId,
+        });
+      }
+    } catch (e) {
+      throw Exception('Failed to update saved status');
+    }
+  }
+
+  Future<bool> isListingSaved(String propertyId) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return false;
+
+    try {
+      final response = await _supabase
+          .from('saved_listings')
+          .select()
+          .eq('user_id', userId)
+          .eq('property_id', propertyId)
+          .maybeSingle();
+      
+      return response != null;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<List<ListingEntity>> fetchSavedListings() async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return [];
+
+    try {
+      final response = await _supabase
+          .from('saved_listings')
+          .select('properties(*)')
+          .eq('user_id', userId);
+      
+      final data = response as List<dynamic>;
+      return data
+          .where((json) => json['properties'] != null)
+          .map((json) => ListingModel.fromJson(json['properties']))
+          .toList();
+    } catch (e) {
+      print('Error fetching saved listings: $e');
+      return [];
+    }
+  }
 }

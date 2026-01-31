@@ -1,206 +1,250 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/widgets/custom_app_bar.dart';
+import 'package:go_router/go_router.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:mesh_gradient/mesh_gradient.dart';
+import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 
-class NotificationsScreen extends StatelessWidget {
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/glass_container.dart';
+import '../../data/notifications_repository.dart';
+import '../../../../core/globals.dart';
+
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
+
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  final _repository = NotificationsRepository();
+  List<NotificationEntity> _notifications = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifications();
+  }
+
+  Future<void> _loadNotifications() async {
+    setState(() => _isLoading = true);
+    final notifications = await _repository.fetchNotifications();
+    if (mounted) {
+      setState(() {
+        _notifications = notifications;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _markAllRead() async {
+    await _repository.markAllAsRead();
+    _loadNotifications();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.alabaster,
-      appBar: const CustomAppBar(title: 'Notification Center', showSearch: false),
-      body: ListView(
-        padding: const EdgeInsets.all(24),
+      body: Stack(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Recent',
-                style: GoogleFonts.workSans(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.structuralBrown,
-                ),
-              ),
-              Text(
-                'MARK ALL READ',
-                style: GoogleFonts.workSans(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.mutedGold,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          
-          _buildSectionHeader('MESSAGES'),
-          _buildNotificationTile(
-            icon: Icons.chat_bubble,
-            title: 'Architectural Inquiry',
-            time: '2m ago',
-            description: 'David sent a message regarding the structural blueprints for the Kileleshwa project.',
-            isUnread: true,
-          ),
-          _buildNotificationTile(
-            icon: Icons.maps_ugc,
-            title: 'Property Tour Confirmed',
-            time: '1h ago',
-            description: 'Your visit to Azure Towers is scheduled for tomorrow at 10:00 AM.',
-            isUnread: false,
-          ),
-          
-          const SizedBox(height: 24),
-          _buildSectionHeader('FINANCIAL'),
-          _buildNotificationTile(
-            icon: Icons.receipt_long,
-            title: 'Rent Invoice Generated',
-            time: '3h ago',
-            description: 'Invoice #KJ-882 for October is ready. Total due: 125,000 KES.',
-            isUnread: true,
-          ),
-          _buildNotificationTile(
-            icon: Icons.payments,
-            title: 'Security Deposit Refunded',
-            time: 'Yesterday',
-            description: 'The deposit for Riverside Drive has been successfully processed.',
-            isUnread: false,
-          ),
-
-          const SizedBox(height: 24),
-          _buildSectionHeader('SYSTEM'),
-          _buildNotificationTile(
-            icon: Icons.settings_suggest,
-            title: 'Market Report Update',
-            time: '2d ago',
-            description: 'New Q4 data available for Westlands area property appreciation trends.',
-            isUnread: false,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Text(
-        title,
-        style: GoogleFonts.workSans(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: Colors.grey[500],
-          letterSpacing: 2,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNotificationTile({
-    required IconData icon,
-    required String title,
-    required String time,
-    required String description,
-    bool isUnread = false,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isUnread ? Colors.white : Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        border: isUnread ? null : Border.all(color: Colors.transparent),
-        boxShadow: isUnread
-            ? [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : null,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey[100]!),
-                ),
-                child: Icon(icon, color: AppColors.structuralBrown, size: 22),
-              ),
-              if (isUnread)
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: AppColors.mutedGold,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.alabaster, width: 2),
-                    ),
+          // Background
+          Positioned.fill(
+            child: kIsWeb
+                ? Container(color: AppColors.alabaster)
+                : AnimatedMeshGradient(
+                    colors: [
+                      AppColors.structuralBrown,
+                      const Color(0xFF5D4037),
+                      AppColors.mutedGold.withOpacity(0.4),
+                      AppColors.structuralBrown,
+                    ],
+                    options: AnimatedMeshGradientOptions(speed: 2),
                   ),
-                ),
-            ],
           ),
-          const SizedBox(width: 16),
-          Expanded(
+          
+          SafeArea(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: GoogleFonts.workSans(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.structuralBrown,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      time,
-                      style: GoogleFonts.workSans(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[400],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: GoogleFonts.workSans(
-                    fontSize: 14,
-                    color: Colors.grey[500],
-                    height: 1.5,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                _buildHeader(context),
+                Expanded(
+                  child: _isLoading
+                      ? const Center(child: CircularProgressIndicator(color: AppColors.mutedGold))
+                      : _notifications.isEmpty
+                          ? _buildEmptyState()
+                          : _buildNotificationsList(),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => rootScaffoldKey.currentState?.openDrawer(),
+            child: GlassContainer(
+              padding: const EdgeInsets.all(12),
+              borderRadius: BorderRadius.circular(12),
+              child: const Icon(Icons.menu, color: Colors.white, size: 20),
+            ),
+          ),
+          const SizedBox(width: 20),
+          FadeInDown(
+            child: Text(
+              "Notifications",
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ),
+          const Spacer(),
+          if (_notifications.isNotEmpty)
+            TextButton(
+              onPressed: _markAllRead,
+              child: const Text(
+                "MARK ALL READ",
+                style: TextStyle(
+                  color: AppColors.mutedGold,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return FadeInUp(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GlassContainer(
+              padding: const EdgeInsets.all(32),
+              borderRadius: BorderRadius.circular(100),
+              child: Icon(
+                Icons.notifications_none_outlined,
+                size: 64,
+                color: Colors.white.withOpacity(0.5),
+              ),
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              "All caught up!",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              "You don't have any new notifications.",
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationsList() {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      itemCount: _notifications.length,
+      itemBuilder: (context, index) {
+        final notification = _notifications[index];
+        return _buildNotificationItem(notification);
+      },
+    );
+  }
+
+  Widget _buildNotificationItem(NotificationEntity notification) {
+    IconData icon;
+    Color iconColor;
+
+    switch (notification.type) {
+      case 'MESSAGE':
+        icon = Icons.chat_bubble_outline;
+        iconColor = Colors.blueAccent;
+        break;
+      case 'FINANCIAL':
+        icon = Icons.account_balance_wallet_outlined;
+        iconColor = Colors.greenAccent;
+        break;
+      default:
+        icon = Icons.info_outline;
+        iconColor = AppColors.mutedGold;
+    }
+
+    return FadeInLeft(
+      delay: Duration(milliseconds: 50 * _notifications.indexOf(notification)),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: GlassContainer(
+          borderRadius: BorderRadius.circular(16),
+          opacity: notification.isRead ? 0.1 : 0.25,
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: iconColor, size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          notification.title,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: notification.isRead ? FontWeight.w500 : FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          DateFormat.jm().format(notification.createdAt),
+                          style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      notification.message,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

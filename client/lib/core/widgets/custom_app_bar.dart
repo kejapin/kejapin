@@ -5,11 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 import '../widgets/glass_container.dart';
 
 import '../../features/search/presentation/widgets/universal_search_bar.dart';
+import '../globals.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
   final bool showSearch;
   final bool showNotification;
+  final bool showMenu;
   final VoidCallback? onNotificationPressed;
   final VoidCallback? onProfilePressed;
   final VoidCallback? onMenuPressed;
@@ -19,6 +21,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.title = 'kejapin',
     this.showSearch = true,
     this.showNotification = true,
+    this.showMenu = true,
     this.onNotificationPressed,
     this.onProfilePressed,
     this.onMenuPressed,
@@ -39,9 +42,11 @@ class _CustomAppBarState extends State<CustomAppBar> {
     return AppBar(
       backgroundColor: Colors.transparent,
       flexibleSpace: GlassContainer(
-        borderRadius: BorderRadius.zero,
-        blur: 20,
-        opacity: 0.6,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
+        blur: 40,
+        opacity: 0.75, // Frosted glass effect
+        color: AppColors.structuralBrown,
+        borderColor: AppColors.champagne.withOpacity(0.1),
         child: Container(),
       ),
       elevation: 0,
@@ -49,26 +54,26 @@ class _CustomAppBarState extends State<CustomAppBar> {
       leadingWidth: 56,
       leading: _isSearchActive
           ? IconButton(
-              icon: const Icon(Icons.arrow_back, color: AppColors.structuralBrown),
+              icon: const Icon(Icons.arrow_back, color: AppColors.champagne),
               onPressed: () => setState(() => _isSearchActive = false),
             )
-          : (widget.onMenuPressed != null
+          : (widget.showMenu
               ? IconButton(
-                  icon: const Icon(Icons.menu, color: AppColors.structuralBrown),
-                  onPressed: widget.onMenuPressed,
+                  icon: const Icon(Icons.menu, color: AppColors.champagne),
+                  onPressed: widget.onMenuPressed ?? () => rootScaffoldKey.currentState?.openDrawer(),
                 )
               : null),
       title: _isSearchActive
           ? const UniversalSearchBar()
           : Row(
               children: [
-                Image.asset('assets/images/logo.png', height: 24, color: AppColors.structuralBrown, errorBuilder: (_,__,___) => const SizedBox()),
+                Image.asset('assets/images/logo.png', height: 24, color: AppColors.champagne, errorBuilder: (_,__,___) => const SizedBox()),
                 const SizedBox(width: 8),
                 Text(
                   widget.title,
                   style: GoogleFonts.montserrat(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.structuralBrown,
+                    color: AppColors.champagne,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -78,7 +83,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
       actions: [
         if (!_isSearchActive && widget.showSearch)
           IconButton(
-            icon: const Icon(Icons.search, color: AppColors.structuralBrown),
+            icon: const Icon(Icons.search, color: AppColors.champagne),
             onPressed: () => setState(() => _isSearchActive = true),
           ),
         if (widget.showNotification)
@@ -86,7 +91,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
             alignment: Alignment.center,
             children: [
               IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: AppColors.structuralBrown),
+                icon: const Icon(Icons.notifications_outlined, color: AppColors.champagne),
                 onPressed: widget.onNotificationPressed ?? () => context.push('/notifications'),
               ),
               Positioned(

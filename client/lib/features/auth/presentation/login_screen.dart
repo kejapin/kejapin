@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
-import 'package:mesh_gradient/mesh_gradient.dart';
+import 'package:mesh_gradient/mesh_gradient.dart'; // Ensure you have this package or remove if unused
 
 import '../data/auth_repository.dart';
 import '../../../core/constants/app_colors.dart';
@@ -36,14 +36,9 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } catch (e) {
         if (mounted) {
-          final errorStr = e.toString().toLowerCase();
-          if (errorStr.contains('email not confirmed') || errorStr.contains('email_not_confirmed')) {
-            context.push('/verify-email-pending?email=${_emailController.text}');
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
+           ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
             );
-          }
         }
       } finally {
         if (mounted) {
@@ -75,14 +70,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   )
-                : AnimatedMeshGradient(
-                    colors: [
-                      AppColors.structuralBrown,
-                      const Color(0xFF5D4037),
-                      AppColors.mutedGold.withOpacity(0.4),
-                      AppColors.structuralBrown,
-                    ],
-                    options: AnimatedMeshGradientOptions(speed: 2),
+                // Use a Container with gradient as fallback if MeshGradient is buggy
+                : Container(
+                     decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.structuralBrown,
+                          const Color(0xFF5D4037),
+                          AppColors.structuralBrown,
+                        ],
+                      ),
+                    ),
                   ),
           ),
           
@@ -101,12 +101,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           flex: 1,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center, // Centered
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Image.asset(
                                 'assets/images/logo.png',
                                 height: 80,
                                 color: Colors.white,
+                                errorBuilder: (c,e,s) => const Icon(Icons.home, size: 80, color: Colors.white),
                               ),
                               const SizedBox(height: 24),
                               Text(
@@ -152,6 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               'assets/images/logo.png',
                               height: 60,
                               color: Colors.white,
+                              errorBuilder: (c,e,s) => const Icon(Icons.home, size: 60, color: Colors.white),
                             ),
                             const SizedBox(height: 40),
                             GlassContainer(
@@ -173,8 +175,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Removed _buildSplitLayout and _buildMobileLayout as they are integrated above
-
   Widget _buildForm(BuildContext context) {
     return Form(
       key: _formKey,
@@ -184,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Text(
             "Welcome Back",
             style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                  color: Colors.white, // Changed to white
+                  color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -192,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Text(
             "Sign in to continue to your dashboard",
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.white70, // Changed to white70
+                  color: Colors.white70,
                 ),
           ),
           const SizedBox(height: 48),
@@ -261,17 +261,6 @@ class _LoginScreenState extends State<LoginScreen> {
               return null;
             },
           ),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => context.push('/forgot-password'),
-              child: const Text(
-                "Forgot Password?",
-                style: TextStyle(color: AppColors.mutedGold, fontWeight: FontWeight.w600),
-              ),
-            ),
-          ),
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
@@ -321,11 +310,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
                 }
               },
-              icon: Image.network(
-                'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_\"G\"_Logo.svg',
-                height: 24,
-                errorBuilder: (context, error, stackTrace) => const Icon(Icons.login, color: Colors.white),
-              ),
+              icon: const Icon(Icons.login, color: Colors.white), // Simplified icon for stability
               label: const Text(
                 "Continue with Google",
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),

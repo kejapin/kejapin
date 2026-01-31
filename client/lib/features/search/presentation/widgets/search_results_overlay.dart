@@ -161,7 +161,7 @@ class SearchResultsOverlay extends StatelessWidget {
         context.push('/map', extra: item);
         break;
       case SearchResultType.listing:
-        context.push('/listings/${item.id}', extra: item);
+        context.push('/marketplace/listing/${item.id}', extra: {'listing_id': item.id}); // Passing simplified map for now
         break;
       case SearchResultType.landlord:
         context.push('/landlords/${item.id}', extra: item);

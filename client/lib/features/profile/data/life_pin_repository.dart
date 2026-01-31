@@ -28,8 +28,7 @@ class LifePinRepository {
       if (user == null) throw Exception('User not logged in');
 
       final pinData = pin.toJson();
-      pinData['user_id'] = user.id; // Ensure user_id is set to current user
-      // Remove ID if present to let DB generate it (unless model has it)
+      pinData['user_id'] = user.id; 
       if (pinData['id'] == null || pinData['id'].toString().isEmpty) {
         pinData.remove('id'); 
       }

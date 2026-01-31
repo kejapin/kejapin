@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_map/flutter_map.dart'; // Ensure flutter_map is used for detailed view
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/services/commute_service.dart';
+import '../../../../core/services/navigation_service.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../profile/data/life_pin_repository.dart';
@@ -13,8 +17,14 @@ import '../../../search/data/models/search_result.dart';
 class ListingDetailsScreen extends StatefulWidget {
   final String id;
   final SearchResult? extra;
+  final String activeViewMode; // 'image' or 'map'
 
-  const ListingDetailsScreen({super.key, required this.id, this.extra});
+  const ListingDetailsScreen({
+    super.key,
+    required this.id,
+    this.extra,
+    this.activeViewMode = 'image',
+  });
 
   @override
   State<ListingDetailsScreen> createState() => _ListingDetailsScreenState();
@@ -24,14 +34,19 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   final ListingsRepository _listingsRepo = ListingsRepository();
   final LifePinRepository _lifePinRepo = LifePinRepository();
   final CommuteService _commuteService = CommuteService();
+  final NavigationService _navService = NavigationService();
+  final MapController _mapController = MapController();
 
   late Future<ListingEntity> _listingFuture;
   late Future<List<LifePin>> _lifePinsFuture;
   final Map<String, CommuteResult> _commuteResults = {};
+  
+  late bool _showMap;
 
   @override
   void initState() {
     super.initState();
+    _showMap = widget.activeViewMode == 'map';
     _listingFuture = _listingsRepo.fetchListingById(widget.id);
     _lifePinsFuture = _lifePinRepo.getLifePins();
     _calculateCommutes();
@@ -76,29 +91,79 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
           final listing = snapshot.data![0] as ListingEntity;
           final lifePins = snapshot.data![1] as List<LifePin>;
 
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(listing),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildTitleSection(listing),
-                      const SizedBox(height: 24),
-                      _buildCommuteSection(lifePins),
-                      const SizedBox(height: 24),
-                      _buildDescriptionSection(listing),
-                      const SizedBox(height: 24),
-                      _buildAmenitiesSection(listing),
-                      const SizedBox(height: 80), // Space for bottom action bar
-                    ],
+          return Stack(
+            children: [
+              Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHeader(listing, lifePins),
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildTitleSection(listing),
+                                const SizedBox(height: 24),
+                                _buildCommuteSection(lifePins),
+                                const SizedBox(height: 24),
+                                _buildDescriptionSection(listing),
+                                const SizedBox(height: 24),
+                                _buildAmenitiesSection(listing),
+                                const SizedBox(height: 80), // Space for bottom action bar
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+              // Floating Toggle Button
+              Positioned(
+                 top: 16,
+                 left: 0, 
+                 right: 0,
+                 child: Align(
+                   alignment: Alignment.topCenter,
+                   child: GestureDetector(
+                     onTap: () {
+                       setState(() {
+                         _showMap = !_showMap;
+                       });
+                     },
+                     child: Container(
+                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                       decoration: BoxDecoration(
+                         color: AppColors.structuralBrown,
+                         borderRadius: BorderRadius.circular(30),
+                         boxShadow: [
+                           BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4)),
+                         ],
+                       ),
+                       child: Row(
+                         mainAxisSize: MainAxisSize.min,
+                         children: [
+                           Icon(_showMap ? Icons.image : Icons.map_outlined, color: AppColors.champagne, size: 18),
+                           const SizedBox(width: 8),
+                           Text(
+                             _showMap ? "Show Photos" : "Show Map",
+                             style: const TextStyle(
+                               color: AppColors.champagne,
+                               fontWeight: FontWeight.bold,
+                             ),
+                           ),
+                         ],
+                       ),
+                     ),
+                   ),
+                 ),
+              ),
+            ],
           );
         },
       ),
@@ -106,7 +171,88 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
     );
   }
 
-  Widget _buildHeader(ListingEntity listing) {
+  Widget _buildHeader(ListingEntity listing, List<LifePin> lifePins) {
+    if (_showMap) {
+      return SizedBox(
+        height: 400,
+        child: FlutterMap(
+          mapController: _mapController,
+          options: MapOptions(
+            initialCenter: LatLng(listing.latitude, listing.longitude),
+            initialZoom: 14.0,
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'com.kejapin.app',
+            ),
+            // Floating Navigation Button
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: FloatingActionButton.small(
+                onPressed: () {
+                  context.push('/map', extra: SearchResult(
+                    id: listing.id,
+                    title: listing.title,
+                    subtitle: '${listing.city}, ${listing.county}',
+                    type: SearchResultType.location,
+                    metadata: {'lat': listing.latitude, 'lon': listing.longitude},
+                  ));
+                },
+                backgroundColor: AppColors.structuralBrown,
+                child: const Icon(Icons.navigation, color: AppColors.champagne),
+              ),
+            ),
+            // My Location Button
+            Positioned(
+              bottom: 16,
+              right: 80, // Left of navigation button
+              child: FloatingActionButton.small(
+                heroTag: 'listing_location',
+                onPressed: () async {
+                   try {
+                      final pos = await _navService.getCurrentLocation();
+                      _mapController.move(LatLng(pos.latitude, pos.longitude), 15);
+                   } catch (e) {
+                      if (e.toString().contains('permanently denied')) Geolocator.openAppSettings();
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+                   }
+                },
+                backgroundColor: Colors.white,
+                child: const Icon(Icons.my_location, color: AppColors.structuralBrown),
+              ),
+            ),
+            MarkerLayer(
+              markers: [
+                // Property Marker
+                Marker(
+                  point: LatLng(listing.latitude, listing.longitude),
+                  width: 40,
+                  height: 40,
+                  child: const Icon(Icons.location_on, color: AppColors.brickRed, size: 40),
+                ),
+                // Life Pins Markers
+                ...lifePins.map((pin) => Marker(
+                  point: LatLng(pin.latitude, pin.longitude),
+                  width: 30,
+                  height: 30,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: AppColors.structuralBrown,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(_getIconForMode(pin.transportMode), color: Colors.white, size: 16),
+                  ),
+                )),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+  
+    // Image View
     return Container(
       height: 350,
       width: double.infinity,

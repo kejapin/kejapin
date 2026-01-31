@@ -77,3 +77,35 @@ func (h *GeoHandler) CalculateCommute(c *fiber.Ctx) error {
 
 	return c.JSON(resp)
 }
+
+func (h *GeoHandler) SearchLocations(c *fiber.Ctx) error {
+	query := c.Query("query")
+	if query == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Query is required"})
+	}
+
+	results, err := h.GeoService.SearchLocations(query, 10)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(results)
+}
+
+func (h *GeoHandler) GetNearbyAmenities(c *fiber.Ctx) error {
+	var req struct {
+		Lat    float64 `json:"lat"`
+		Lon    float64 `json:"lon"`
+		Radius float64 `json:"radius"`
+	}
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
+	}
+
+	results, err := h.GeoService.GetNearbyAmenities(req.Lat, req.Lon, req.Radius)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(results)
+}

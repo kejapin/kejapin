@@ -14,4 +14,9 @@ class ApiEndpoints {
   static String get register => '$baseUrl/auth/register';
   static String get messages => '$baseUrl/messaging/messages';
   static String get notifications => '$baseUrl/messaging/notifications';
+  
+  // Geo & Life Pins
+  static String get locationSearch => '$baseUrl/geo/search';
+  static String get nearbyAmenities => '$baseUrl/geo/nearby';
+  static String get lifePins => '$baseUrl/lifepins';
 }

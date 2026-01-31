@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'custom_bottom_nav.dart';
 import 'package:flutter/foundation.dart';
+import '../globals.dart';
+import 'app_drawer.dart';
 
 class MainLayout extends StatelessWidget {
   final Widget child;
@@ -11,6 +13,9 @@ class MainLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: rootScaffoldKey,
+      drawer: const AppDrawer(),
+      drawerScrimColor: Colors.transparent,
       body: child,
       bottomNavigationBar: kIsWeb 
           ? null 

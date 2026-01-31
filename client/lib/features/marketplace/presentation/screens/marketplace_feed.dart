@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/widgets/web_layout_wrapper.dart';
 import '../widgets/animated_marketplace_hero.dart';
 import '../widgets/advanced_filters_sheet.dart';
+import '../widgets/marketplace_background.dart';
 import 'dart:async';
 import '../../../search/presentation/widgets/marketplace_search_bar.dart';
 
@@ -31,11 +32,11 @@ class MarketplaceFeed extends StatefulWidget {
 }
 
 class _MarketplaceFeedState extends State<MarketplaceFeed> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late ListingFeedCubit _cubit;
+  final ScrollController _scrollController = ScrollController();
   bool _isMapView = false;
   late String _selectedCategory;
   Map<String, dynamic> _activeFilters = {};
-  late ListingFeedCubit _cubit;
 
   @override
   void initState() {
@@ -84,14 +85,12 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
     return BlocProvider.value(
       value: _cubit,
       child: Scaffold(
-        key: _scaffoldKey,
-        backgroundColor: AppColors.alabaster,
-        drawer: const AppDrawer(),
-        drawerScrimColor: Colors.transparent,
-        appBar: CustomAppBar(
-          onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
-        body: _isMapView
+        backgroundColor: Colors.transparent, // Important: Let MarketplaceBackground show through
+        extendBody: true, // Allow body to extend behind bottom nav
+        extendBodyBehindAppBar: true, // Allow body to extend behind app bar
+        appBar: CustomAppBar(),
+        body: MarketplaceBackground(
+          child: _isMapView
             ? BlocBuilder<ListingFeedCubit, ListingFeedState>(
                 builder: (context, state) {
                   if (state is ListingFeedLoaded) {
@@ -110,132 +109,136 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                 color: AppColors.structuralBrown,
                 child: CustomScrollView(
                   slivers: [
-                    const SliverToBoxAdapter(
-                      child: AnimatedMarketplaceHero(),
+                    SliverPadding(
+                        padding: EdgeInsets.only(top: kToolbarHeight + MediaQuery.of(context).padding.top + 20),
+                        sliver: const SliverToBoxAdapter(
+                            child: AnimatedMarketplaceHero(),
+                        ),
                     ),
                     SliverToBoxAdapter(
-                      child: GlassContainer(
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(24),
-                          bottomRight: Radius.circular(24),
-                        ),
-                        blur: 20,
-                        opacity: 0.6,
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              child: Column(
-                                children: [
-                                  Row(
+                      child: Padding( // Add padding around the filter area
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: GlassContainer(
+                            borderRadius: BorderRadius.circular(24),
+                            blur: 15,
+                            opacity: 0.7,
+                            color: Colors.white,
+                            borderColor: AppColors.champagne.withOpacity(0.3),
+                            child: Column(
+                            children: [
+                                Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                child: Column(
                                     children: [
-                                      Expanded(
-                                        child: MarketplaceSearchBar(
-                                          isMapView: _isMapView,
-                                          onToggleView: (isMap) {
-                                            setState(() => _isMapView = isMap);
-                                          },
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      GestureDetector(
-                                        onTap: _showAdvancedFilters,
-                                        child: Container(
-                                          height: 56,
-                                          width: 56,
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              colors: [
-                                                AppColors.mutedGold,
-                                                AppColors.mutedGold.withOpacity(0.8),
-                                              ],
-                                            ),
-                                            borderRadius: BorderRadius.circular(12),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: AppColors.mutedGold.withOpacity(0.3),
-                                                blurRadius: 8,
-                                                spreadRadius: 1,
-                                              ),
-                                            ],
-                                          ),
-                                          child: Stack(
-                                            alignment: Alignment.center,
-                                            children: [
-                                              const Icon(Icons.tune, color: Colors.white, size: 24),
-                                              if (_activeFilters.isNotEmpty)
-                                                Positioned(
-                                                  right: 12,
-                                                  top: 12,
-                                                  child: Container(
-                                                    width: 8,
-                                                    height: 8,
-                                                    decoration: const BoxDecoration(
-                                                      color: Colors.red,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  if (widget.initialSearchQuery != null)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
-                                      child: Row(
+                                    Row(
                                         children: [
-                                          Text(
-                                            'Results for "${widget.initialSearchQuery}"',
-                                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                              color: AppColors.structuralBrown,
-                                              fontWeight: FontWeight.bold,
+                                        Expanded(
+                                            child: MarketplaceSearchBar(
+                                            isMapView: _isMapView,
+                                            onToggleView: (isMap) {
+                                                setState(() => _isMapView = isMap);
+                                            },
                                             ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          GestureDetector(
-                                            onTap: () => context.go('/marketplace'),
-                                            child: const Icon(Icons.cancel, size: 16, color: Colors.grey),
-                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        GestureDetector(
+                                            onTap: _showAdvancedFilters,
+                                            child: Container(
+                                            height: 56,
+                                            width: 56,
+                                            decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                colors: [
+                                                    AppColors.mutedGold,
+                                                    AppColors.mutedGold.withOpacity(0.8),
+                                                ],
+                                                ),
+                                                borderRadius: BorderRadius.circular(16),
+                                                boxShadow: [
+                                                BoxShadow(
+                                                    color: AppColors.mutedGold.withOpacity(0.3),
+                                                    blurRadius: 8,
+                                                    spreadRadius: 1,
+                                                ),
+                                                ],
+                                            ),
+                                            child: Stack(
+                                                alignment: Alignment.center,
+                                                children: [
+                                                const Icon(Icons.tune, color: Colors.white, size: 24),
+                                                if (_activeFilters.isNotEmpty)
+                                                    Positioned(
+                                                    right: 12,
+                                                    top: 12,
+                                                    child: Container(
+                                                        width: 8,
+                                                        height: 8,
+                                                        decoration: const BoxDecoration(
+                                                        color: Colors.red,
+                                                        shape: BoxShape.circle,
+                                                        ),
+                                                    ),
+                                                    ),
+                                                ],
+                                            ),
+                                            ),
+                                        ),
                                         ],
-                                      ),
                                     ),
-                                ],
-                              ),
+                                    if (widget.initialSearchQuery != null)
+                                        Padding(
+                                        padding: const EdgeInsets.only(top: 8.0),
+                                        child: Row(
+                                            children: [
+                                            Text(
+                                                'Results for "${widget.initialSearchQuery}"',
+                                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                color: AppColors.structuralBrown,
+                                                fontWeight: FontWeight.bold,
+                                                ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            GestureDetector(
+                                                onTap: () => context.go('/marketplace'),
+                                                child: const Icon(Icons.cancel, size: 16, color: Colors.grey),
+                                            ),
+                                            ],
+                                        ),
+                                        ),
+                                    ],
+                                ),
+                                ),
+                                Container(
+                                height: 50,
+                                margin: const EdgeInsets.only(bottom: 12),
+                                child: ListView(
+                                    scrollDirection: Axis.horizontal,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    children: [
+                                    'All',
+                                    'BEDSITTER',
+                                    '1BHK',
+                                    '2BHK',
+                                    'SQ',
+                                    'BUNGALOW'
+                                    ].map((category) {
+                                    return _CategoryChip(
+                                        label: category,
+                                        isSelected: _selectedCategory == category,
+                                        onSelected: (selected) {
+                                        if (selected) {
+                                            setState(() => _selectedCategory = category);
+                                            context.read<ListingFeedCubit>().loadListings(
+                                                propertyType: category == 'All' ? null : category,
+                                                );
+                                        }
+                                        },
+                                    );
+                                    }).toList(),
+                                ),
+                                ),
+                            ],
                             ),
-                            const SizedBox(height: 8),
-                            Container(
-                              height: 50,
-                              margin: const EdgeInsets.only(bottom: 16),
-                              child: ListView(
-                                scrollDirection: Axis.horizontal,
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                children: [
-                                  'All',
-                                  'BEDSITTER',
-                                  '1BHK',
-                                  '2BHK',
-                                  'SQ',
-                                  'BUNGALOW'
-                                ].map((category) {
-                                  return _CategoryChip(
-                                    label: category,
-                                    isSelected: _selectedCategory == category,
-                                    onSelected: (selected) {
-                                      if (selected) {
-                                        setState(() => _selectedCategory = category);
-                                        context.read<ListingFeedCubit>().loadListings(
-                                              propertyType: category == 'All' ? null : category,
-                                            );
-                                      }
-                                    },
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                     ),
@@ -243,7 +246,7 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                       builder: (context, state) {
                         if (state is ListingFeedLoading) {
                           return const SliverFillRemaining(
-                            child: Center(child: CircularProgressIndicator()),
+                            child: Center(child: CircularProgressIndicator(color: AppColors.structuralBrown)),
                           );
                         } else if (state is ListingFeedError) {
                           return SliverFillRemaining(
@@ -260,9 +263,9 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                             sliver: SliverGrid(
                               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                                 maxCrossAxisExtent: 400,
-                                childAspectRatio: 0.75,
+                                childAspectRatio: 0.75, // Matches the new card aspect ratio better
                                 crossAxisSpacing: 16,
-                                mainAxisSpacing: 16,
+                                mainAxisSpacing: 24, // More spacing for the new large cards
                               ),
                               delegate: SliverChildBuilderDelegate(
                                 (context, index) {
@@ -284,6 +287,7 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                   ],
                 ),
               ),
+        ),
         floatingActionButton: Padding(
           padding: EdgeInsets.only(bottom: kIsWeb ? 30 : 90),
           child: GestureDetector(
