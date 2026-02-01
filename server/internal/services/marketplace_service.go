@@ -16,3 +16,17 @@ func NewMarketplaceService(repo ports.PropertyRepository) ports.MarketplaceServi
 func (s *marketplaceService) GetListings(filters map[string]interface{}) ([]domain.Property, error) {
 	return s.repo.FindAll(filters)
 }
+
+func (s *marketplaceService) CreateListing(listing *domain.Property) error {
+	return s.repo.Create(listing)
+}
+
+func (s *marketplaceService) SubmitReview(review *domain.Review) error {
+	// Cast to internal interface to access CreateReview
+	if repo, ok := s.repo.(interface {
+		CreateReview(review *domain.Review) error
+	}); ok {
+		return repo.CreateReview(review)
+	}
+	return nil
+}

@@ -23,4 +23,6 @@ type PropertyRepository interface {
 
 type MarketplaceService interface {
 	GetListings(filters map[string]interface{}) ([]domain.Property, error)
+	CreateListing(listing *domain.Property) error
+	SubmitReview(review *domain.Review) error
 }

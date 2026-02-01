@@ -20,7 +20,7 @@ func main() {
 
 	// Auto Migrate with logging
 	log.Println("Starting database migrations...")
-	err := cfg.DB.AutoMigrate(&domain.User{}, &domain.Property{}, &domain.Message{}, &domain.Notification{}, &domain.LifePin{}, &domain.RoleApplication{})
+	err := cfg.DB.AutoMigrate(&domain.User{}, &domain.Property{}, &domain.Message{}, &domain.Notification{}, &domain.LifePin{}, &domain.RoleApplication{}, &domain.Review{})
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}
@@ -63,6 +63,15 @@ func main() {
 	app.Use(cors.New())
 
 	// Routes
+	authMiddleware := func(c *fiber.Ctx) error {
+		userID := c.Get("X-User-ID")
+		if userID == "" {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
+		}
+		c.Locals("user_id", userID)
+		return c.Next()
+	}
+
 	api := app.Group("/api")
 
 	api.Get("/health", func(c *fiber.Ctx) error {
@@ -75,25 +84,14 @@ func main() {
 
 	marketplace := api.Group("/marketplace")
 	marketplace.Get("/listings", marketplaceHandler.GetListings)
+	marketplace.Post("/listings", authMiddleware, marketplaceHandler.CreateListing)
+	marketplace.Post("/reviews", authMiddleware, marketplaceHandler.SubmitReview)
 
 	// Uploads & Images
 	uploads := api.Group("/uploads")
 	uploads.Post("/image", uploadHandler.UploadImage)
 	uploads.Post("/images", uploadHandler.UploadMultipleImages)
 	uploads.Get("/images/:filename", uploadHandler.ServeImage)
-
-	// Middleware to simulate auth
-	authMiddleware := func(c *fiber.Ctx) error {
-		// TODO: Replace with actual JWT validation
-		// For now, accept a header "X-User-ID"
-		userID := c.Get("X-User-ID")
-		if userID == "" {
-			// Fallback for testing if no header
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
-		}
-		c.Locals("user_id", userID)
-		return c.Next()
-	}
 
 	messaging := api.Group("/messaging")
 	messaging.Use(authMiddleware)

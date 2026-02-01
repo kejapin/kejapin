@@ -43,10 +43,17 @@ func (h *VerificationHandler) SubmitApplication(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create application"})
 	}
 
-	// 2. Fetch User and Update Role (Auto-Approve for now as requested)
+	// 2. Fetch User or create stub if not found
 	user, err := h.userRepo.FindByID(userIDStr)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "User not found"})
+		// Create lazy stub for Supabase user
+		user = &domain.User{
+			ID:   userID,
+			Role: domain.RoleTenant,
+		}
+		if err := h.userRepo.Create(user); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to sync user"})
+		}
 	}
 
 	user.Role = domain.RoleLandlord

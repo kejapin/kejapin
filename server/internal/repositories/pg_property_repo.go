@@ -14,6 +14,30 @@ func NewPropertyRepository(db *gorm.DB) ports.PropertyRepository {
 	return &pgPropertyRepo{db: db}
 }
 
+type MarketplaceRepository interface {
+	ports.PropertyRepository
+	CreateReview(review *domain.Review) error
+}
+
+func (r *pgPropertyRepo) CreateReview(review *domain.Review) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(review).Error; err != nil {
+			return err
+		}
+		// Update Property Rating/Count
+		var status struct {
+			AvgRating   float64
+			ReviewCount int
+		}
+		tx.Raw("SELECT AVG(rating) as avg_rating, COUNT(*) as review_count FROM reviews WHERE property_id = ?", review.PropertyID).Scan(&status)
+
+		return tx.Model(&domain.Property{}).Where("id = ?", review.PropertyID).Updates(map[string]interface{}{
+			"rating":       status.AvgRating,
+			"review_count": status.ReviewCount,
+		}).Error
+	})
+}
+
 func (r *pgPropertyRepo) FindAll(filters map[string]interface{}) ([]domain.Property, error) {
 	var properties []domain.Property
 

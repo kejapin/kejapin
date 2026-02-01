@@ -64,3 +64,16 @@ func (p *Property) BeforeCreate(tx *gorm.DB) (err error) {
 	}
 	return
 }
+
+type Review struct {
+	ID         uuid.UUID `gorm:"type:char(36);primary_key" json:"id"`
+	PropertyID uuid.UUID `gorm:"type:char(36);not null" json:"property_id"`
+	UserID     uuid.UUID `gorm:"type:char(36);not null" json:"user_id"`
+	Rating     int       `gorm:"not null" json:"rating"`
+	Comment    string    `json:"comment"`
+	CreatedAt  time.Time `json:"created_at"`
+}
+
+func (Review) TableName() string {
+	return "reviews"
+}
