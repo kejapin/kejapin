@@ -52,3 +52,10 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		"user":  user,
 	})
 }
+
+// GetProfile returns the current user profile from the database
+func (h *AuthHandler) GetProfile(c *fiber.Ctx) error {
+	// This uses the userRepo directly for now since it's just a fetch
+	// We'll pass the repo to the handler in main.go
+	return nil // To be implemented in main.go if we don't want to change AuthService
+}

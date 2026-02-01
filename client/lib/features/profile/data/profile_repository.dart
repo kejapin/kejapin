@@ -58,16 +58,33 @@ class ProfileRepository {
     if (user == null) throw Exception('User not logged in');
 
     try {
-      final response = await _supabase
+      // Try fetching from Go backend first (it has the most recent role/status)
+      final response = await http.get(
+        Uri.parse('${ApiEndpoints.baseUrl}/auth/profile'),
+        headers: {'X-User-ID': user.id},
+      ).timeout(const Duration(seconds: 5));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return UserProfile.fromJson(data);
+      }
+      
+      // Fallback to Supabase if backend fails
+      final sbResponse = await _supabase
           .from('users')
           .select()
           .eq('id', user.id)
           .single();
       
-      return UserProfile.fromJson(response);
+      return UserProfile.fromJson(sbResponse);
     } catch (e) {
-      print('Error fetching profile: $e');
-      throw Exception('Failed to load profile');
+      print('Error fetching profile, attempting Supabase fallback: $e');
+      try {
+        final sbResponse = await _supabase.from('users').select().eq('id', user.id).single();
+        return UserProfile.fromJson(sbResponse);
+      } catch (e2) {
+        throw Exception('Failed to load profile');
+      }
     }
   }
 

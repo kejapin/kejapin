@@ -81,6 +81,14 @@ func main() {
 	auth := api.Group("/auth")
 	auth.Post("/register", authHandler.Register)
 	auth.Post("/login", authHandler.Login)
+	auth.Get("/profile", authMiddleware, func(c *fiber.Ctx) error {
+		userID := c.Locals("user_id").(string)
+		user, err := userRepo.FindByID(userID)
+		if err != nil {
+			return c.Status(404).JSON(fiber.Map{"error": "user not found"})
+		}
+		return c.JSON(user)
+	})
 
 	marketplace := api.Group("/marketplace")
 	marketplace.Get("/listings", marketplaceHandler.GetListings)
