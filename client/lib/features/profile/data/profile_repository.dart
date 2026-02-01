@@ -116,8 +116,8 @@ class ProfileRepository {
       }).eq('id', user.id);
       
     } catch (e) {
-      print('Error submitting application: $e');
-      throw Exception('Failed to submit application');
+      print('DEBUG: ProfileRepository.submitLandlordApplication error: $e');
+      throw Exception('Failed to submit application: $e');
     }
   }
 }
