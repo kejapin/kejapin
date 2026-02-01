@@ -19,7 +19,7 @@ const (
 type RoleApplication struct {
 	ID         uuid.UUID          `gorm:"type:char(36);primary_key" json:"id"`
 	UserID     uuid.UUID          `gorm:"type:char(36);not null" json:"user_id"`
-	Documents  string             `gorm:"type:text" json:"documents"` // JSON string
+	Documents  string             `gorm:"type:jsonb" json:"documents"` // JSON field
 	Status     VerificationStatus `gorm:"type:varchar(20);default:'PENDING'" json:"status"`
 	AdminNotes string             `json:"admin_notes"`
 	CreatedAt  time.Time          `json:"created_at"`
