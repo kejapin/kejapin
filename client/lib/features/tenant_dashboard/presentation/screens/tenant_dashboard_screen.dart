@@ -5,42 +5,63 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
+import '../../../../core/widgets/dashboard_control_panel.dart';
 
-class TenantDashboardScreen extends StatelessWidget {
+class TenantDashboardScreen extends StatefulWidget {
   const TenantDashboardScreen({super.key});
+
+  @override
+  State<TenantDashboardScreen> createState() => _TenantDashboardScreenState();
+}
+
+class _TenantDashboardScreenState extends State<TenantDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
       appBar: const CustomAppBar(title: 'MY LIFE-HUB', showSearch: false),
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FadeInDown(
-                child: const Text(
-                  'Spatial Activity',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.structuralBrown),
-                ),
+      body: Stack(
+        children: [
+          SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FadeInDown(
+                    child: const Text(
+                      'Spatial Activity',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.structuralBrown),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildEfficiencySummary(),
+                  const SizedBox(height: 24),
+                  _buildTimelineSection(),
+                  const SizedBox(height: 24),
+                  FadeInUp(
+                    delay: const Duration(milliseconds: 300),
+                    child: _buildBudgetChart(),
+                  ),
+                  const SizedBox(height: 100), // Padding for the bottom nav
+                ],
               ),
-              const SizedBox(height: 20),
-              _buildEfficiencySummary(),
-              const SizedBox(height: 24),
-              _buildTimelineSection(),
-              const SizedBox(height: 24),
-              FadeInUp(
-                delay: const Duration(milliseconds: 300),
-                child: _buildBudgetChart(),
-              ),
-              const SizedBox(height: 100), // Padding for the bottom nav
+            ),
+          ),
+          DashboardControlPanel(
+            currentRoute: '/tenant-dashboard',
+            items: [
+              ControlPanelItem(title: 'Life-Hub Home', icon: Icons.home_outlined, route: '/tenant-dashboard'),
+              ControlPanelItem(title: 'Explore Markets', icon: Icons.explore_outlined, route: '/marketplace'),
+              ControlPanelItem(title: 'My Geo-Pins', icon: Icons.pin_drop_outlined, route: '/life-pins'),
+              ControlPanelItem(title: 'Saved Listings', icon: Icons.favorite_border, route: '/saved'),
+              ControlPanelItem(title: 'My Profile', icon: Icons.person_outline, route: '/profile'),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

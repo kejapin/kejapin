@@ -4,42 +4,62 @@ import 'package:animate_do/animate_do.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
+import '../../../../core/widgets/dashboard_control_panel.dart';
 
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
+
+  @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
       appBar: const CustomAppBar(title: 'REWARD ADMIN', showSearch: false),
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FadeInDown(
-                child: const Text(
-                  'Platform Overview',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.structuralBrown),
-                ),
+      body: Stack(
+        children: [
+          SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FadeInDown(
+                    child: const Text(
+                      'Platform Overview',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.structuralBrown),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildQuickStats(),
+                  const SizedBox(height: 24),
+                  FadeInUp(
+                    delay: const Duration(milliseconds: 200),
+                    child: _buildRevenueChart(),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildVerificationQueue(context),
+                  const SizedBox(height: 100),
+                ],
               ),
-              const SizedBox(height: 20),
-              _buildQuickStats(),
-              const SizedBox(height: 24),
-              FadeInUp(
-                delay: const Duration(milliseconds: 200),
-                child: _buildRevenueChart(),
-              ),
-              const SizedBox(height: 24),
-              _buildVerificationQueue(context),
-              const SizedBox(height: 100),
+            ),
+          ),
+          DashboardControlPanel(
+            currentRoute: '/admin-dashboard',
+            items: [
+              ControlPanelItem(title: 'Admin Console', icon: Icons.security_outlined, route: '/admin-dashboard'),
+              ControlPanelItem(title: 'Market Monitoring', icon: Icons.visibility_outlined, route: '/marketplace'),
+              ControlPanelItem(title: 'UI Component Lab', icon: Icons.science_outlined, route: '/gallery'),
+              ControlPanelItem(title: 'My Profile', icon: Icons.admin_panel_settings_outlined, route: '/profile'),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

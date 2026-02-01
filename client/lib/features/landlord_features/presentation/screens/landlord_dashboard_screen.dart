@@ -5,45 +5,66 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
+import '../../../../core/widgets/dashboard_control_panel.dart';
 
-class LandlordDashboardScreen extends StatelessWidget {
+class LandlordDashboardScreen extends StatefulWidget {
   const LandlordDashboardScreen({super.key});
+
+  @override
+  State<LandlordDashboardScreen> createState() => _LandlordDashboardScreenState();
+}
+
+class _LandlordDashboardScreenState extends State<LandlordDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
       appBar: const CustomAppBar(title: 'PARTNER PORTAL', showSearch: false),
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FadeInDown(
-                child: const Text(
-                  'Business Insights',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.structuralBrown),
-                ),
+      body: Stack(
+        children: [
+          SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FadeInDown(
+                    child: const Text(
+                      'Business Insights',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.structuralBrown),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildActionCards(context),
+                  const SizedBox(height: 24),
+                  FadeInUp(
+                    delay: const Duration(milliseconds: 200),
+                    child: _buildOccupancyChart(),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text('Property Performance', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 12),
+                  _buildPropertyPerformanceItem(name: 'Skyline Terrace', views: '2.4k', leads: '12'),
+                  _buildPropertyPerformanceItem(name: 'Oakwood Studio', views: '1.2k', leads: '5'),
+                  const SizedBox(height: 100),
+                ],
               ),
-              const SizedBox(height: 20),
-              _buildActionCards(context),
-              const SizedBox(height: 24),
-              FadeInUp(
-                delay: const Duration(milliseconds: 200),
-                child: _buildOccupancyChart(),
-              ),
-              const SizedBox(height: 24),
-              const Text('Property Performance', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              _buildPropertyPerformanceItem(name: 'Skyline Terrace', views: '2.4k', leads: '12'),
-              _buildPropertyPerformanceItem(name: 'Oakwood Studio', views: '1.2k', leads: '5'),
-              const SizedBox(height: 100),
+            ),
+          ),
+          DashboardControlPanel(
+            currentRoute: '/landlord-dashboard',
+            items: [
+              ControlPanelItem(title: 'Partner Home', icon: Icons.dashboard_outlined, route: '/landlord-dashboard'),
+              ControlPanelItem(title: 'Post Property', icon: Icons.add_business_outlined, route: '/create-listing'),
+              ControlPanelItem(title: 'Market Feed', icon: Icons.dynamic_feed_outlined, route: '/marketplace'),
+              ControlPanelItem(title: 'Visual Gallery', icon: Icons.auto_awesome_motion_outlined, route: '/gallery'),
+              ControlPanelItem(title: 'My Profile', icon: Icons.account_circle_outlined, route: '/profile'),
             ],
           ),
-        ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
