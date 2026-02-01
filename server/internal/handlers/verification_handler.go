@@ -23,9 +23,15 @@ func (h *VerificationHandler) SubmitApplication(c *fiber.Ctx) error {
 	}
 
 	var req struct {
-		Documents   string `json:"documents"`
-		CompanyName string `json:"company_name"`
-		CompanyBio  string `json:"company_bio"`
+		Documents     string `json:"documents"`
+		CompanyName   string `json:"company_name"`
+		CompanyBio    string `json:"company_bio"`
+		NationalID    string `json:"national_id"`
+		KRAPin        string `json:"kra_pin"`
+		BusinessRole  string `json:"business_role"`
+		PayoutMethod  string `json:"payout_method"`
+		PayoutDetails string `json:"payout_details"`
+		PhoneNumber   string `json:"phone_number"`
 	}
 
 	if err := c.BodyParser(&req); err != nil {
@@ -60,6 +66,14 @@ func (h *VerificationHandler) SubmitApplication(c *fiber.Ctx) error {
 	user.VStatus = string(domain.VStatusPending)
 	user.CompanyName = req.CompanyName
 	user.CompanyBio = req.CompanyBio
+	user.NationalID = req.NationalID
+	user.KRAPin = req.KRAPin
+	user.BusinessRole = req.BusinessRole
+	user.PayoutMethod = req.PayoutMethod
+	user.PayoutDetails = req.PayoutDetails
+	if req.PhoneNumber != "" {
+		user.PhoneNumber = req.PhoneNumber
+	}
 
 	if err := h.userRepo.Update(user); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update user role"})

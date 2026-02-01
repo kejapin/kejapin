@@ -8,6 +8,8 @@ import '../blocs/listing_feed_cubit.dart';
 import '../widgets/listing_card.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../../core/widgets/glass_container.dart';
+import '../../../../core/widgets/smart_dashboard_panel.dart';
+import '../../../../core/widgets/keja_state_view.dart';
 import 'marketplace_map.dart';
 import 'package:flutter/foundation.dart';
 import '../../../../core/widgets/web_layout_wrapper.dart';
@@ -89,8 +91,10 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
         extendBody: true, // Allow body to extend behind bottom nav
         extendBodyBehindAppBar: true, // Allow body to extend behind app bar
         appBar: CustomAppBar(),
-        body: MarketplaceBackground(
-          child: _isMapView
+        body: Stack(
+          children: [
+            MarketplaceBackground(
+              child: _isMapView
             ? BlocBuilder<ListingFeedCubit, ListingFeedState>(
                 builder: (context, state) {
                   if (state is ListingFeedLoaded) {
@@ -250,12 +254,21 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                           );
                         } else if (state is ListingFeedError) {
                           return SliverFillRemaining(
-                            child: Center(child: Text('Error: ${state.message}')),
+                            child: KejaStateView(
+                              type: KejaStateType.error,
+                              title: "Feed Error",
+                              message: state.message,
+                              onRetry: () => context.read<ListingFeedCubit>().loadListings(),
+                            ),
                           );
                         } else if (state is ListingFeedLoaded) {
                           if (state.listings.isEmpty) {
                             return const SliverFillRemaining(
-                              child: Center(child: Text('No listings found.')),
+                              child: KejaStateView(
+                                type: KejaStateType.empty,
+                                title: "No Listings",
+                                message: "We couldn't find any properties matching your criteria.",
+                              ),
                             );
                           }
                           return SliverPadding(
@@ -290,6 +303,9 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                   ],
                 ),
               ),
+            ),
+            const SmartDashboardPanel(currentRoute: '/marketplace'),
+          ],
         ),
         floatingActionButton: Padding(
           padding: EdgeInsets.only(bottom: kIsWeb ? 30 : 90),

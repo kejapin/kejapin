@@ -10,6 +10,7 @@ import '../../data/listings_repository.dart';
 import '../../domain/listing_entity.dart';
 import '../widgets/listing_card.dart';
 import '../../../../core/globals.dart';
+import '../../../../core/widgets/smart_dashboard_panel.dart';
 
 class SavedListingsScreen extends StatefulWidget {
   const SavedListingsScreen({super.key});
@@ -81,6 +82,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
               ],
             ),
           ),
+          const SmartDashboardPanel(currentRoute: '/saved'),
         ],
       ),
     );

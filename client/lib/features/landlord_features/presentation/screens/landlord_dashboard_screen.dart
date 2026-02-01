@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
-import '../../../../core/widgets/dashboard_control_panel.dart';
+import '../../../../core/widgets/smart_dashboard_panel.dart';
 
 class LandlordDashboardScreen extends StatefulWidget {
   const LandlordDashboardScreen({super.key});
@@ -54,16 +54,7 @@ class _LandlordDashboardScreenState extends State<LandlordDashboardScreen> {
               ),
             ),
           ),
-          DashboardControlPanel(
-            currentRoute: '/landlord-dashboard',
-            items: [
-              ControlPanelItem(title: 'Partner Home', icon: Icons.dashboard_outlined, route: '/landlord-dashboard'),
-              ControlPanelItem(title: 'Post Property', icon: Icons.add_business_outlined, route: '/create-listing'),
-              ControlPanelItem(title: 'Market Feed', icon: Icons.dynamic_feed_outlined, route: '/marketplace'),
-              ControlPanelItem(title: 'Visual Gallery', icon: Icons.auto_awesome_motion_outlined, route: '/gallery'),
-              ControlPanelItem(title: 'My Profile', icon: Icons.account_circle_outlined, route: '/profile'),
-            ],
-          ),
+          const SmartDashboardPanel(currentRoute: '/landlord-dashboard'),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(

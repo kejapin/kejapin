@@ -4,7 +4,7 @@ import 'package:animate_do/animate_do.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
-import '../../../../core/widgets/dashboard_control_panel.dart';
+import '../../../../core/widgets/smart_dashboard_panel.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -50,15 +50,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             ),
           ),
-          DashboardControlPanel(
-            currentRoute: '/admin-dashboard',
-            items: [
-              ControlPanelItem(title: 'Admin Console', icon: Icons.security_outlined, route: '/admin-dashboard'),
-              ControlPanelItem(title: 'Market Monitoring', icon: Icons.visibility_outlined, route: '/marketplace'),
-              ControlPanelItem(title: 'UI Component Lab', icon: Icons.science_outlined, route: '/gallery'),
-              ControlPanelItem(title: 'My Profile', icon: Icons.admin_panel_settings_outlined, route: '/profile'),
-            ],
-          ),
+          const SmartDashboardPanel(currentRoute: '/admin-dashboard'),
         ],
       ),
     );

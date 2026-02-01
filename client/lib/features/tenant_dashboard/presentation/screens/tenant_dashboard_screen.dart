@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
-import '../../../../core/widgets/dashboard_control_panel.dart';
+import '../../../../core/widgets/smart_dashboard_panel.dart';
 
 class TenantDashboardScreen extends StatefulWidget {
   const TenantDashboardScreen({super.key});
@@ -51,16 +51,7 @@ class _TenantDashboardScreenState extends State<TenantDashboardScreen> {
               ),
             ),
           ),
-          DashboardControlPanel(
-            currentRoute: '/tenant-dashboard',
-            items: [
-              ControlPanelItem(title: 'Life-Hub Home', icon: Icons.home_outlined, route: '/tenant-dashboard'),
-              ControlPanelItem(title: 'Explore Markets', icon: Icons.explore_outlined, route: '/marketplace'),
-              ControlPanelItem(title: 'My Geo-Pins', icon: Icons.pin_drop_outlined, route: '/life-pins'),
-              ControlPanelItem(title: 'Saved Listings', icon: Icons.favorite_border, route: '/saved'),
-              ControlPanelItem(title: 'My Profile', icon: Icons.person_outline, route: '/profile'),
-            ],
-          ),
+          const SmartDashboardPanel(currentRoute: '/tenant-dashboard'),
         ],
       ),
     );

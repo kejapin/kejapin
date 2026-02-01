@@ -1,14 +1,18 @@
 import 'dart:math' as math;
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:animate_do/animate_do.dart';
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
-import '../../data/profile_repository.dart';
 import '../../../../core/widgets/animated_indicators.dart';
-import 'package:animate_do/animate_do.dart';
+import '../../../../core/widgets/keja_state_view.dart';
+import '../../data/profile_repository.dart';
 
 class ApplyLandlordScreen extends StatefulWidget {
   const ApplyLandlordScreen({super.key});
@@ -22,49 +26,94 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
   final _profileRepo = ProfileRepository();
   final _picker = ImagePicker();
   
-  // Data
-  String? _companyName;
-  String? _companyBio;
+  // Controllers
+  final _fullNameController = TextEditingController();
+  final _idNumberController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _kraPinController = TextEditingController();
+  final _companyNameController = TextEditingController();
+  final _companyBioController = TextEditingController();
+  final _payoutDetailsController = TextEditingController();
+
+  // Selection Data
+  String _businessRole = 'OWNER'; // OWNER, AGENT, CARETAKER
+  String _proofType = 'UTILITY_BILL'; // UTILITY_BILL, REG_CERT, AUTHORITY_LETTER
+  String _payoutMethod = 'MPESA'; // MPESA, BANK
+  
+  // File Data
   XFile? _idDocument;
   XFile? _selfie;
+  XFile? _proofDocument;
+  
   bool _isSubmitting = false;
 
-  Future<void> _pickImage(bool forSelfie) async {
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _idNumberController.dispose();
+    _phoneController.dispose();
+    _kraPinController.dispose();
+    _companyNameController.dispose();
+    _companyBioController.dispose();
+    _payoutDetailsController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImage(String type) async {
     final XFile? image = await _picker.pickImage(
-      source: forSelfie ? ImageSource.camera : ImageSource.gallery,
+      source: type == 'SELFIE' ? ImageSource.camera : ImageSource.gallery,
       preferredCameraDevice: CameraDevice.front,
     );
     if (image != null) {
       setState(() {
-        if (forSelfie) {
-          _selfie = image;
-        } else {
-          _idDocument = image;
-        }
+        if (type == 'SELFIE') _selfie = image;
+        else if (type == 'ID') _idDocument = image;
+        else if (type == 'PROOF') _proofDocument = image;
       });
     }
   }
 
-  Future<void> _submit() async {
-    if (_idDocument == null || _selfie == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please provide all required documents')),
-      );
-      return;
+  bool _validateStep() {
+    if (_currentStep == 0) {
+      if (_fullNameController.text.isEmpty) return _error("Legal name is required");
+      if (_idNumberController.text.isEmpty) return _error("ID Number is required");
+      if (_phoneController.text.isEmpty) return _error("Phone number is required");
+    } else if (_currentStep == 1) {
+      if (_kraPinController.text.isEmpty) return _error("KRA PIN is required for verification");
+    } else if (_currentStep == 2) {
+      if (_idDocument == null) return _error("ID document image is required");
+      if (_selfie == null) return _error("Live selfie image is required");
+      if (_proofDocument == null) return _error("Proof of association is required");
+    } else if (_currentStep == 3) {
+      if (_payoutDetailsController.text.isEmpty) return _error("Payout details are required");
     }
+    return true;
+  }
 
+  bool _error(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.redAccent));
+    return false;
+  }
+
+  Future<void> _submit() async {
     setState(() => _isSubmitting = true);
     try {
-      // In a real app, we would upload to Supabase Storage first.
-      // For this implementation, we'll store the paths/names in the JSONB documents field.
       await _profileRepo.submitLandlordApplication(
         documents: {
           'id_document': _idDocument!.name,
           'selfie': _selfie!.name,
+          'proof_document': _proofDocument!.name,
+          'proof_type': _proofType,
           'submitted_at': DateTime.now().toIso8601String(),
         },
-        companyName: _companyName,
-        companyBio: _companyBio,
+        companyName: _companyNameController.text,
+        companyBio: _companyBioController.text,
+        nationalId: _idNumberController.text,
+        kraPin: _kraPinController.text,
+        businessRole: _businessRole,
+        payoutMethod: _payoutMethod,
+        payoutDetails: _payoutDetailsController.text,
+        phoneNumber: _phoneController.text,
       );
 
       if (mounted) {
@@ -76,9 +125,7 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        context.showErrorDialog(message: e.toString(), onRetry: _submit);
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -89,147 +136,270 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
-      appBar: const CustomAppBar(title: 'Become a Landlord', showSearch: false),
-      body: Stepper(
-        type: StepperType.horizontal,
-        currentStep: _currentStep,
-        onStepContinue: () {
-          if (_currentStep < 2) {
-            setState(() => _currentStep++);
-          } else {
-            _submit();
-          }
-        },
-        onStepCancel: () {
-          if (_currentStep > 0) {
-            setState(() => _currentStep--);
-          }
-        },
-        controlsBuilder: (context, details) {
-          return Padding(
-            padding: const EdgeInsets.only(top: 24),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _isSubmitting ? null : details.onStepContinue,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.structuralBrown,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: _isSubmitting 
-                      ? const UploadingIndicator()
-                      : Text(_currentStep == 2 ? 'SUBMIT APPLICATION' : 'CONTINUE', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  ),
-                ),
-                if (_currentStep > 0) ...[
-                  const SizedBox(width: 12),
-                  TextButton(
-                    onPressed: details.onStepCancel,
-                    child: const Text('BACK', style: TextStyle(color: AppColors.structuralBrown)),
-                  ),
-                ],
-              ],
-            ),
-          );
-        },
-        steps: [
-          Step(
-            isActive: _currentStep >= 0,
-            state: _currentStep > 0 ? StepState.complete : StepState.indexed,
-            title: const Text('Company'),
-            content: FadeInUp(
-              child: Column(
-                children: [
-                  const Text('Tell us about your property agency or personal brand.', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 20),
-                  TextField(
-                    decoration: const InputDecoration(
-                      labelText: 'Company Name',
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (v) => _companyName = v,
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    maxLines: 3,
-                    decoration: const InputDecoration(
-                      labelText: 'Company Bio',
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (v) => _companyBio = v,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Step(
-            isActive: _currentStep >= 1,
-            state: _currentStep > 1 ? StepState.complete : StepState.indexed,
-            title: const Text('Identify'),
-            content: FadeInUp(
-              child: Column(
-                children: [
-                  const Text('Upload a clear photo of your ID or Passport.', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 20),
-                  _buildUploadCard(
-                    title: 'ID Document',
-                    file: _idDocument,
-                    onTap: () => _pickImage(false),
-                    icon: Icons.badge_outlined,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Step(
-            isActive: _currentStep >= 2,
-            state: _currentStep > 2 ? StepState.complete : StepState.indexed,
-            title: const Text('Verify'),
-            content: FadeInUp(
-              child: Column(
-                children: [
-                  const Text('Take a live selfie to verify your identity.', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 20),
-                  _buildUploadCard(
-                    title: 'Live Selfie',
-                    file: _selfie,
-                    onTap: () => _pickImage(true),
-                    icon: Icons.camera_front_outlined,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      appBar: const CustomAppBar(title: 'PARTNER PROGRAM', showSearch: false),
+      body: Theme(
+        data: Theme.of(context).copyWith(colorScheme: const ColorScheme.light(primary: AppColors.structuralBrown)),
+        child: Stepper(
+          type: StepperType.horizontal,
+          currentStep: _currentStep,
+          onStepContinue: () {
+            if (_validateStep()) {
+              if (_currentStep < 3) setState(() => _currentStep++);
+              else _submit();
+            }
+          },
+          onStepCancel: () {
+            if (_currentStep > 0) setState(() => _currentStep--);
+          },
+          controlsBuilder: (context, details) => _buildControls(details),
+          steps: [
+            _buildIdentityStep(),
+            _buildVerificationStep(),
+            _buildDocumentStep(),
+            _buildFinanceStep(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildUploadCard({required String title, XFile? file, required VoidCallback onTap, required IconData icon}) {
+  Step _buildIdentityStep() {
+    return Step(
+      isActive: _currentStep >= 0,
+      state: _currentStep > 0 ? StepState.complete : StepState.indexed,
+      title: const Text('ID'),
+      content: FadeInUp(
+        child: Column(
+          children: [
+            _buildField(_fullNameController, 'Full Legal Name', 'Must match ID/M-Pesa', Icons.person),
+            _buildField(_idNumberController, 'National ID Number', '00000000', Icons.badge, keyboard: TextInputType.number),
+            _buildField(_phoneController, 'Contact Phone', '0700 000 000', Icons.phone, keyboard: TextInputType.phone),
+            const SizedBox(height: 16),
+            _buildRoleSelector(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Step _buildVerificationStep() {
+    return Step(
+      isActive: _currentStep >= 1,
+      state: _currentStep > 1 ? StepState.complete : StepState.indexed,
+      title: const Text('Keja'),
+      content: FadeInUp(
+        child: Column(
+          children: [
+            _buildField(_kraPinController, 'KRA PIN', 'A000000000X', Icons.description),
+            const SizedBox(height: 16),
+            _buildField(_companyNameController, 'Agency/Brand Name (Optional)', 'Kejapin Realty', Icons.business),
+            const SizedBox(height: 16),
+            _buildProofSelector(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Step _buildDocumentStep() {
+    return Step(
+      isActive: _currentStep >= 2,
+      state: _currentStep > 2 ? StepState.complete : StepState.indexed,
+      title: const Text('Docs'),
+      content: FadeInUp(
+        child: Column(
+          children: [
+            _buildUploadRow('ID DOCUMENT', _idDocument, () => _pickImage('ID'), Icons.badge_outlined),
+            const SizedBox(height: 16),
+            _buildUploadRow('LIVE SELFIE', _selfie, () => _pickImage('SELFIE'), Icons.camera_front_outlined),
+            const SizedBox(height: 16),
+            _buildUploadRow('ASSOCIATION PROOF (${_proofType.replaceAll('_', ' ')})', _proofDocument, () => _pickImage('PROOF'), Icons.assignment_outlined),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Step _buildFinanceStep() {
+    return Step(
+      isActive: _currentStep >= 3,
+      title: const Text('Bank'),
+      content: FadeInUp(
+        child: Column(
+          children: [
+            _buildPayoutSelector(),
+            const SizedBox(height: 24),
+            _buildField(
+              _payoutDetailsController, 
+              _payoutMethod == 'MPESA' ? 'Paybill / Till / Phone' : 'Account Details',
+              _payoutMethod == 'MPESA' ? 'e.g. Paybill: 123456' : 'e.g. Bank: KCB, Acc: 9876...',
+              Icons.account_balance_wallet,
+              maxLines: 3
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildField(TextEditingController ctrl, String label, String hint, IconData icon, {TextInputType keyboard = TextInputType.text, int maxLines = 1}) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade100)),
+      child: TextField(
+        controller: ctrl,
+        keyboardType: keyboard,
+        maxLines: maxLines,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+        decoration: InputDecoration(
+          icon: Icon(icon, color: AppColors.structuralBrown, size: 20),
+          labelText: label, hintText: hint, border: InputBorder.none,
+          labelStyle: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoleSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('YOUR ROLE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 1.5)),
+        const SizedBox(height: 12),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: ['OWNER', 'AGENT', 'CARETAKER'].map((r) {
+              final sel = _businessRole == r;
+              return GestureDetector(
+                onTap: () => setState(() => _businessRole = r),
+                child: Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(color: sel ? AppColors.structuralBrown : Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: sel ? Colors.transparent : Colors.grey.shade200)),
+                  child: Text(r, style: TextStyle(color: sel ? Colors.white : Colors.black, fontWeight: FontWeight.bold, fontSize: 11)),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProofSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('PROOF OF ASSOCIATION', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 1.5)),
+        const SizedBox(height: 12),
+        Column(
+          children: [
+            {'val': 'UTILITY_BILL', 'label': 'Recent Utility Bill (KPLC/Water)'},
+            {'val': 'REG_CERT', 'label': 'Agency Registration Cert'},
+            {'val': 'AUTHORITY_LETTER', 'label': 'Letter of Authority (Caretaker)'},
+          ].map((item) {
+            final sel = _proofType == item['val'];
+            return GestureDetector(
+              onTap: () => setState(() => _proofType = item['val']!),
+              child: Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: sel ? AppColors.mutedGold.withOpacity(0.1) : Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: sel ? AppColors.mutedGold : Colors.grey.shade200)),
+                child: Row(
+                  children: [
+                    Icon(sel ? Icons.check_circle : Icons.radio_button_off, color: sel ? AppColors.mutedGold : Colors.grey, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(item['label']!, style: TextStyle(fontWeight: sel ? FontWeight.bold : FontWeight.normal, fontSize: 13))),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPayoutSelector() {
+    return Row(
+      children: [
+        Expanded(child: _buildSelectBtn('MPESA', Icons.phone_iphone, _payoutMethod == 'MPESA')),
+        const SizedBox(width: 12),
+        Expanded(child: _buildSelectBtn('BANK', Icons.account_balance, _payoutMethod == 'BANK')),
+      ],
+    );
+  }
+
+  Widget _buildSelectBtn(String val, IconData icon, bool sel) {
     return GestureDetector(
-      onTap: onTap,
-      child: GlassContainer(
-        height: 200,
-        width: double.infinity,
-        borderRadius: BorderRadius.circular(20),
-        color: AppColors.structuralBrown.withOpacity(0.05),
-        child: file != null 
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Image.file(File(file.path), fit: BoxFit.cover),
-            )
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+      onTap: () => setState(() => _payoutMethod = val),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(color: sel ? AppColors.structuralBrown : Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: sel ? Colors.transparent : Colors.grey.shade200)),
+        child: Column(
+          children: [
+            Icon(icon, color: sel ? Colors.white : AppColors.structuralBrown),
+            const SizedBox(height: 8),
+            Text(val, style: TextStyle(color: sel ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUploadRow(String label, XFile? file, VoidCallback onTap, IconData icon) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 1.2, color: Colors.grey)),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 80, padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: file != null ? AppColors.mutedGold : Colors.grey.shade200)),
+            child: Row(
               children: [
-                Icon(icon, size: 48, color: AppColors.structuralBrown.withOpacity(0.5)),
-                const SizedBox(height: 12),
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                const SizedBox(height: 4),
-                const Text('Tap to capture', style: TextStyle(color: Colors.grey)),
+                Icon(icon, color: file != null ? AppColors.mutedGold : Colors.grey),
+                const SizedBox(width: 16),
+                Expanded(child: Text(file != null ? file.name : 'Tap to upload / capture', style: TextStyle(color: file != null ? Colors.black : Colors.grey, fontWeight: file != null ? FontWeight.bold : FontWeight.normal, fontSize: 13))),
+                if (file != null) const Icon(Icons.check_circle, color: AppColors.mutedGold),
               ],
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildControls(StepperControlsDetails details) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 32),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: _isSubmitting ? null : details.onStepContinue,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.structuralBrown, foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              child: _isSubmitting ? const UploadingIndicator() : Text(_currentStep == 3 ? 'BECOME PARTNER' : 'CONTINUE', style: const TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ),
+          if (_currentStep > 0) ...[
+            const SizedBox(width: 12),
+            IconButton(
+              onPressed: details.onStepCancel,
+              icon: const Icon(Icons.arrow_back),
+              style: IconButton.styleFrom(backgroundColor: Colors.white, padding: const EdgeInsets.all(16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+            )
+          ]
+        ],
       ),
     );
   }
@@ -245,93 +415,27 @@ class PartnerCongratulationsCard extends StatelessWidget {
       elevation: 0,
       insetPadding: const EdgeInsets.symmetric(horizontal: 24),
       child: FadeInUp(
-        duration: const Duration(milliseconds: 800),
         child: GlassContainer(
           padding: const EdgeInsets.all(32),
           borderRadius: BorderRadius.circular(40),
-          color: AppColors.structuralBrown,
-          opacity: 0.98,
+          color: AppColors.structuralBrown, opacity: 0.98,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Animated Icon Ring
-              LoopAnimation(
-                duration: const Duration(seconds: 4),
-                builder: (ctx, val, child) {
-                  return Transform.rotate(
-                    angle: val * 2 * math.pi,
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.mutedGold.withOpacity(0.3 + (math.sin(val * math.pi) * 0.4)),
-                          width: 2,
-                        ),
-                      ),
-                      child: Transform.rotate(
-                        angle: -val * 2 * math.pi,
-                        child: child,
-                      ),
-                    ),
-                  );
-                },
-                child: const Icon(Icons.verified_user, color: AppColors.mutedGold, size: 60),
-              ),
-              const SizedBox(height: 32),
-              const Text(
-                'WELCOME PARTNER',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.champagne,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 3,
-                ),
-              ),
+              const Icon(Icons.verified, color: AppColors.mutedGold, size: 80),
+              const SizedBox(height: 24),
+              const Text('AUTO-VERIFIED', style: TextStyle(color: AppColors.mutedGold, letterSpacing: 4, fontWeight: FontWeight.w900, fontSize: 14)),
               const SizedBox(height: 16),
-              const Text(
-                'Your application has been auto-verified. You now have exclusive access to the Landlord Control Hub.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.champagne,
-                  fontSize: 14,
-                  height: 1.6,
-                ),
-              ),
+              const Text('WELCOME PARTNER', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              const Text('Your documents have been submitted and auto-approved for testing. You can now access the Landlord Dashboard.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.champagne, fontSize: 13, height: 1.5)),
               const SizedBox(height: 40),
-              // Premium Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Close dialog and go to dashboard
-                    Navigator.of(context).pop();
-                    context.go('/landlord-dashboard');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.mutedGold,
-                    foregroundColor: AppColors.structuralBrown,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    elevation: 12,
-                    shadowColor: AppColors.mutedGold.withOpacity(0.5),
-                  ),
-                  child: const Text(
-                    'GO TO LANDLORD HUB',
-                    style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'NOT NOW',
-                  style: TextStyle(
-                    color: AppColors.champagne.withOpacity(0.5),
-                    fontWeight: FontWeight.bold,
-                  ),
+                  onPressed: () { Navigator.pop(context); context.go('/landlord-dashboard'); },
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.mutedGold, foregroundColor: AppColors.structuralBrown, padding: const EdgeInsets.symmetric(vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+                  child: const Text('GO TO DASHBOARD', style: TextStyle(fontWeight: FontWeight.w900)),
                 ),
               ),
             ],

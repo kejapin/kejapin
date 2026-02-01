@@ -132,4 +132,20 @@ class ListingsRepository {
       return [];
     }
   }
+
+  Future<void> createListing(Map<String, dynamic> data) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) throw Exception('Must be logged in to create listings');
+
+    try {
+      await _supabase.from('properties').insert({
+        ...data,
+        'owner_id': userId,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      print('Error creating listing: $e');
+      throw Exception('Failed to create listing: $e');
+    }
+  }
 }

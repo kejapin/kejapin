@@ -21,48 +21,60 @@ class KejaStateView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildIcon(),
-          const SizedBox(height: 24),
-          if (title != null)
-            Text(
-              title!.toUpperCase(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 18,
-                letterSpacing: 2,
-                color: AppColors.structuralBrown,
-              ),
-            ),
-          if (message != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              message!,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.structuralBrown.withOpacity(0.6),
-              ),
-            ),
-          ],
-          if (onRetry != null && type == KejaStateType.error) ...[
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildIcon(),
             const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: onRetry,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.structuralBrown,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            if (title != null)
+              Text(
+                title!.toUpperCase(),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
+                  letterSpacing: 2,
+                  color: AppColors.structuralBrown,
+                ),
               ),
-              child: const Text("RETRY ACTION"),
-            ),
+            if (message != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                message!,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.structuralBrown.withOpacity(0.6),
+                ),
+              ),
+            ],
+            if (onRetry != null && type == KejaStateType.error) ...[
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: onRetry,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.structuralBrown,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                ),
+                child: const Text("RETRY ACTION", style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "Report persistent issues to:",
+                style: TextStyle(fontSize: 10, color: AppColors.structuralBrown.withOpacity(0.4)),
+              ),
+              Text(
+                "kejapinmail@gmail.com",
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.structuralBrown.withOpacity(0.7)),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -104,6 +116,28 @@ extension KejaStateOverlay on BuildContext {
               ),
             ],
           ],
+        ),
+      ),
+    );
+  }
+
+  void showErrorDialog({String? message, VoidCallback? onRetry}) {
+    showDialog(
+      context: this,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: KejaStateView(
+            type: KejaStateType.error,
+            title: "System Hitch",
+            message: message ?? "We encountered an unexpected error.",
+            onRetry: () {
+              Navigator.pop(context);
+              onRetry?.call();
+            },
+          ),
         ),
       ),
     );

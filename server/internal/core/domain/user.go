@@ -31,6 +31,11 @@ type User struct {
 	LastLogin      *time.Time `json:"last_login"`
 	VStatus        string     `gorm:"type:varchar(20);default:'PENDING'" json:"v_status"`
 	AppAttempts    int        `gorm:"default:0" json:"app_attempts"`
+	NationalID     string     `json:"national_id"`
+	KRAPin         string     `json:"kra_pin"`
+	BusinessRole   string     `json:"business_role"` // OWNER, AGENT, CARETAKER
+	PayoutMethod   string     `json:"payout_method"` // MPESA, BANK
+	PayoutDetails  string     `json:"payout_details"`
 	CompanyName    string     `json:"company_name"`
 	CompanyBio     string     `json:"company_bio"`
 	BrandColor     string     `json:"brand_color"`

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:convert';
 import '../domain/listing_entity.dart';
 
 class ListingModel extends ListingEntity {
@@ -63,8 +64,17 @@ class ListingModel extends ListingEntity {
       return [];
     }
 
-    // Parse infrastructure stats from JSONB
-    final infraData = json['efficiency_stats'] as Map<String, dynamic>? ?? {};
+    // Parse infrastructure stats from JSONB or String
+    Map<String, dynamic> infraData = {};
+    final rawInfra = json['efficiency_stats'];
+    if (rawInfra is Map<String, dynamic>) {
+      infraData = rawInfra;
+    } else if (rawInfra is String && rawInfra.isNotEmpty) {
+      try {
+        infraData = jsonDecode(rawInfra) as Map<String, dynamic>;
+      } catch (_) {}
+    }
+
     final Map<String, double> infraStats = infraData.map(
       (key, value) => MapEntry(key, (value as num).toDouble()),
     );

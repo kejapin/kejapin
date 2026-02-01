@@ -12,6 +12,7 @@ import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/services/navigation_service.dart';
 import '../../../profile/data/life_pin_repository.dart';
 import '../../../profile/domain/life_pin_model.dart';
+import '../../../../core/widgets/smart_dashboard_panel.dart';
 import '../../../search/data/models/search_result.dart';
 import 'package:client/features/messages/data/notifications_repository.dart';
 import 'package:glassmorphism/glassmorphism.dart';
@@ -271,6 +272,7 @@ class _LifePinsScreenState extends State<LifePinsScreen> with TickerProviderStat
               ],
             ),
           ),
+          const SmartDashboardPanel(currentRoute: '/life-pins'),
         ],
       ),
       floatingActionButton: Padding(

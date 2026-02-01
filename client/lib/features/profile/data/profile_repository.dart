@@ -16,6 +16,12 @@ class UserProfile {
   final String? companyName;
   final String? companyBio;
   final String? brandColor;
+  final String? nationalId;
+  final String? kraPin;
+  final String? businessRole;
+  final String? payoutMethod;
+  final String? payoutDetails;
+  final String? phoneNumber;
 
   UserProfile({
     required this.id,
@@ -30,11 +36,17 @@ class UserProfile {
     this.companyName,
     this.companyBio,
     this.brandColor,
+    this.nationalId,
+    this.kraPin,
+    this.businessRole,
+    this.payoutMethod,
+    this.payoutDetails,
+    this.phoneNumber,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
-      id: json['id'],
+      id: json['id'] ?? '',
       email: json['email'] ?? '',
       firstName: json['first_name'] ?? '',
       lastName: json['last_name'] ?? '',
@@ -46,6 +58,12 @@ class UserProfile {
       companyName: json['company_name'],
       companyBio: json['company_bio'],
       brandColor: json['brand_color'],
+      nationalId: json['national_id'],
+      kraPin: json['kra_pin'],
+      businessRole: json['business_role'],
+      payoutMethod: json['payout_method'],
+      payoutDetails: json['payout_details'],
+      phoneNumber: json['phone_number'],
     );
   }
 }
@@ -115,6 +133,12 @@ class ProfileRepository {
     required Map<String, dynamic> documents,
     String? companyName,
     String? companyBio,
+    String? nationalId,
+    String? kraPin,
+    String? businessRole,
+    String? payoutMethod,
+    String? payoutDetails,
+    String? phoneNumber,
   }) async {
     final user = _supabase.auth.currentUser;
     if (user == null) throw Exception('User not logged in');
@@ -130,6 +154,12 @@ class ProfileRepository {
           'documents': json.encode(documents),
           'company_name': companyName,
           'company_bio': companyBio,
+          'national_id': nationalId,
+          'kra_pin': kraPin,
+          'business_role': businessRole,
+          'payout_method': payoutMethod,
+          'payout_details': payoutDetails,
+          'phone_number': phoneNumber,
         }),
       );
 
