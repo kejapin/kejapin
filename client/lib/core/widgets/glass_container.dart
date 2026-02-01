@@ -10,6 +10,8 @@ class GlassContainer extends StatelessWidget {
   final BoxConstraints? constraints;
   final Color color;
   final Color? borderColor;
+  final double? width;
+  final double? height;
 
   const GlassContainer({
     super.key,
@@ -21,6 +23,8 @@ class GlassContainer extends StatelessWidget {
     this.borderRadius,
     this.padding,
     this.constraints,
+    this.width,
+    this.height,
   });
 
   @override
@@ -30,6 +34,8 @@ class GlassContainer extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
         child: Container(
+          width: width,
+          height: height,
           constraints: constraints,
           padding: padding,
           decoration: BoxDecoration(

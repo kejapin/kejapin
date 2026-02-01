@@ -27,7 +27,13 @@ type User struct {
 	ProfilePicture string     `json:"profile_picture"`
 	IsPremium      bool       `gorm:"default:false" json:"is_premium"`
 	IsVerified     bool       `gorm:"default:false" json:"is_verified"`
+	FcmToken       string     `json:"fcm_token"`
 	LastLogin      *time.Time `json:"last_login"`
+	VStatus        string     `gorm:"type:varchar(20);default:'PENDING'" json:"v_status"`
+	AppAttempts    int        `gorm:"default:0" json:"app_attempts"`
+	CompanyName    string     `json:"company_name"`
+	CompanyBio     string     `json:"company_bio"`
+	BrandColor     string     `json:"brand_color"`
 	CreatedAt      time.Time  `json:"created_at"`
 	UpdatedAt      time.Time  `json:"updated_at"`
 }

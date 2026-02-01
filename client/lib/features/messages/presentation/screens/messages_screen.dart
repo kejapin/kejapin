@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
@@ -14,34 +15,6 @@ class MessagesScreen extends StatefulWidget {
 
 class _MessagesScreenState extends State<MessagesScreen> {
   final MessagesRepository _repository = MessagesRepository();
-  List<MessageEntity> _conversations = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadMessages();
-  }
-
-  Future<void> _loadMessages() async {
-    setState(() => _isLoading = true);
-    final messages = await _repository.fetchMessages();
-    
-    // Group by conversation (otherUserId) and keep only the latest message
-    final Map<String, MessageEntity> latestMessages = {};
-    for (var msg in messages) {
-        // Create a unique key for conversation, e.g., combine user and property or just user
-        // For simple chat, just otherUserId is usually enough.
-        if (!latestMessages.containsKey(msg.otherUserId)) {
-            latestMessages[msg.otherUserId] = msg;
-        }
-    }
-    
-    setState(() {
-      _conversations = latestMessages.values.toList();
-      _isLoading = false;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,46 +47,73 @@ class _MessagesScreenState extends State<MessagesScreen> {
           
           // Messages List
           Expanded(
-            child: _isLoading 
-                ? const Center(child: CircularProgressIndicator(color: AppColors.structuralBrown))
-                : _conversations.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[300]),
-                            const SizedBox(height: 16),
-                            Text(
-                              "No messages yet",
-                              style: GoogleFonts.workSans(
-                                fontSize: 18,
-                                color: Colors.grey[400],
-                                fontWeight: FontWeight.w600
-                              ),
-                            ),
-                          ],
+            child: StreamBuilder<List<MessageEntity>>(
+              stream: _repository.getMessagesStream(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator(color: AppColors.structuralBrown));
+                }
+
+                final messages = snapshot.data ?? [];
+                
+                // Group by conversation (otherUserId) and keep only the latest message
+                final Map<String, MessageEntity> latestMessages = {};
+                for (var msg in messages) {
+                    if (!latestMessages.containsKey(msg.otherUserId)) {
+                        latestMessages[msg.otherUserId] = msg;
+                    }
+                }
+                final conversations = latestMessages.values.toList();
+
+                if (conversations.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[300]),
+                        const SizedBox(height: 16),
+                        Text(
+                          "No messages yet",
+                          style: GoogleFonts.workSans(
+                            fontSize: 18,
+                            color: Colors.grey[400],
+                            fontWeight: FontWeight.w600
+                          ),
                         ),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: _conversations.length,
-                        separatorBuilder: (context, index) => const SizedBox(height: 8),
-                        itemBuilder: (context, index) {
-                          final msg = _conversations[index];
-                          // Format time logic could be better (e.g. today/yesterday)
-                          final timeStr = "${msg.createdAt.hour}:${msg.createdAt.minute.toString().padLeft(2, '0')}";
-                          
-                          return _buildMessageTile(
-                            name: msg.otherUserName,
-                            time: timeStr,
-                            property: msg.propertyTitle ?? 'General Inquiry',
-                            message: msg.content,
-                            avatarUrl: msg.otherUserAvatar,
-                            initials: msg.otherUserName.isNotEmpty ? msg.otherUserName[0] : '?',
-                            isUnread: !msg.isRead, // Need to check if I am the recipient to count as unread
-                          );
-                        },
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: conversations.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final msg = conversations[index];
+                    final timeStr = "${msg.createdAt.hour}:${msg.createdAt.minute.toString().padLeft(2, '0')}";
+                    
+                    return GestureDetector(
+                      onTap: () => context.push('/chat', extra: {
+                        'otherUserId': msg.otherUserId,
+                        'otherUserName': msg.otherUserName,
+                        'avatarUrl': msg.otherUserAvatar,
+                        'propertyTitle': msg.propertyTitle,
+                      }),
+                      child: _buildMessageTile(
+                        name: msg.otherUserName,
+                        time: timeStr,
+                        property: msg.propertyTitle ?? 'General Inquiry',
+                        message: msg.content,
+                        avatarUrl: msg.otherUserAvatar,
+                        initials: msg.otherUserName.isNotEmpty ? msg.otherUserName[0] : '?',
+                        isUnread: !msg.isRead,
                       ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),

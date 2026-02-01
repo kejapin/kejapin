@@ -7,6 +7,7 @@ class NotificationEntity {
   final String type;
   final bool isRead;
   final DateTime createdAt;
+  final String? route;
 
   NotificationEntity({
     required this.id,
@@ -15,6 +16,7 @@ class NotificationEntity {
     required this.type,
     required this.isRead,
     required this.createdAt,
+    this.route,
   });
 
   factory NotificationEntity.fromJson(Map<String, dynamic> json) {
@@ -25,12 +27,36 @@ class NotificationEntity {
       type: json['type'],
       isRead: json['is_read'],
       createdAt: DateTime.parse(json['created_at']),
+      route: json['route'],
     );
   }
 }
 
 class NotificationsRepository {
   final SupabaseClient _supabase = Supabase.instance.client;
+
+  Future<void> createNotification({
+    required String title,
+    required String message,
+    required String type,
+    String? route,
+  }) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    try {
+      await _supabase.from('notifications').insert({
+        'user_id': userId,
+        'title': title,
+        'message': message,
+        'type': type,
+        'route': route,
+        'is_read': false,
+      });
+    } catch (e) {
+      print('Error creating notification: $e');
+    }
+  }
 
   Future<List<NotificationEntity>> fetchNotifications() async {
     final userId = _supabase.auth.currentUser?.id;
@@ -49,6 +75,22 @@ class NotificationsRepository {
       print('Error fetching notifications: $e');
       return [];
     }
+  }
+
+  Stream<List<NotificationEntity>> getNotificationsStream() {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return Stream.value([]);
+
+    return _supabase
+        .from('notifications')
+        .stream(primaryKey: ['id'])
+        .map((data) {
+          return data
+              .where((n) => n['user_id'] == userId)
+              .map((json) => NotificationEntity.fromJson(json))
+              .toList()
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        });
   }
 
   Future<void> markAsRead(String id) async {

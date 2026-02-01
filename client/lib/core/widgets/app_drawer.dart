@@ -4,6 +4,7 @@ import 'animated_map_background.dart';
 import 'package:go_router/go_router.dart';
 import '../constants/app_colors.dart';
 import '../../features/auth/data/auth_repository.dart';
+import '../../features/profile/data/profile_repository.dart';
 import 'glass_container.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -72,59 +73,102 @@ class AppDrawer extends StatelessWidget {
                   Divider(color: AppColors.champagne.withOpacity(0.1), height: 1),
                   const SizedBox(height: 16),
                   // Menu Items
+                  // Menu Items
                   Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      children: [
-                        _DrawerItem(
-                          icon: Icons.explore_outlined,
-                          title: 'Marketplace',
-                          onTap: () {
-                            Navigator.pop(context);
-                            context.go('/marketplace');
-                          },
-                        ),
-                        _DrawerItem(
-                          icon: Icons.pin_drop_outlined,
-                          title: 'Life Pins',
-                          onTap: () {
-                            Navigator.pop(context);
-                            context.go('/life-pins');
-                          },
-                        ),
-                        _DrawerItem(
-                          icon: Icons.favorite_outline,
-                          title: 'Saved',
-                          onTap: () {
-                            Navigator.pop(context);
-                            context.go('/saved');
-                          },
-                        ),
-                        _DrawerItem(
-                          icon: Icons.message_outlined,
-                          title: 'Messages',
-                          onTap: () {
-                            Navigator.pop(context);
-                            context.go('/messages');
-                          },
-                        ),
-                        _DrawerItem(
-                          icon: Icons.person_outline,
-                          title: 'Profile',
-                          onTap: () {
-                            Navigator.pop(context);
-                            context.go('/profile');
-                          },
-                        ),
-                        _DrawerItem(
-                          icon: Icons.settings_outlined,
-                          title: 'Settings',
-                          onTap: () {
-                            Navigator.pop(context);
-                            context.go('/settings');
-                          },
-                        ),
-                      ],
+                    child: FutureBuilder(
+                      future: ProfileRepository().getProfile(),
+                      builder: (context, snapshot) {
+                        final profile = snapshot.data;
+                        final String role = profile?.role ?? 'TENANT';
+                        final String email = profile?.email ?? '';
+                        final isAdmin = email == 'kejapinmail@gmail.com';
+
+                        return ListView(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          children: [
+                            _DrawerItem(
+                              icon: Icons.explore_outlined,
+                              title: 'Marketplace',
+                              onTap: () {
+                                Navigator.pop(context);
+                                context.go('/marketplace');
+                              },
+                            ),
+                            // Tenant Dashboard (Life-Hub)
+                            _DrawerItem(
+                              icon: Icons.dashboard_customize_outlined,
+                              title: 'My Life-Hub',
+                              onTap: () {
+                                Navigator.pop(context);
+                                context.go('/tenant-dashboard');
+                              },
+                            ),
+                            // Landlord/Agent Dashboard
+                            if (role == 'LANDLORD' || role == 'AGENT' || isAdmin)
+                              _DrawerItem(
+                                icon: Icons.business_center_outlined,
+                                title: 'Partner Portal',
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  context.go('/landlord-dashboard');
+                                },
+                              ),
+                            // Admin Dashboard
+                            if (isAdmin)
+                              _DrawerItem(
+                                icon: Icons.admin_panel_settings_outlined,
+                                title: 'REWARD Admin',
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  context.go('/admin-dashboard');
+                                },
+                              ),
+                            // Apply to be Landlord
+                            if (role == 'TENANT' && !isAdmin)
+                              _DrawerItem(
+                                icon: Icons.verified_user_outlined,
+                                title: 'Become a Partner',
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  context.go('/apply-landlord');
+                                },
+                              ),
+                            const Divider(color: Colors.white10),
+                            _DrawerItem(
+                              icon: Icons.pin_drop_outlined,
+                              title: 'Life Pins',
+                              onTap: () {
+                                Navigator.pop(context);
+                                context.go('/life-pins');
+                              },
+                            ),
+                            _DrawerItem(
+                              icon: Icons.favorite_outline,
+                              title: 'Saved',
+                              onTap: () {
+                                Navigator.pop(context);
+                                context.go('/saved');
+                              },
+                            ),
+                            _DrawerItem(
+                              icon: Icons.message_outlined,
+                              title: 'Messages',
+                              onTap: () {
+                                Navigator.pop(context);
+                                context.go('/messages');
+                              },
+                            ),
+                            _DrawerItem(
+                              icon: Icons.person_outline,
+                              title: 'Profile',
+                              onTap: () {
+                                Navigator.pop(context);
+                                context.go('/profile');
+                              },
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                   // Logout Button at bottom

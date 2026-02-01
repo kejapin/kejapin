@@ -11,7 +11,7 @@ class ListingsRepository {
     Map<String, dynamic>? filters,
   }) async {
     try {
-      var query = _supabase.from('properties').select();
+      var query = _supabase.from('properties').select('*, owner:owner_id(first_name, last_name, profile_picture)');
 
       // Apply initial filters
       if (propertyType != null && propertyType != 'All') {
@@ -44,11 +44,25 @@ class ListingsRepository {
     }
   }
 
+  Stream<List<ListingEntity>> getListingsStream() {
+    return _supabase
+        .from('properties')
+        .stream(primaryKey: ['id'])
+        .map((data) {
+          final List<ListingEntity> listings = data
+              .map((json) => ListingModel.fromJson(json))
+              .toList();
+          
+          listings.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return listings;
+        });
+  }
+
   Future<ListingEntity> fetchListingById(String id) async {
     try {
       final response = await _supabase
           .from('properties')
-          .select()
+          .select('*, owner:owner_id(first_name, last_name, profile_picture)')
           .eq('id', id)
           .single();
       
@@ -105,7 +119,7 @@ class ListingsRepository {
     try {
       final response = await _supabase
           .from('saved_listings')
-          .select('properties(*)')
+          .select('properties(*, owner:owner_id(first_name, last_name, profile_picture))')
           .eq('user_id', userId);
       
       final data = response as List<dynamic>;

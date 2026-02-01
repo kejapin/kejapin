@@ -6,6 +6,7 @@ import 'package:mesh_gradient/mesh_gradient.dart';
 import '../data/auth_repository.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/glass_container.dart';
+import 'package:client/features/messages/data/notifications_repository.dart';
 import 'widgets/password_strength_indicator.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -31,11 +32,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
       setState(() => _isLoading = true);
       try {
         // Defaulting to TENANT role for now, can be expanded later
-        await _authRepository.register(
+        final response = await _authRepository.register(
           _emailController.text,
           _passwordController.text,
           'TENANT', 
         );
+        
+        // If user is immediately signed in, create welcome notification
+        if (response.user != null) {
+          await NotificationsRepository().createNotification(
+            title: 'Welcome to Kejapin! ✨',
+            message: 'Your journey to finding the perfect home starts here. "Pin" your first listing to see the magic!',
+            type: 'WELCOME',
+          );
+        }
         if (mounted) {
           context.push('/verify-email-pending?email=${_emailController.text}');
         }

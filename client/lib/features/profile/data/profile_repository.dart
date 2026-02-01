@@ -8,6 +8,11 @@ class UserProfile {
   final String role;
   final String? profilePicture;
   final bool isVerified;
+  final String vStatus;
+  final int appAttempts;
+  final String? companyName;
+  final String? companyBio;
+  final String? brandColor;
 
   UserProfile({
     required this.id,
@@ -17,6 +22,11 @@ class UserProfile {
     required this.role,
     this.profilePicture,
     this.isVerified = false,
+    this.vStatus = 'PENDING',
+    this.appAttempts = 0,
+    this.companyName,
+    this.companyBio,
+    this.brandColor,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -28,6 +38,11 @@ class UserProfile {
       role: json['role'] ?? 'TENANT',
       profilePicture: json['profile_picture'],
       isVerified: json['is_verified'] ?? false,
+      vStatus: json['v_status'] ?? 'PENDING',
+      appAttempts: json['app_attempts'] ?? 0,
+      companyName: json['company_name'],
+      companyBio: json['company_bio'],
+      brandColor: json['brand_color'],
     );
   }
 }
@@ -73,6 +88,36 @@ class ProfileRepository {
     } catch (e) {
       print('Error updating profile: $e');
       throw Exception('Failed to update profile');
+    }
+  }
+
+  Future<void> submitLandlordApplication({
+    required Map<String, dynamic> documents,
+    String? companyName,
+    String? companyBio,
+  }) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception('User not logged in');
+
+    try {
+      // 1. Create Application Record
+      await _supabase.from('role_applications').insert({
+        'user_id': user.id,
+        'documents': documents,
+        'status': 'PENDING',
+      });
+
+      // 2. Auto-Approve Role (Transition to LANDLORD immediately as requested)
+      await _supabase.from('users').update({
+        'role': 'LANDLORD',
+        'v_status': 'PENDING', // Admin still needs to review later
+        'company_name': companyName,
+        'company_bio': companyBio,
+      }).eq('id', user.id);
+      
+    } catch (e) {
+      print('Error submitting application: $e');
+      throw Exception('Failed to submit application');
     }
   }
 }

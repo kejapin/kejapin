@@ -20,7 +20,7 @@ func main() {
 
 	// Auto Migrate with logging
 	log.Println("Starting database migrations...")
-	err := cfg.DB.AutoMigrate(&domain.User{}, &domain.Property{}, &domain.Message{}, &domain.Notification{}, &domain.LifePin{})
+	err := cfg.DB.AutoMigrate(&domain.User{}, &domain.Property{}, &domain.Message{}, &domain.Notification{}, &domain.LifePin{}, &domain.RoleApplication{})
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}

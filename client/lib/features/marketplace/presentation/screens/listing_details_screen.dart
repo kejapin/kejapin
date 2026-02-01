@@ -1,4 +1,6 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart' as gf;
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart'; // Ensure flutter_map is used for detailed view
@@ -13,6 +15,8 @@ import '../../../profile/domain/life_pin_model.dart';
 import '../../data/listings_repository.dart';
 import '../../domain/listing_entity.dart';
 import '../../../search/data/models/search_result.dart';
+import '../../../../core/services/efficiency_service.dart';
+import 'package:client/features/messages/data/notifications_repository.dart';
 
 class ListingDetailsScreen extends StatefulWidget {
   final String id;
@@ -33,6 +37,7 @@ class ListingDetailsScreen extends StatefulWidget {
 class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   final ListingsRepository _listingsRepo = ListingsRepository();
   final LifePinRepository _lifePinRepo = LifePinRepository();
+  final NotificationsRepository _notificationsRepo = NotificationsRepository();
   final CommuteService _commuteService = CommuteService();
   final NavigationService _navService = NavigationService();
   final MapController _mapController = MapController();
@@ -42,6 +47,8 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   final Map<String, CommuteResult> _commuteResults = {};
   
   late bool _showMap;
+  bool _isSaved = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -50,6 +57,55 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
     _listingFuture = _listingsRepo.fetchListingById(widget.id);
     _lifePinsFuture = _lifePinRepo.getLifePins();
     _calculateCommutes();
+    _checkSavedStatus();
+  }
+
+  Future<void> _checkSavedStatus() async {
+    try {
+      final isSaved = await _listingsRepo.isListingSaved(widget.id);
+      if (mounted) {
+        setState(() => _isSaved = isSaved);
+      }
+    } catch (e) {
+      debugPrint("Error checking saved status: $e");
+    }
+  }
+
+  Future<void> _toggleSave() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+    try {
+      await _listingsRepo.toggleSaveListing(widget.id, _isSaved);
+      if (mounted) {
+        setState(() {
+          _isSaved = !_isSaved;
+          _isSaving = false;
+        });
+        if (_isSaved) {
+           _notificationsRepo.createNotification(
+             title: 'Property Pinned! 📍',
+             message: 'Selected property added to your life-path.',
+             type: 'FAVORITE',
+             route: '/saved',
+           );
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_isSaved ? 'Property pinned to your life-path!' : 'Property unpinned.'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppColors.structuralBrown,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _calculateCommutes() async {
@@ -110,10 +166,12 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                                 const SizedBox(height: 24),
                                 _buildCommuteSection(lifePins),
                                 const SizedBox(height: 24),
+                                _buildEfficiencySection(listing),
+                                const SizedBox(height: 24),
                                 _buildDescriptionSection(listing),
                                 const SizedBox(height: 24),
                                 _buildAmenitiesSection(listing),
-                                const SizedBox(height: 80), // Space for bottom action bar
+                                const SizedBox(height: 20), // Extra padding for bottom list item
                               ],
                             ),
                           ),
@@ -121,9 +179,10 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                       ),
                     ),
                   ),
+                  _buildBottomBar(listing),
                 ],
               ),
-              // Floating Toggle Button
+              // Floating Toggle Button moved into Stack correctly if needed, or keep in header
               Positioned(
                  top: 16,
                  left: 0, 
@@ -167,15 +226,19 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
           );
         },
       ),
-      bottomSheet: _buildBottomBar(),
     );
   }
 
   Widget _buildHeader(ListingEntity listing, List<LifePin> lifePins) {
     if (_showMap) {
-      return SizedBox(
-        height: 400,
-        child: FlutterMap(
+      return ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(32),
+          topRight: Radius.circular(32),
+        ),
+        child: SizedBox(
+          height: 400,
+          child: FlutterMap(
           mapController: _mapController,
           options: MapOptions(
             initialCenter: LatLng(listing.latitude, listing.longitude),
@@ -232,53 +295,129 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                   height: 40,
                   child: const Icon(Icons.location_on, color: AppColors.brickRed, size: 40),
                 ),
+                // 10 Category Neural Visualization
+                ...EfficiencyService().calculateScore(listing).categories.entries.map((entry) {
+                   final offset = _getCategoryOffset(entry.key);
+                   return Marker(
+                     point: LatLng(listing.latitude + offset.latitude, listing.longitude + offset.longitude),
+                     width: 28,
+                     height: 28,
+                     child: Container(
+                       decoration: BoxDecoration(
+                         color: _getCategoryColor(entry.key, entry.value),
+                         shape: BoxShape.circle,
+                         border: Border.all(color: Colors.white, width: 2),
+                         boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                       ),
+                       child: Icon(_getEfficiencyIcon(entry.key), color: Colors.white, size: 12),
+                     ),
+                   );
+                }),
                 // Life Pins Markers
                 ...lifePins.map((pin) => Marker(
                   point: LatLng(pin.latitude, pin.longitude),
-                  width: 30,
-                  height: 30,
+                  width: 34,
+                  height: 34,
                   child: Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppColors.structuralBrown,
                       shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                      boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
                     ),
                     child: Icon(_getIconForMode(pin.transportMode), color: Colors.white, size: 16),
                   ),
                 )),
               ],
             ),
+            PolylineLayer(
+              polylines: [
+                ...EfficiencyService().calculateScore(listing).categories.entries.map((entry) {
+                  final offset = _getCategoryOffset(entry.key);
+                  return Polyline(
+                    points: [
+                      LatLng(listing.latitude, listing.longitude),
+                      LatLng(listing.latitude + offset.latitude, listing.longitude + offset.longitude),
+                    ],
+                    strokeWidth: 2,
+                    color: _getCategoryColor(entry.key, entry.value).withOpacity(0.4),
+                  );
+                }),
+              ],
+            ),
           ],
         ),
-      );
-    }
+      ),
+    );
+  }
   
     // Image View
-    return Container(
-      height: 350,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        image: listing.photos.isNotEmpty
-            ? DecorationImage(
-                image: NetworkImage(listing.photos[0]),
-                fit: BoxFit.cover,
-              )
-            : null,
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(32),
+        topRight: Radius.circular(32),
       ),
       child: Stack(
         children: [
-          Positioned(
-            top: 16,
-            right: 16,
-            child: FloatingActionButton.small(
-              onPressed: () {},
-              backgroundColor: Colors.white,
-              child: const Icon(Icons.favorite_border, color: AppColors.structuralBrown),
+        Container(
+          height: 350,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            image: listing.photos.isNotEmpty
+                ? DecorationImage(
+                    image: NetworkImage(listing.photos[0]),
+                    fit: BoxFit.cover,
+                  )
+                : null,
+          ),
+        ),
+        Positioned(
+          top: 16,
+          right: 16,
+          child: GestureDetector(
+            onTap: _toggleSave,
+            child: GlassContainer(
+              padding: const EdgeInsets.all(10),
+              borderRadius: BorderRadius.circular(30),
+              color: Colors.white,
+              opacity: 0.9,
+              blur: 10,
+              child: _isSaving 
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.structuralBrown))
+                : Icon(
+                    _isSaved ? Icons.favorite : Icons.favorite_border,
+                    color: _isSaved ? AppColors.brickRed : AppColors.structuralBrown,
+                    size: 24,
+                  ),
             ),
           ),
-        ],
-      ),
-    );
+        ),
+      ],
+    ),
+  );
+}
+
+  LatLng _getCategoryOffset(String category) {
+    switch (category) {
+      case 'Life-Path Fit': return const LatLng(0.005, 0.003);
+      case 'Stage Radar': return const LatLng(-0.004, -0.005);
+      case 'Network Strength': return const LatLng(0.007, -0.002);
+      case 'Water Reliability': return const LatLng(-0.006, 0.008);
+      case 'Power Stability': return const LatLng(0.003, -0.009);
+      case 'Security': return const LatLng(-0.003, 0.004);
+      case 'Retail Density': return const LatLng(0.009, 0.006);
+      case 'Healthcare': return const LatLng(-0.008, -0.004);
+      case 'Wellness': return const LatLng(0.004, 0.008);
+      case 'Vibe Match': return const LatLng(-0.002, -0.008);
+      default: return const LatLng(0, 0);
+    }
+  }
+
+  Color _getCategoryColor(String key, double val) {
+    if (val > 0.8) return AppColors.sageGreen;
+    if (val > 0.5) return AppColors.mutedGold;
+    return AppColors.brickRed.withOpacity(0.6);
   }
 
   Widget _buildTitleSection(ListingEntity listing) {
@@ -324,23 +463,26 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
         const SizedBox(height: 16),
         Row(
           children: [
+            _buildIconInfo(Icons.star, '${listing.rating} (${listing.reviewCount} reviews)', color: AppColors.mutedGold),
+            const SizedBox(width: 20),
             _buildIconInfo(Icons.king_bed, '${listing.bedrooms} Beds'),
             const SizedBox(width: 20),
             _buildIconInfo(Icons.bathtub, '${listing.bathrooms} Baths'),
             const SizedBox(width: 20),
-            _buildIconInfo(Icons.square_foot, '1,200 sqft'),
+            if (listing.sqft != null)
+              _buildIconInfo(Icons.square_foot, '${listing.sqft} sqft'),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildIconInfo(IconData icon, String text) {
+  Widget _buildIconInfo(IconData icon, String text, {Color? color}) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: AppColors.structuralBrown),
+        Icon(icon, size: 20, color: color ?? AppColors.structuralBrown),
         const SizedBox(width: 6),
-        Text(text, style: const TextStyle(fontWeight: FontWeight.w500)),
+        Text(text, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
       ],
     );
   }
@@ -392,16 +534,18 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                           ],
                         ),
                         const Spacer(),
-                        if (commute != null) ...[
-                          Text(
-                            commute.formattedDuration,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.structuralBrown),
-                          ),
-                          Text(
-                            commute.formattedDistance,
-                            style: const TextStyle(fontSize: 11, color: Colors.grey),
-                          ),
-                        ] else
+                        if (commute != null)
+                          ...[
+                            Text(
+                              commute.formattedDuration,
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.structuralBrown),
+                            ),
+                            Text(
+                              commute.formattedDistance,
+                              style: const TextStyle(fontSize: 11, color: Colors.grey),
+                            ),
+                          ]
+                        else
                           const Text('Calculating...', style: TextStyle(fontSize: 12, color: Colors.grey)),
                       ],
                     ),
@@ -409,6 +553,107 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                 ),
               );
             },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEfficiencySection(ListingEntity listing) {
+    final efficiency = EfficiencyService().calculateScore(listing);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Living Efficiency',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  efficiency.efficiencyLabel.toUpperCase(),
+                  style: gf.GoogleFonts.montserrat(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.mutedGold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.structuralBrown,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'Prop Score: ${efficiency.totalScore.toInt()}/100',
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        GlassContainer(
+          borderRadius: BorderRadius.circular(16),
+          blur: 10,
+          opacity: 0.05,
+          color: AppColors.structuralBrown,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            children: [
+              // Efficiency Pulse Chart Integration
+              _buildEfficiencySpectrum(efficiency),
+              const Divider(height: 32),
+              ...efficiency.categories.entries.map((entry) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            _getEfficiencyIcon(entry.key),
+                            size: 16,
+                            color: AppColors.structuralBrown.withOpacity(0.7),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              entry.key,
+                              style: gf.GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                          ),
+                          Text(
+                            '${(entry.value * 100).toInt()}%',
+                            style: gf.GoogleFonts.lato(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.structuralBrown),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: entry.value,
+                          backgroundColor: AppColors.structuralBrown.withOpacity(0.1),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            _getCategoryColor(entry.key, entry.value)
+                          ),
+                          minHeight: 6,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ],
           ),
         ),
       ],
@@ -461,7 +706,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
     );
   }
 
-  Widget _buildBottomBar() {
+  Widget _buildBottomBar(ListingEntity listing) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -474,7 +719,14 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () {},
+              onPressed: () {
+                context.push('/chat', extra: {
+                  'otherUserId': listing.ownerId,
+                  'otherUserName': listing.ownerName,
+                  'avatarUrl': listing.ownerAvatar,
+                  'propertyTitle': listing.title,
+                });
+              },
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 side: const BorderSide(color: AppColors.structuralBrown),
@@ -486,7 +738,15 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                 // Could be a specialized viewing request message
+                 context.push('/chat', extra: {
+                  'otherUserId': listing.ownerId,
+                  'otherUserName': listing.ownerName,
+                  'avatarUrl': listing.ownerAvatar,
+                  'propertyTitle': listing.title,
+                });
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.structuralBrown,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -513,5 +773,107 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
       default:
         return Icons.location_on;
     }
+  }
+
+  Widget _buildEfficiencySpectrum(EfficiencyScore efficiency) {
+    return Container(
+      height: 60,
+      width: double.infinity,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: efficiency.categories.values.toList().asMap().entries.map((entry) {
+          return _PulseBar(
+            index: entry.key,
+            value: entry.value,
+            color: _getCategoryColor('', entry.value),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  IconData _getEfficiencyIcon(String category) {
+    switch (category) {
+      case 'Life-Path Fit': return Icons.route;
+      case 'Stage Radar': return Icons.directions_bus;
+      case 'Network Strength': return Icons.wifi;
+      case 'Water Reliability': return Icons.water_drop;
+      case 'Power Stability': return Icons.bolt;
+      case 'Security': return Icons.security;
+      case 'Retail Density': return Icons.shopping_bag;
+      case 'Healthcare': return Icons.local_hospital;
+      case 'Wellness': return Icons.spa;
+      case 'Vibe Match': return Icons.celebration;
+      default: return Icons.star;
+    }
+  }
+}
+
+class _PulseBar extends StatefulWidget {
+  final int index;
+  final double value;
+  final Color color;
+
+  const _PulseBar({required this.index, required this.value, required this.color});
+
+  @override
+  State<_PulseBar> createState() => _PulseBarState();
+}
+
+class _PulseBarState extends State<_PulseBar> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  final Random _random = Random();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1500 + _random.nextInt(1000)),
+    );
+
+    _animation = Tween<double>(
+      begin: 0.85,
+      end: 1.15,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOutSine,
+    ));
+
+    Future.delayed(Duration(milliseconds: widget.index * 100), () {
+      if (mounted) _controller.repeat(reverse: true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Container(
+          width: 8,
+          height: (10 + (widget.value * 40)) * _animation.value,
+          decoration: BoxDecoration(
+            color: widget.color.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(4),
+            boxShadow: [
+              BoxShadow(
+                color: widget.color.withOpacity(0.3),
+                blurRadius: 10,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

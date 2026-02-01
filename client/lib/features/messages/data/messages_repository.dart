@@ -10,6 +10,7 @@ class MessageEntity {
   final String otherUserName;
   final String? otherUserAvatar;
   final String? propertyTitle;
+  final bool isMe;
 
   MessageEntity({
     required this.id,
@@ -20,6 +21,7 @@ class MessageEntity {
     required this.otherUserName,
     this.otherUserAvatar,
     this.propertyTitle,
+    required this.isMe,
   });
 
   factory MessageEntity.fromRecord(Map<String, dynamic> record, String currentUserId) {
@@ -29,7 +31,6 @@ class MessageEntity {
     final otherUser = isMe ? record['recipient'] : record['sender'];
     final property = record['property'];
     
-    // Handle cases where relations might be null (though schema says sender/recipient are not null)
     final otherMap = otherUser is Map ? otherUser : {};
     final firstName = otherMap['first_name'] ?? 'Unknown';
     final lastName = otherMap['last_name'] ?? 'User';
@@ -43,6 +44,7 @@ class MessageEntity {
       otherUserName: '$firstName $lastName',
       otherUserAvatar: otherMap['profile_picture'],
       propertyTitle: property != null ? property['title'] : null,
+      isMe: isMe,
     );
   }
 }
@@ -69,6 +71,42 @@ class MessagesRepository {
     }
   }
 
+  Stream<List<MessageEntity>> getMessagesStream() {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return Stream.value([]);
+
+    return _supabase
+        .from('messages')
+        .stream(primaryKey: ['id'])
+        .map((data) {
+          final userMessages = data.where((m) => 
+            m['sender_id'] == user.id || m['recipient_id'] == user.id
+          ).toList();
+
+          return userMessages.map((e) => MessageEntity.fromRecord(e, user.id)).toList()
+            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        });
+  }
+
+  /// Live stream for a specific conversation
+  Stream<List<MessageEntity>> getConversationStream(String otherUserId) {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return Stream.value([]);
+
+    return _supabase
+        .from('messages')
+        .stream(primaryKey: ['id'])
+        .map((data) {
+          final conversationMessages = data.where((m) => 
+            (m['sender_id'] == user.id && m['recipient_id'] == otherUserId) ||
+            (m['sender_id'] == otherUserId && m['recipient_id'] == user.id)
+          ).toList();
+
+          return conversationMessages.map((e) => MessageEntity.fromRecord(e, user.id)).toList()
+            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        });
+  }
+
   Future<void> sendMessage({
     required String recipientId,
     required String content,
@@ -83,5 +121,16 @@ class MessagesRepository {
       'content': content,
       'property_id': propertyId,
     });
+  }
+
+  Future<void> markConversationAsRead(String otherUserId) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    await _supabase
+        .from('messages')
+        .update({'is_read': true})
+        .eq('recipient_id', user.id)
+        .eq('sender_id', otherUserId);
   }
 }

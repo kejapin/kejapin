@@ -13,6 +13,7 @@ import '../../../../core/services/navigation_service.dart';
 import '../../../profile/data/life_pin_repository.dart';
 import '../../../profile/domain/life_pin_model.dart';
 import '../../../search/data/models/search_result.dart';
+import 'package:client/features/messages/data/notifications_repository.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -583,6 +584,12 @@ class _LifePinsScreenState extends State<LifePinsScreen> with TickerProviderStat
             try {
               await _repository.createLifePin(pin);
               _loadPins();
+              NotificationsRepository().createNotification(
+                title: 'Life Path Expanded! ⚡',
+                message: 'New pin "${pin.label}" added. Your efficiency scores are being recalibrated.',
+                type: 'EFFICIENCY',
+                route: '/life-pins',
+              );
               if (mounted) Navigator.pop(context);
             } catch (e) {
                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));

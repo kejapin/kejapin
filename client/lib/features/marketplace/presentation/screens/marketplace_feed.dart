@@ -270,7 +270,10 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                               delegate: SliverChildBuilderDelegate(
                                 (context, index) {
                                   final listing = state.listings[index];
-                                  return ListingCard(listing: listing);
+                                  return ListingCard(
+                                    listing: listing,
+                                    marketContext: state.listings,
+                                  );
                                 },
                                 childCount: state.listings.length,
                               ),

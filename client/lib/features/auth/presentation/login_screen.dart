@@ -6,6 +6,8 @@ import 'package:mesh_gradient/mesh_gradient.dart'; // Ensure you have this packa
 import '../data/auth_repository.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/glass_container.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:client/features/messages/data/notifications_repository.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,10 +29,34 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       try {
-        await _authRepository.login(
+        final response = await _authRepository.login(
           _emailController.text,
           _passwordController.text,
         );
+        
+        // Handle Welcome Notification on first ever login
+        if (response.user != null) {
+          final prefs = await SharedPreferences.getInstance();
+          final isFirstLogin = prefs.getBool('first_login_${response.user!.id}') ?? true;
+          
+          if (isFirstLogin) {
+            await NotificationsRepository().createNotification(
+              title: 'Welcome Back! ✨',
+              message: 'Great to see you again. Start pinning properties to your life-path to see your efficiency scores!',
+              type: 'WELCOME',
+            );
+            await prefs.setBool('first_login_${response.user!.id}', false);
+          } else {
+            // Regular Login Security Alert
+            await NotificationsRepository().createNotification(
+              title: 'New Sign-in Alert 🛡️',
+              message: 'A new login was detected for your account. If this wasn\'t you, please reset your password.',
+              type: 'SYSTEM',
+              route: '/profile',
+            );
+          }
+        }
+
         if (mounted) {
           context.go('/marketplace');
         }

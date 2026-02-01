@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'features/admin_features/presentation/screens/component_gallery_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/landing_page.dart';
@@ -13,6 +14,7 @@ import 'core/widgets/main_layout.dart';
 import 'features/tenant_dashboard/presentation/screens/life_pins_screen.dart';
 import 'features/messages/presentation/screens/messages_screen.dart';
 import 'features/messages/presentation/screens/notifications_screen.dart';
+import 'features/messages/presentation/screens/chat_screen.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
 import 'features/profile/presentation/screens/settings_screen.dart';
 import 'features/marketplace/presentation/screens/saved_listings_screen.dart';
@@ -26,11 +28,20 @@ import 'features/search/presentation/bloc/search_bloc.dart';
 import 'features/search/presentation/screens/map_screen.dart';
 import 'features/search/presentation/screens/all_results_screen.dart';
 import 'features/marketplace/presentation/screens/listing_details_screen.dart';
+import 'features/landlord_features/presentation/screens/create_listing_screen.dart';
+import 'features/landlord_features/presentation/screens/landlord_dashboard_screen.dart';
 import 'features/landlord_features/presentation/screens/landlord_details_screen.dart';
 import 'features/search/data/models/search_result.dart';
+import 'features/profile/presentation/screens/apply_landlord_screen.dart';
+import 'features/tenant_dashboard/presentation/screens/tenant_dashboard_screen.dart';
+import 'features/admin_features/presentation/screens/admin_dashboard_screen.dart';
 
+import 'features/tenant_dashboard/presentation/screens/property_review_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +50,15 @@ void main() async {
     url: 'https://jxdanbsfcjkuvrakvnoa.supabase.co',
     anonKey: 'sb_publishable_b7AgK9iw5qof-ZuBTDVyHg_FeNHRxox',
   );
+
+  // Initialize Firebase (Catch if not configured yet)
+  try {
+    await Firebase.initializeApp();
+    await NotificationService().initialize();
+  } catch (e) {
+    debugPrint("Firebase not initialized: $e");
+    debugPrint("Please run 'flutterfire configure' to set up notifications.");
+  }
 
   // Initialize SharedPreferences
   await SharedPreferences.getInstance();
@@ -157,11 +177,55 @@ final GoRouter _router = GoRouter(
           path: '/settings',
           builder: (context, state) => const SettingsScreen(),
         ),
+        GoRoute(
+          path: '/tenant-dashboard',
+          builder: (context, state) => const TenantDashboardScreen(),
+        ),
+        GoRoute(
+          path: '/landlord-dashboard',
+          builder: (context, state) => const LandlordDashboardScreen(),
+        ),
+        GoRoute(
+          path: '/create-listing',
+          builder: (context, state) => const CreateListingScreen(),
+        ),
+        GoRoute(
+          path: '/admin-dashboard',
+          builder: (context, state) => const AdminDashboardScreen(),
+        ),
+        GoRoute(
+          path: '/apply-landlord',
+          builder: (context, state) => const ApplyLandlordScreen(),
+        ),
+        GoRoute(
+          path: '/gallery',
+          builder: (context, state) => const ComponentGalleryScreen(),
+        ),
+        GoRoute(
+          path: '/review/:id',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            final name = state.uri.queryParameters['name'] ?? 'Property';
+            return PropertyReviewScreen(propertyId: id, propertyName: name);
+          },
+        ),
       ],
     ),
     GoRoute(
       path: '/notifications',
       builder: (context, state) => const NotificationsScreen(),
+    ),
+    GoRoute(
+      path: '/chat',
+      builder: (context, state) {
+        final extras = state.extra as Map<String, dynamic>;
+        return ChatScreen(
+          otherUserId: extras['otherUserId'],
+          otherUserName: extras['otherUserName'],
+          avatarUrl: extras['avatarUrl'],
+          propertyTitle: extras['propertyTitle'],
+        );
+      },
     ),
     // Search & Details Routes
     GoRoute(

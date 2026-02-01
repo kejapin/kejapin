@@ -2,12 +2,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ApiEndpoints {
   static String get baseUrl {
-    if (kIsWeb) {
-      // Web - use localhost
-      return 'http://localhost:8080/api';
-    }
-    // Mobile - use WiFi IP
-    return 'http://192.168.100.8:8080/api';
+    // Live Server on Render
+    return 'https://kejapin.onrender.com/api';
   }
 
   static String get login => '$baseUrl/auth/login';
