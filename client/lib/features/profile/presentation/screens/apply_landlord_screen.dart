@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -70,22 +71,7 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            backgroundColor: AppColors.structuralBrown,
-            title: const Text('Congratulations!', style: TextStyle(color: AppColors.champagne)),
-            content: const Text(
-              'Your application has been received and auto-approved. You are now a Landlord! Admin will review your documents shortly.',
-              style: TextStyle(color: AppColors.champagne),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  context.go('/marketplace');
-                },
-                child: const Text('Go to Dashboard', style: TextStyle(color: AppColors.mutedGold)),
-              ),
-            ],
-          ),
+          builder: (context) => const PartnerCongratulationsCard(),
         );
       }
     } catch (e) {
@@ -244,6 +230,113 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
                 const Text('Tap to capture', style: TextStyle(color: Colors.grey)),
               ],
             ),
+      ),
+    );
+  }
+}
+
+class PartnerCongratulationsCard extends StatelessWidget {
+  const PartnerCongratulationsCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+      child: FadeInUp(
+        duration: const Duration(milliseconds: 800),
+        child: GlassContainer(
+          padding: const EdgeInsets.all(32),
+          borderRadius: BorderRadius.circular(40),
+          color: AppColors.structuralBrown,
+          opacity: 0.98,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Animated Icon Ring
+              LoopAnimation(
+                duration: const Duration(seconds: 4),
+                builder: (ctx, val, child) {
+                  return Transform.rotate(
+                    angle: val * 2 * math.pi,
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.mutedGold.withOpacity(0.3 + (math.sin(val * math.pi) * 0.4)),
+                          width: 2,
+                        ),
+                      ),
+                      child: Transform.rotate(
+                        angle: -val * 2 * math.pi,
+                        child: child,
+                      ),
+                    ),
+                  );
+                },
+                child: const Icon(Icons.verified_user, color: AppColors.mutedGold, size: 60),
+              ),
+              const SizedBox(height: 32),
+              const Text(
+                'WELCOME PARTNER',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.champagne,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 3,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Your application has been auto-verified. You now have exclusive access to the Landlord Control Hub.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.champagne,
+                  fontSize: 14,
+                  height: 1.6,
+                ),
+              ),
+              const SizedBox(height: 40),
+              // Premium Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Close dialog and go to dashboard
+                    Navigator.of(context).pop();
+                    context.go('/landlord-dashboard');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.mutedGold,
+                    foregroundColor: AppColors.structuralBrown,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    elevation: 12,
+                    shadowColor: AppColors.mutedGold.withOpacity(0.5),
+                  ),
+                  child: const Text(
+                    'GO TO LANDLORD HUB',
+                    style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'NOT NOW',
+                  style: TextStyle(
+                    color: AppColors.champagne.withOpacity(0.5),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
