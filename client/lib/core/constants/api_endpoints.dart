@@ -15,4 +15,5 @@ class ApiEndpoints {
   static String get locationSearch => '$baseUrl/geo/search';
   static String get nearbyAmenities => '$baseUrl/geo/nearby';
   static String get lifePins => '$baseUrl/lifepins';
+  static String get verificationApply => '$baseUrl/verification/apply';
 }

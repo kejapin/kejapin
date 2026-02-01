@@ -1,4 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../../../../core/constants/api_endpoints.dart';
 
 class UserProfile {
   final String id;
@@ -100,20 +103,23 @@ class ProfileRepository {
     if (user == null) throw Exception('User not logged in');
 
     try {
-      // 1. Create Application Record
-      await _supabase.from('role_applications').insert({
-        'user_id': user.id,
-        'documents': documents,
-        'status': 'PENDING',
-      });
+      final response = await http.post(
+        Uri.parse(ApiEndpoints.verificationApply),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': user.id,
+        },
+        body: json.encode({
+          'documents': json.encode(documents),
+          'company_name': companyName,
+          'company_bio': companyBio,
+        }),
+      );
 
-      // 2. Auto-Approve Role (Transition to LANDLORD immediately as requested)
-      await _supabase.from('users').update({
-        'role': 'LANDLORD',
-        'v_status': 'PENDING', // Admin still needs to review later
-        'company_name': companyName,
-        'company_bio': companyBio,
-      }).eq('id', user.id);
+      if (response.statusCode != 200) {
+        final errorData = json.decode(response.body);
+        throw Exception(errorData['error'] ?? 'Server error');
+      }
       
     } catch (e) {
       print('DEBUG: ProfileRepository.submitLandlordApplication error: $e');

@@ -35,3 +35,11 @@ func (r *UserRepository) FindByID(id string) (*domain.User, error) {
 	}
 	return &user, nil
 }
+
+func (r *UserRepository) Update(user *domain.User) error {
+	return r.db.Save(user).Error
+}
+
+func (r *UserRepository) CreateApplication(app *domain.RoleApplication) error {
+	return r.db.Create(app).Error
+}

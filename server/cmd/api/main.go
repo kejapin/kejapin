@@ -48,6 +48,7 @@ func main() {
 	marketplaceHandler := handlers.NewMarketplaceHandler(marketplaceService)
 	messagingHandler := handlers.NewMessagingHandler(msgRepo, notifRepo)
 	geoHandler := handlers.NewGeoHandler(lifePinRepo, geoService)
+	verificationHandler := handlers.NewVerificationHandler(userRepo)
 
 	// Initialize Storage
 	b2Storage, err := storage.NewB2Storage()
@@ -111,6 +112,10 @@ func main() {
 	lifePins.Post("/", geoHandler.CreateLifePin)
 	lifePins.Get("/", geoHandler.GetLifePins)
 	lifePins.Delete("/:id", geoHandler.DeleteLifePin)
+
+	verification := api.Group("/verification")
+	verification.Use(authMiddleware)
+	verification.Post("/apply", verificationHandler.SubmitApplication)
 
 	log.Fatal(app.Listen(":8080"))
 }
