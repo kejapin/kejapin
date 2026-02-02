@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../widgets/glass_container.dart';
 import '../../features/search/presentation/widgets/universal_search_bar.dart';
+
 import '../../features/messages/data/notifications_repository.dart';
+import '../../features/profile/data/profile_repository.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../globals.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -37,6 +42,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _CustomAppBarState extends State<CustomAppBar> {
   bool _isSearchActive = false;
   final NotificationsRepository _notifRepo = NotificationsRepository();
+  final ProfileRepository _profileRepo = ProfileRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +142,43 @@ class _CustomAppBarState extends State<CustomAppBar> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: const Icon(Icons.person, color: AppColors.structuralBrown),
+                child: FutureBuilder<UserProfile>(
+                    future: _profileRepo.getProfile(),
+                    builder: (context, snapshot) {
+                        String? imageUrl;
+                        if (snapshot.hasData) {
+                             imageUrl = snapshot.data!.profilePicture;
+                        }
+                        
+                        // Fallback logic
+                        if (imageUrl == null || imageUrl.isEmpty) {
+                            final user = Supabase.instance.client.auth.currentUser;
+                            if (user != null) {
+                                final avatarUrl = user.userMetadata?['avatar_url'] ?? user.userMetadata?['picture'];
+                                if (avatarUrl != null) {
+                                    imageUrl = avatarUrl;
+                                }
+                            }
+                        }
+                        
+                        imageUrl ??= 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Technologist.png';
+
+                        if (imageUrl!.toLowerCase().endsWith('.svg')) {
+                            return SvgPicture.network(
+                                imageUrl,
+                                fit: BoxFit.cover,
+                                placeholderBuilder: (BuildContext context) => const Icon(Icons.person, size: 20, color: Colors.grey),
+                            );
+                        }
+
+                        return CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Icon(Icons.person, size: 20, color: Colors.grey),
+                            errorWidget: (context, url, error) => const Icon(Icons.person, size: 20, color: Colors.grey),
+                        );
+                    }
+                ),
               ),
             ),
           ),

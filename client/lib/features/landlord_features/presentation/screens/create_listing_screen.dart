@@ -7,7 +7,9 @@ import 'package:animate_do/animate_do.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -15,12 +17,16 @@ import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../../core/widgets/smart_dashboard_panel.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../../../core/widgets/keja_state_view.dart';
+import '../../../../core/widgets/animated_indicators.dart';
 import '../../../../core/services/efficiency_service.dart';
+import '../../../../core/services/supabase_storage_service.dart';
 import '../../../../core/globals.dart';
 import '../../../marketplace/data/listings_repository.dart';
+import '../../../marketplace/domain/listing_entity.dart';
 
 class CreateListingScreen extends StatefulWidget {
-  const CreateListingScreen({super.key});
+  final ListingEntity? existingListing;
+  const CreateListingScreen({super.key, this.existingListing});
 
   @override
   State<CreateListingScreen> createState() => _CreateListingScreenState();
@@ -29,7 +35,9 @@ class CreateListingScreen extends StatefulWidget {
 class _CreateListingScreenState extends State<CreateListingScreen> {
   final _repository = ListingsRepository();
   final _efficiencyService = EfficiencyService();
+  final _storageService = SupabaseStorageService();
   final _mapController = MapController();
+  final _picker = ImagePicker();
   
   int _currentStep = 0;
   bool _isSubmitting = false;
@@ -51,6 +59,11 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   String _county = 'Nairobi';
   List<String> _selectedAmenities = [];
 
+  // Media Data
+  XFile? _mainPhoto;
+  List<XFile> _galleryPhotos = [];
+  List<String> _existingPhotos = [];
+
   // Map & Search state
   List<dynamic> _searchResults = [];
   bool _isSearching = false;
@@ -66,6 +79,43 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.existingListing != null) {
+        _populateFields(widget.existingListing!);
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(CreateListingScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.existingListing != null && widget.existingListing != oldWidget.existingListing) {
+      _populateFields(widget.existingListing!);
+    }
+  }
+
+  void _populateFields(ListingEntity l) {
+    setState(() {
+      _titleController.text = l.title;
+      _descriptionController.text = l.description;
+      _priceController.text = l.priceAmount.toInt().toString();
+      _propertyType = l.propertyType;
+      _listingType = l.listingType;
+      _bedrooms = l.bedrooms;
+      _bathrooms = l.bathrooms;
+      _selectedLocation = LatLng(l.latitude, l.longitude);
+      _locationName = l.locationName;
+      _city = l.city;
+      _county = l.county;
+      _selectedAmenities = List.from(l.amenities);
+      _existingPhotos = List.from(l.photos);
+      _mapTapped = true;
+    });
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
@@ -73,6 +123,21 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
     _searchLocationController.dispose();
     _debounce?.cancel();
     super.dispose();
+  }
+
+  Future<void> _pickImage(bool isMain) async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        if (isMain) {
+          _mainPhoto = image;
+        } else {
+          if (_galleryPhotos.length < 4) {
+            _galleryPhotos.add(image);
+          }
+        }
+      });
+    }
   }
 
   Future<void> _onSearchChanged(String query) async {
@@ -142,7 +207,10 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
       if (_descriptionController.text.trim().isEmpty) return _showError('Please enter a description');
       if (_priceController.text.isEmpty) return _showError('Please enter a price');
     }
-    if (_currentStep == 2 && !_mapTapped) {
+    if (_currentStep == 1) {
+      if (_mainPhoto == null && _existingPhotos.isEmpty) return _showError('Please select a primary photo');
+    }
+    if (_currentStep == 3 && !_mapTapped) {
       return _showError('Please pin the property location on the map');
     }
     return true;
@@ -158,7 +226,41 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
     final efficiency = _efficiencyService.calculateScoreFromCoords(_selectedLocation.latitude, _selectedLocation.longitude, {});
     
     try {
-      await _repository.createListing({
+      final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      final userId = _repository.supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception("User not logged in");
+
+      List<String> finalPhotos = [];
+
+      // 1. Handle Main Photo
+      if (_mainPhoto != null) {
+        final String mainPhotoUrl = await _storageService.uploadFile(
+          bucket: 'property-images',
+          file: File(_mainPhoto!.path),
+          path: '$userId/$timestamp/primary.jpg',
+        );
+        finalPhotos.add(mainPhotoUrl);
+      } else if (_existingPhotos.isNotEmpty) {
+        finalPhotos.add(_existingPhotos.first);
+      }
+
+      // 2. Handle Gallery
+      // If we pick new gallery photos, we'll append them. If we want to replace, we'd need more UI.
+      // For now, let's keep existing if none picked, or append.
+      if (_galleryPhotos.isNotEmpty) {
+        for (var i = 0; i < _galleryPhotos.length; i++) {
+          final url = await _storageService.uploadFile(
+            bucket: 'property-images',
+            file: File(_galleryPhotos[i].path),
+            path: '$userId/$timestamp/gallery_$i.jpg',
+          );
+          finalPhotos.add(url);
+        }
+      } else if (_existingPhotos.length > 1) {
+        finalPhotos.addAll(_existingPhotos.sublist(1));
+      }
+
+      final data = {
         'title': _titleController.text,
         'description': _descriptionController.text,
         'price_amount': double.tryParse(_priceController.text) ?? 0,
@@ -172,20 +274,24 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
         'county': _county,
         'address_line_1': _locationName.split(',')[0],
         'amenities': _selectedAmenities.join(','),
-        'photos': 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800', // Placeholder
-        'status': 'AVAILABLE',
+        'photos': finalPhotos.join(','),
+        'status': widget.existingListing?.status ?? 'AVAILABLE',
         'efficiency_stats': jsonEncode(efficiency.categories),
-      });
+      };
+
+      if (widget.existingListing != null) {
+        await _repository.updateListing(widget.existingListing!.id, data);
+      } else {
+        await _repository.createListing(data);
+      }
+
       if (mounted) {
         context.go('/landlord-dashboard');
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Property pinned successfully! 🚀')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(widget.existingListing != null ? 'Listing updated! ✨' : 'Property pinned successfully! 🚀')));
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorDialog(
-          message: e.toString(),
-          onRetry: _submitListing,
-        );
+        context.showErrorDialog(message: 'Listing failed: $e', onRetry: _submitListing);
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -194,11 +300,12 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.existingListing != null;
     return Scaffold(
       backgroundColor: AppColors.alabaster,
       drawer: const AppDrawer(),
       appBar: CustomAppBar(
-        title: 'POST PROPERTY', 
+        title: isEditing ? 'EDIT LISTING' : 'POST PROPERTY', 
         showSearch: false,
         onMenuPressed: () => rootScaffoldKey.currentState?.openDrawer(),
       ),
@@ -208,72 +315,84 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
             data: Theme.of(context).copyWith(
               colorScheme: const ColorScheme.light(primary: AppColors.structuralBrown),
             ),
-            child: Stepper(
-              type: StepperType.horizontal,
-              currentStep: _currentStep,
-              onStepTapped: (index) {
-                if (index < _currentStep) setState(() => _currentStep = index);
-              },
-              onStepContinue: () {
-                if (_validateCurrentStep()) {
-                  if (_currentStep < 3) {
-                    setState(() => _currentStep++);
-                  } else {
-                    _submitListing();
-                  }
-                }
-              },
-              onStepCancel: () {
-                if (_currentStep > 0) setState(() => _currentStep--);
-              },
-              controlsBuilder: (context, controls) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 32, bottom: 80),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _isSubmitting ? null : controls.onStepContinue,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.structuralBrown,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            elevation: 4,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          ),
-                          child: _isSubmitting 
-                            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : Text(
-                                _currentStep == 3 ? 'PUBLISH NOW' : 'CONTINUE', 
-                                style: GoogleFonts.workSans(fontWeight: FontWeight.bold, letterSpacing: 1),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Stepper(
+                      type: StepperType.horizontal,
+                      currentStep: _currentStep,
+                      elevation: 0,
+                      physics: const ClampingScrollPhysics(),
+                      controlsBuilder: (context, details) {
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(4, 32, 4, 80),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: _isSubmitting ? null : details.onStepContinue,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.structuralBrown,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 18),
+                                    elevation: 4,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  ),
+                                  child: _isSubmitting 
+                                    ? const UploadingIndicator()
+                                    : Text(
+                                        _currentStep == 4 ? (isEditing ? 'UPDATE LISTING' : 'PUBLISH NOW') : 'CONTINUE', 
+                                        style: GoogleFonts.workSans(fontWeight: FontWeight.bold, letterSpacing: 1),
+                                      ),
+                                ),
                               ),
-                        ),
-                      ),
-                      if (_currentStep > 0) ...[
-                        const SizedBox(width: 12),
-                        IconButton(
-                          onPressed: controls.onStepCancel,
-                          icon: const Icon(Icons.arrow_back),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            padding: const EdgeInsets.all(16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade200)),
+                              if (_currentStep > 0) ...[
+                                const SizedBox(width: 12),
+                                IconButton(
+                                  onPressed: details.onStepCancel,
+                                  icon: const Icon(Icons.arrow_back),
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    padding: const EdgeInsets.all(16),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade200)),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
-                        ),
-                      ],
-                    ],
-                  ),
-                );
-              },
-              steps: [
+                        );
+                      },
+                      onStepTapped: (index) {
+                        if (index < _currentStep) setState(() => _currentStep = index);
+                      },
+                      onStepContinue: () {
+                        if (_validateCurrentStep()) {
+                          if (_currentStep < 4) {
+                            setState(() => _currentStep++);
+                          } else {
+                            _submitListing();
+                          }
+                        }
+                      },
+                      onStepCancel: () {
+                        if (_currentStep > 0) setState(() => _currentStep--);
+                      },
+                      steps: [
                 _buildBasicInfoStep(),
+                _buildMediaStep(),
                 _buildSpecsStep(),
                 _buildLocationStep(),
                 _buildPulsePreviewStep(),
               ],
             ),
           ),
-          const SmartDashboardPanel(currentRoute: '/create-listing'),
+        ],
+        ),
+      ),
+    ),
+    const SmartDashboardPanel(currentRoute: '/create-listing'),
         ],
       ),
     );
@@ -323,10 +442,66 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
     );
   }
 
-  Step _buildSpecsStep() {
+  Step _buildMediaStep() {
     return Step(
       isActive: _currentStep >= 1,
       state: _currentStep > 1 ? StepState.complete : StepState.indexed,
+      title: const Text('MEDIA'),
+      content: FadeInUp(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('PRIMARY PHOTO', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1, fontSize: 10)),
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: () => _pickImage(true),
+              child: Container(
+                height: 200, width: double.infinity,
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: (_mainPhoto != null || _existingPhotos.isNotEmpty) ? AppColors.mutedGold : Colors.grey.shade200)),
+                child: _mainPhoto != null 
+                  ? ClipRRect(borderRadius: BorderRadius.circular(20), child: Image.file(File(_mainPhoto!.path), fit: BoxFit.cover))
+                  : (_existingPhotos.isNotEmpty 
+                      ? ClipRRect(borderRadius: BorderRadius.circular(20), child: Image.network(_existingPhotos.first, fit: BoxFit.cover))
+                      : const Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add_a_photo, size: 40, color: Colors.grey), Text('Add main photo', style: TextStyle(color: Colors.grey, fontSize: 12))]))),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text('GALLERY (MAX 4)', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1, fontSize: 10)),
+            const SizedBox(height: 12),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, mainAxisSpacing: 12, crossAxisSpacing: 12, childAspectRatio: 1.5),
+              itemCount: 4,
+              itemBuilder: (context, index) {
+                final hasStored = _galleryPhotos.length > index;
+                // Simple logic: we favor picked photos first
+                return GestureDetector(
+                  onTap: () => _pickImage(false),
+                  child: Container(
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
+                    child: hasStored 
+                      ? Stack(
+                          children: [
+                            Positioned.fill(child: ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.file(File(_galleryPhotos[index].path), fit: BoxFit.cover))),
+                            Positioned(right: 4, top: 4, child: GestureDetector(onTap: () => setState(() => _galleryPhotos.removeAt(index)), child: const CircleAvatar(radius: 12, backgroundColor: Colors.white, child: Icon(Icons.close, size: 14, color: Colors.red)))),
+                          ],
+                        )
+                      : const Center(child: Icon(Icons.add, color: Colors.grey)),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Step _buildSpecsStep() {
+    return Step(
+      isActive: _currentStep >= 2,
+      state: _currentStep > 2 ? StepState.complete : StepState.indexed,
       title: const Text('SPECS'),
       content: FadeInUp(
         child: Column(
@@ -375,8 +550,8 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
 
   Step _buildLocationStep() {
     return Step(
-      isActive: _currentStep >= 2,
-      state: _currentStep > 2 ? StepState.complete : StepState.indexed,
+      isActive: _currentStep >= 3,
+      state: _currentStep > 3 ? StepState.complete : StepState.indexed,
       title: const Text('MAP'),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,6 +563,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
             children: [
               Expanded(
                 child: Container(
+                  margin: const EdgeInsets.only(right: 4), // Add margin to avoid touching
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -511,11 +687,13 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   Step _buildPulsePreviewStep() {
     final efficiency = _efficiencyService.calculateScoreFromCoords(_selectedLocation.latitude, _selectedLocation.longitude, {});
     return Step(
-      isActive: _currentStep >= 3,
-      title: const Text('PULSE'),
+      isActive: _currentStep >= 4,
+      title: const Text('DONE'),
       content: FadeInUp(
-        child: Column(
-          children: [
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            children: [
             const Text('MARKET PULSE GENERATED', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1, fontSize: 12)),
             const SizedBox(height: 20),
             GlassContainer(
@@ -553,11 +731,12 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            const Text('Publishing will make this visible to all tenants in your area.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 13)),
+            Text(widget.existingListing != null ? 'Updating will keep your performance history and ranking.' : 'Publishing will make this visible to all tenants in your area.', textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey, fontSize: 13)),
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildTextField(TextEditingController controller, String label, String hint, IconData icon, {int maxLines = 1, TextInputType keyboardType = TextInputType.text}) {

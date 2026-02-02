@@ -8,6 +8,7 @@ class NotificationEntity {
   final bool isRead;
   final DateTime createdAt;
   final String? route;
+  final Map<String, dynamic>? metadata;
 
   NotificationEntity({
     required this.id,
@@ -17,6 +18,7 @@ class NotificationEntity {
     required this.isRead,
     required this.createdAt,
     this.route,
+    this.metadata,
   });
 
   factory NotificationEntity.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class NotificationEntity {
       isRead: json['is_read'],
       createdAt: DateTime.parse(json['created_at']),
       route: json['route'],
+      metadata: json['metadata'],
     );
   }
 }
@@ -40,8 +43,10 @@ class NotificationsRepository {
     required String message,
     required String type,
     String? route,
+    String? explicitUserId,
+    Map<String, dynamic>? metadata,
   }) async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = explicitUserId ?? _supabase.auth.currentUser?.id;
     if (userId == null) return;
 
     try {
@@ -51,6 +56,7 @@ class NotificationsRepository {
         'message': message,
         'type': type,
         'route': route,
+        'metadata': metadata,
         'is_read': false,
       });
     } catch (e) {

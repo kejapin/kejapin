@@ -15,6 +15,7 @@ import '../../../../core/widgets/glass_container.dart';
 import '../../domain/listing_entity.dart';
 import '../../data/listings_repository.dart';
 import 'package:client/features/messages/data/notifications_repository.dart';
+import '../../../../core/services/notification_service.dart';
 
 class ListingCard extends StatefulWidget {
   final ListingEntity listing;
@@ -78,6 +79,20 @@ class _ListingCardState extends State<ListingCard> {
             type: 'FAVORITE',
             route: '/saved',
           );
+          NotificationService().showNotification(
+            title: 'Listing Saved 📍',
+            body: 'You saved "${widget.listing.title}"',
+          );
+        } else {
+          NotificationService().showNotification(
+            title: 'Listing Removed 🗑️',
+            body: 'You removed "${widget.listing.title}" from your saved list.',
+          );
+          _notificationsRepo.createNotification(
+            title: 'Property Removed 🗑️',
+            message: 'You removed "${widget.listing.title}" from your life-path.',
+            type: 'SYSTEM',
+          );
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -140,8 +155,24 @@ class _ListingCardState extends State<ListingCard> {
         flipOnTouch: false,
         direction: FlipDirection.HORIZONTAL,
         side: CardSide.FRONT,
-        front: _buildFrontSide(efficiency),
-        back: _buildBackSide(efficiency),
+        front: GestureDetector(
+          onTap: () {
+            context.push(
+              '/marketplace/listing/${widget.listing.id}', 
+              extra: {'listing': widget.listing, 'initialView': 'image'}
+            );
+          },
+          child: _buildFrontSide(efficiency),
+        ),
+        back: GestureDetector(
+          onTap: () {
+            context.push(
+              '/marketplace/listing/${widget.listing.id}', 
+              extra: {'listing': widget.listing, 'initialView': 'image'}
+            );
+          },
+          child: _buildBackSide(efficiency),
+        ),
       ),
     );
   }

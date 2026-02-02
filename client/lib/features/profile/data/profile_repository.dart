@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
 import '../../../../core/constants/api_endpoints.dart';
 
 class UserProfile {
@@ -22,6 +23,9 @@ class UserProfile {
   final String? payoutMethod;
   final String? payoutDetails;
   final String? phoneNumber;
+  final String? username;
+  final String? bio;
+  final bool profileCompleted;
 
   UserProfile({
     required this.id,
@@ -42,6 +46,9 @@ class UserProfile {
     this.payoutMethod,
     this.payoutDetails,
     this.phoneNumber,
+    this.username,
+    this.bio,
+    this.profileCompleted = false,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -64,31 +71,23 @@ class UserProfile {
       payoutMethod: json['payout_method'],
       payoutDetails: json['payout_details'],
       phoneNumber: json['phone_number'],
+      username: json['username'],
+      bio: json['bio'],
+      profileCompleted: json['profile_completed'] ?? false,
     );
   }
 }
 
 class ProfileRepository {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  final SupabaseClient supabase = Supabase.instance.client;
 
   Future<UserProfile> getProfile() async {
-    final user = _supabase.auth.currentUser;
+    final user = supabase.auth.currentUser;
     if (user == null) throw Exception('User not logged in');
 
     try {
-      // Try fetching from Go backend first (it has the most recent role/status)
-      final response = await http.get(
-        Uri.parse('${ApiEndpoints.baseUrl}/auth/profile'),
-        headers: {'X-User-ID': user.id},
-      ).timeout(const Duration(seconds: 5));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return UserProfile.fromJson(data);
-      }
-      
-      // Fallback to Supabase if backend fails
-      final sbResponse = await _supabase
+      // 1. Fetch from Supabase first (primary source for roles/profile)
+      final sbResponse = await supabase
           .from('users')
           .select()
           .eq('id', user.id)
@@ -96,12 +95,21 @@ class ProfileRepository {
       
       return UserProfile.fromJson(sbResponse);
     } catch (e) {
-      print('Error fetching profile, attempting Supabase fallback: $e');
+      print('Error fetching from Supabase, attempting Go backend fallback: $e');
       try {
-        final sbResponse = await _supabase.from('users').select().eq('id', user.id).single();
-        return UserProfile.fromJson(sbResponse);
+        // 2. Fallback to Go backend
+        final response = await http.get(
+          Uri.parse('${ApiEndpoints.baseUrl}/auth/profile'),
+          headers: {'X-User-ID': user.id},
+        ).timeout(const Duration(seconds: 5));
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          return UserProfile.fromJson(data);
+        }
+        throw Exception('Failed to load profile from all sources');
       } catch (e2) {
-        throw Exception('Failed to load profile');
+        throw Exception('Failed to load profile: $e2');
       }
     }
   }
@@ -110,22 +118,57 @@ class ProfileRepository {
     String? firstName,
     String? lastName,
     String? profilePicture,
+    String? role,
+    String? vStatus,
+    bool? isVerified,
+    String? username,
+    String? bio,
+    bool? profileCompleted,
   }) async {
-    final user = _supabase.auth.currentUser;
+    final user = supabase.auth.currentUser;
     if (user == null) throw Exception('User not logged in');
 
     final updates = {
       if (firstName != null) 'first_name': firstName,
       if (lastName != null) 'last_name': lastName,
       if (profilePicture != null) 'profile_picture': profilePicture,
+      if (role != null) 'role': role,
+      if (vStatus != null) 'v_status': vStatus,
+      if (isVerified != null) 'is_verified': isVerified,
+      if (username != null) 'username': username,
+      if (bio != null) 'bio': bio,
+      if (profileCompleted != null) 'profile_completed': profileCompleted,
       'updated_at': DateTime.now().toIso8601String(),
     };
 
     try {
-      await _supabase.from('users').update(updates).eq('id', user.id);
+      await supabase.from('users').update(updates).eq('id', user.id);
     } catch (e) {
       print('Error updating profile: $e');
       throw Exception('Failed to update profile');
+    }
+  }
+
+  Future<String> uploadProfilePicture(File imageFile) async {
+    final user = supabase.auth.currentUser;
+    if (user == null) throw Exception('User not logged in');
+
+    final fileExt = imageFile.path.split('.').last;
+    final fileName = '${user.id}/${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+
+    try {
+      await supabase.storage.from('profile-pics').upload(
+        fileName,
+        imageFile,
+        fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+      );
+
+      final imageUrl = supabase.storage.from('profile-pics').getPublicUrl(fileName);
+      await updateProfile(profilePicture: imageUrl);
+      return imageUrl;
+    } catch (e) {
+      print('Error uploading profile picture: $e');
+      throw Exception('Failed to upload profile picture: $e');
     }
   }
 
@@ -140,37 +183,101 @@ class ProfileRepository {
     String? payoutDetails,
     String? phoneNumber,
   }) async {
-    final user = _supabase.auth.currentUser;
+    final user = supabase.auth.currentUser;
     if (user == null) throw Exception('User not logged in');
 
     try {
-      final response = await http.post(
-        Uri.parse(ApiEndpoints.verificationApply),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': user.id,
-        },
-        body: json.encode({
-          'documents': json.encode(documents),
-          'company_name': companyName,
-          'company_bio': companyBio,
-          'national_id': nationalId,
-          'kra_pin': kraPin,
-          'business_role': businessRole,
-          'payout_method': payoutMethod,
-          'payout_details': payoutDetails,
-          'phone_number': phoneNumber,
-        }),
+      // 1. Insert into role_applications table (Supabase)
+      await supabase.from('role_applications').insert({
+        'user_id': user.id,
+        'documents': documents, // Stored as JSONB
+        'status': 'PENDING',
+        'created_at': DateTime.now().toIso8601String(),
+      });
+
+      // 2. Update user table to show they have a pending application
+      await updateProfile(
+        vStatus: 'PENDING',
+        isVerified: false,
       );
 
-      if (response.statusCode != 200) {
-        final errorData = json.decode(response.body);
-        throw Exception(errorData['error'] ?? 'Server error');
+      // 3. (Optional) Also hit Go backend if parallel sync is needed
+      try {
+        await http.post(
+          Uri.parse(ApiEndpoints.verificationApply),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-ID': user.id,
+          },
+          body: json.encode({
+            'documents': json.encode(documents),
+            'company_name': companyName,
+            'company_bio': companyBio,
+            'national_id': nationalId,
+            'kra_pin': kraPin,
+            'business_role': businessRole,
+            'payout_method': payoutMethod,
+            'payout_details': payoutDetails,
+            'phone_number': phoneNumber,
+          }),
+        ).timeout(const Duration(seconds: 5));
+      } catch (e) {
+        print('Backend sync skipped: $e');
       }
       
     } catch (e) {
       print('DEBUG: ProfileRepository.submitLandlordApplication error: $e');
       throw Exception('Failed to submit application: $e');
     }
+  }
+
+  // --- Settings & Security Methods ---
+
+  Future<Map<String, dynamic>> getUserSettings() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) throw Exception('User not logged in');
+    
+    try {
+      final res = await supabase.from('user_settings').select().eq('user_id', user.id).single();
+      return res;
+    } catch (e) {
+      // If no settings exist yet, create default
+      await supabase.from('user_settings').insert({'user_id': user.id});
+      return await supabase.from('user_settings').select().eq('user_id', user.id).single();
+    }
+  }
+
+  Future<void> updateUserSettings(Map<String, dynamic> updates) async {
+    final user = supabase.auth.currentUser;
+    if (user == null) throw Exception('User not logged in');
+    await supabase.from('user_settings').update(updates).eq('user_id', user.id);
+  }
+
+  // --- Payment Methods ---
+
+  Future<List<Map<String, dynamic>>> getPaymentMethods() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) throw Exception('User not logged in');
+    final res = await supabase.from('payment_methods').select().eq('user_id', user.id).order('created_at', ascending: false);
+    return List<Map<String, dynamic>>.from(res);
+  }
+
+  Future<void> addPaymentMethod(Map<String, dynamic> data) async {
+    final user = supabase.auth.currentUser;
+    if (user == null) throw Exception('User not logged in');
+    await supabase.from('payment_methods').insert({...data, 'user_id': user.id});
+  }
+
+  // --- Support ---
+
+  Future<void> createSupportTicket(String subject, String message) async {
+    final user = supabase.auth.currentUser;
+    if (user == null) throw Exception('User not logged in');
+    await supabase.from('support_tickets').insert({
+      'user_id': user.id,
+      'subject': subject,
+      'message': message,
+      'status': 'OPEN'
+    });
   }
 }

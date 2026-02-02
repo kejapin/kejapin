@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../../core/widgets/smart_dashboard_panel.dart';
+import '../../data/admin_repository.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -14,6 +15,20 @@ class AdminDashboardScreen extends StatefulWidget {
 }
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  final AdminRepository _adminRepo = AdminRepository();
+  late Future<List<SupportTicket>> _ticketsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticketsFuture = _adminRepo.getAllSupportTickets();
+  }
+
+  void _refreshTickets() {
+    setState(() {
+      _ticketsFuture = _adminRepo.getAllSupportTickets();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +59,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     child: _buildRevenueChart(),
                   ),
                   const SizedBox(height: 24),
-                  _buildVerificationQueue(context),
+                  _buildSupportTicketsSection(),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -116,16 +131,87 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildVerificationQueue(BuildContext context) {
+  Widget _buildSupportTicketsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Verification Queue', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('Incoming Support Tickets', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            IconButton(onPressed: _refreshTickets, icon: const Icon(Icons.refresh, size: 20)),
+          ],
+        ),
         const SizedBox(height: 12),
-        _QueueItem(name: 'John Doe', docs: 'ID, Selfie', time: '2 mins ago'),
-        _QueueItem(name: 'Sarah Smith', docs: 'ID, Selfie', time: '15 mins ago'),
+        FutureBuilder<List<SupportTicket>>(
+          future: _ticketsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()));
+            }
+            if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Center(child: Text('No active tickets found.', style: TextStyle(color: Colors.grey))),
+              );
+            }
+
+            final tickets = snapshot.data!;
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: tickets.length,
+              itemBuilder: (context, index) {
+                final ticket = tickets[index];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: GlassContainer(
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white,
+                    opacity: 0.7,
+                    child: ListTile(
+                      title: Text(ticket.subject, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text(ticket.message, maxLines: 2, overflow: TextOverflow.ellipsis),
+                          const SizedBox(height: 4),
+                          Text('From: ${ticket.userEmail ?? 'Unknown'} • ${ticket.status}',
+                               style: TextStyle(fontSize: 12, color: _getStatusColor(ticket.status))),
+                        ],
+                      ),
+                      trailing: PopupMenuButton<String>(
+                        onSelected: (val) async {
+                          await _adminRepo.updateTicketStatus(ticket.id, val);
+                          _refreshTickets();
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(value: 'OPEN', child: Text('Open')),
+                          const PopupMenuItem(value: 'IN_PROGRESS', child: Text('In Progress')),
+                          const PopupMenuItem(value: 'CLOSED', child: Text('Close')),
+                        ],
+                        icon: const Icon(Icons.more_vert),
+                      ),
+                      isThreeLine: true,
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ],
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'OPEN': return Colors.red;
+      case 'IN_PROGRESS': return Colors.orange;
+      case 'CLOSED': return Colors.green;
+      default: return Colors.grey;
+    }
   }
 }
 

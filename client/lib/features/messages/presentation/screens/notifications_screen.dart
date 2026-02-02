@@ -9,6 +9,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../data/notifications_repository.dart';
 import '../../../../core/globals.dart';
+import '../../../../core/widgets/smart_dashboard_panel.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -62,6 +63,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ],
                 ),
               ),
+              const SmartDashboardPanel(currentRoute: '/notifications'),
             ],
           ),
         );
@@ -75,11 +77,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => rootScaffoldKey.currentState?.openDrawer(),
+            onTap: () => context.pop(),
             child: GlassContainer(
               padding: const EdgeInsets.all(12),
               borderRadius: BorderRadius.circular(12),
-              child: const Icon(Icons.menu, color: Colors.white, size: 20),
+              child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
             ),
           ),
           const SizedBox(width: 20),

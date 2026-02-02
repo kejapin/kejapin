@@ -17,6 +17,7 @@ import '../../domain/listing_entity.dart';
 import '../../../search/data/models/search_result.dart';
 import '../../../../core/services/efficiency_service.dart';
 import 'package:client/features/messages/data/notifications_repository.dart';
+import '../../../../core/services/notification_service.dart';
 
 class ListingDetailsScreen extends StatefulWidget {
   final String id;
@@ -49,6 +50,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   late bool _showMap;
   bool _isSaved = false;
   bool _isSaving = false;
+  // Index and Controller moved to ListingImageGallery to prevent whole-screen rebuilds
 
   @override
   void initState() {
@@ -58,6 +60,12 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
     _lifePinsFuture = _lifePinRepo.getLifePins();
     _calculateCommutes();
     _checkSavedStatus();
+  }
+
+  @override
+  void dispose() {
+    // Controller disposal handled in ListingImageGallery
+    super.dispose();
   }
 
   Future<void> _checkSavedStatus() async {
@@ -87,6 +95,20 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
              message: 'Selected property added to your life-path.',
              type: 'FAVORITE',
              route: '/saved',
+           );
+           NotificationService().showNotification(
+             title: 'Property Pinned! 📍',
+             body: 'Listing added to your life-path.',
+           );
+        } else {
+           NotificationService().showNotification(
+             title: 'Property Removed 🗑️',
+             body: 'Listing removed from your life-path.',
+           );
+           _notificationsRepo.createNotification(
+             title: 'Property Removed 🗑️',
+             message: 'Selected property removed from your life-path.',
+             type: 'SYSTEM',
            );
         }
 
@@ -351,52 +373,14 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
     );
   }
   
-    // Image View
-    return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(32),
-        topRight: Radius.circular(32),
-      ),
-      child: Stack(
-        children: [
-        Container(
-          height: 350,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            image: listing.photos.isNotEmpty
-                ? DecorationImage(
-                    image: NetworkImage(listing.photos[0]),
-                    fit: BoxFit.cover,
-                  )
-                : null,
-          ),
-        ),
-        Positioned(
-          top: 16,
-          right: 16,
-          child: GestureDetector(
-            onTap: _toggleSave,
-            child: GlassContainer(
-              padding: const EdgeInsets.all(10),
-              borderRadius: BorderRadius.circular(30),
-              color: Colors.white,
-              opacity: 0.9,
-              blur: 10,
-              child: _isSaving 
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.structuralBrown))
-                : Icon(
-                    _isSaved ? Icons.favorite : Icons.favorite_border,
-                    color: _isSaved ? AppColors.brickRed : AppColors.structuralBrown,
-                    size: 24,
-                  ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
+    // Image Gallery View
+    return ListingImageGallery(
+      photos: listing.photos,
+      isSaved: _isSaved,
+      isSaving: _isSaving,
+      onToggleSave: _toggleSave,
+    );
+  }
 
   LatLng _getCategoryOffset(String category) {
     switch (category) {
@@ -725,6 +709,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                   'otherUserName': listing.ownerName,
                   'avatarUrl': listing.ownerAvatar,
                   'propertyTitle': listing.title,
+                  'propertyId': listing.id,
                 });
               },
               style: OutlinedButton.styleFrom(
@@ -745,6 +730,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                   'otherUserName': listing.ownerName,
                   'avatarUrl': listing.ownerAvatar,
                   'propertyTitle': listing.title,
+                  'propertyId': listing.id,
                 });
               },
               style: ElevatedButton.styleFrom(
@@ -874,6 +860,234 @@ class _PulseBarState extends State<_PulseBar> with SingleTickerProviderStateMixi
           ),
         );
       },
+    );
+  }
+}
+
+class _GalleryViewer extends StatelessWidget {
+  final List<String> photos;
+  final PageController controller;
+  final int currentIndex;
+  final Function(int) onPageChanged;
+
+  const _GalleryViewer({
+    required this.photos,
+    required this.controller,
+    required this.currentIndex,
+    required this.onPageChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (photos.isEmpty) {
+      return Container(
+        color: Colors.grey[200],
+        child: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.image_not_supported_outlined, size: 50, color: Colors.grey),
+              SizedBox(height: 8),
+              Text('No photos available', style: TextStyle(color: Colors.grey)),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return PageView.builder(
+      physics: const BouncingScrollPhysics(),
+      key: const PageStorageKey('listing_gallery'),
+      controller: controller,
+      itemCount: photos.length,
+      onPageChanged: onPageChanged,
+      itemBuilder: (context, index) {
+        return Image.network(
+          photos[index],
+          key: ValueKey('${photos[index]}_$index'),
+          fit: BoxFit.cover,
+          gaplessPlayback: true, // Prevents flickering
+          loadingBuilder: (ctx, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                    : null,
+                color: AppColors.structuralBrown,
+              ),
+            );
+          },
+          errorBuilder: (ctx, _, __) => Container(
+            color: Colors.grey[200],
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.broken_image, size: 40, color: Colors.grey),
+                SizedBox(height: 8),
+                Text('Image unavailable', style: TextStyle(color: Colors.grey)),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class ListingImageGallery extends StatefulWidget {
+  final List<String> photos;
+  final bool isSaved;
+  final bool isSaving;
+  final VoidCallback onToggleSave;
+
+  const ListingImageGallery({
+    super.key,
+    required this.photos,
+    required this.isSaved,
+    required this.isSaving,
+    required this.onToggleSave,
+  });
+
+  @override
+  State<ListingImageGallery> createState() => _ListingImageGalleryState();
+}
+
+class _ListingImageGalleryState extends State<ListingImageGallery> {
+  int _currentImageIndex = 0;
+  final PageController _pageController = PageController();
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(32),
+        topRight: Radius.circular(32),
+      ),
+      child: SizedBox(
+        height: 400,
+        width: MediaQuery.of(context).size.width,
+        child: Stack(
+          children: [
+            // 1. Swipeable Image Gallery
+            _GalleryViewer(
+              photos: widget.photos,
+              controller: _pageController,
+              currentIndex: _currentImageIndex,
+              onPageChanged: (index) {
+                if (_currentImageIndex != index) {
+                  setState(() => _currentImageIndex = index);
+                }
+              },
+            ),
+
+            // 2. Cinematic Gradient Overlay (Bottom)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.2), // Slight top shadow for buttons
+                        Colors.transparent,
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.6), // Stronger bottom shadow for text
+                      ],
+                      stops: const [0.0, 0.2, 0.7, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+// 3. Thumbnail Strip (Interactive)
+if (widget.photos.length > 1)
+  Positioned(
+    bottom: 16,
+    left: 0,
+    right: 0,
+    child: SizedBox(
+      height: 60,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: widget.photos.length,
+        itemBuilder: (context, index) {
+          final isSelected = index == _currentImageIndex;
+          return GestureDetector(
+            onTap: () {
+              if (_currentImageIndex != index) {
+                _pageController.jumpToPage(index);
+                // setState will be called by onPageChanged callback
+              }
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: const EdgeInsets.only(right: 10),
+              width: isSelected ? 60 : 50,
+              height: isSelected ? 60 : 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: isSelected 
+                  ? Border.all(color: AppColors.champagne, width: 2) 
+                  : Border.all(color: Colors.white.withOpacity(0.5), width: 1),
+                boxShadow: isSelected 
+                  ? [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))] 
+                  : null,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(isSelected ? 6 : 7),
+                child: Image.network(
+                  widget.photos[index],
+                  fit: BoxFit.cover,
+                  color: isSelected ? null : Colors.black.withOpacity(0.3),
+                  colorBlendMode: isSelected ? null : BlendMode.darken,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    ),
+  ),
+
+            // 4. Save Button
+            Positioned(
+              top: 16,
+              right: 16,
+              child: GestureDetector(
+                onTap: widget.onToggleSave,
+                child: GlassContainer(
+                  padding: const EdgeInsets.all(10),
+                  borderRadius: BorderRadius.circular(30),
+                  color: Colors.white,
+                  opacity: 0.9,
+                  blur: 10,
+                  child: widget.isSaving
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.structuralBrown),
+                        )
+                      : Icon(
+                          widget.isSaved ? Icons.favorite : Icons.favorite_border,
+                          color: widget.isSaved ? AppColors.brickRed : AppColors.structuralBrown,
+                          size: 24,
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

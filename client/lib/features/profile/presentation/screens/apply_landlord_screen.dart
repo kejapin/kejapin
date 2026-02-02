@@ -13,6 +13,7 @@ import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../../core/widgets/animated_indicators.dart';
 import '../../../../core/widgets/keja_state_view.dart';
 import '../../data/profile_repository.dart';
+import '../../../../core/services/supabase_storage_service.dart';
 
 class ApplyLandlordScreen extends StatefulWidget {
   const ApplyLandlordScreen({super.key});
@@ -24,6 +25,7 @@ class ApplyLandlordScreen extends StatefulWidget {
 class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
   int _currentStep = 0;
   final _profileRepo = ProfileRepository();
+  final _storageService = SupabaseStorageService();
   final _picker = ImagePicker();
   
   // Controllers
@@ -41,7 +43,8 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
   String _payoutMethod = 'MPESA'; // MPESA, BANK
   
   // File Data
-  XFile? _idDocument;
+  XFile? _idFront;
+  XFile? _idBack;
   XFile? _selfie;
   XFile? _proofDocument;
   
@@ -67,7 +70,8 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
     if (image != null) {
       setState(() {
         if (type == 'SELFIE') _selfie = image;
-        else if (type == 'ID') _idDocument = image;
+        else if (type == 'ID_FRONT') _idFront = image;
+        else if (type == 'ID_BACK') _idBack = image;
         else if (type == 'PROOF') _proofDocument = image;
       });
     }
@@ -81,7 +85,8 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
     } else if (_currentStep == 1) {
       if (_kraPinController.text.isEmpty) return _error("KRA PIN is required for verification");
     } else if (_currentStep == 2) {
-      if (_idDocument == null) return _error("ID document image is required");
+      if (_idFront == null) return _error("ID Front is required");
+      if (_idBack == null) return _error("ID Back is required");
       if (_selfie == null) return _error("Live selfie image is required");
       if (_proofDocument == null) return _error("Proof of association is required");
     } else if (_currentStep == 3) {
@@ -95,14 +100,89 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
     return false;
   }
 
+  Future<void> _checkExistingPartnerStatus() async {
+    setState(() => _isSubmitting = true);
+    try {
+      // Direct fetch from Supabase (source of truth)
+      final profile = await _profileRepo.getProfile();
+      
+      if (mounted) {
+        if (profile.role == 'LANDLORD' || profile.role == 'AGENT' || profile.role == 'ADMIN') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Partner status confirmed! Redirecting to dashboard..."),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Future.delayed(const Duration(seconds: 1), () {
+            if (mounted) context.go('/landlord-dashboard');
+          });
+        } else if (profile.vStatus == 'PENDING') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Your application is still PENDING verification. Please wait for approval."),
+              backgroundColor: AppColors.mutedGold,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("No partner record found. Please proceed with the application."),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Verification failed: $e"), backgroundColor: Colors.redAccent),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
   Future<void> _submit() async {
     setState(() => _isSubmitting = true);
     try {
+      // 1. Upload Documents to Supabase Storage
+      final userId = _profileRepo.supabase.auth.currentUser?.id;
+      if (userId == null) throw Exception("User not logged in");
+
+      // We'll use a folder for each user in the 'verification-documents' bucket
+      final String idFrontUrl = await _storageService.uploadFile(
+        bucket: 'verification-documents',
+        file: File(_idFront!.path),
+        path: '$userId/id_front_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+
+      final String idBackUrl = await _storageService.uploadFile(
+        bucket: 'verification-documents',
+        file: File(_idBack!.path),
+        path: '$userId/id_back_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+
+      final String selfieUrl = await _storageService.uploadFile(
+        bucket: 'verification-documents',
+        file: File(_selfie!.path),
+        path: '$userId/selfie_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+
+      final String proofUrl = await _storageService.uploadFile(
+        bucket: 'verification-documents',
+        file: File(_proofDocument!.path),
+        path: '$userId/proof_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+
+      // 2. Submit Data to Backend
       await _profileRepo.submitLandlordApplication(
         documents: {
-          'id_document': _idDocument!.name,
-          'selfie': _selfie!.name,
-          'proof_document': _proofDocument!.name,
+          'id_front': idFrontUrl,
+          'id_back': idBackUrl,
+          'selfie': selfieUrl,
+          'proof_document': proofUrl,
           'proof_type': _proofType,
           'submitted_at': DateTime.now().toIso8601String(),
         },
@@ -116,6 +196,9 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
         phoneNumber: _phoneController.text,
       );
 
+      // Note: We removed the auto-approval block. 
+      // User must now wait for admin to approve from the Verification Hub.
+
       if (mounted) {
         showDialog(
           context: context,
@@ -125,7 +208,9 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorDialog(message: e.toString(), onRetry: _submit);
+        ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('Upload failed: $e\nMake sure your Supabase Bucket "verification-documents" is created and public.'), backgroundColor: Colors.redAccent)
+        );
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -209,7 +294,13 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
       content: FadeInUp(
         child: Column(
           children: [
-            _buildUploadRow('ID DOCUMENT', _idDocument, () => _pickImage('ID'), Icons.badge_outlined),
+            Row(
+              children: [
+                Expanded(child: _buildUploadRow('ID FRONT', _idFront, () => _pickImage('ID_FRONT'), Icons.badge_outlined)),
+                const SizedBox(width: 12),
+                Expanded(child: _buildUploadRow('ID BACK', _idBack, () => _pickImage('ID_BACK'), Icons.badge_outlined)),
+              ],
+            ),
             const SizedBox(height: 16),
             _buildUploadRow('LIVE SELFIE', _selfie, () => _pickImage('SELFIE'), Icons.camera_front_outlined),
             const SizedBox(height: 16),
@@ -365,7 +456,7 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
               children: [
                 Icon(icon, color: file != null ? AppColors.mutedGold : Colors.grey),
                 const SizedBox(width: 16),
-                Expanded(child: Text(file != null ? file.name : 'Tap to upload / capture', style: TextStyle(color: file != null ? Colors.black : Colors.grey, fontWeight: file != null ? FontWeight.bold : FontWeight.normal, fontSize: 13))),
+                Expanded(child: Text(file != null ? file.name : 'Tap to upload', style: TextStyle(color: file != null ? Colors.black : Colors.grey, fontWeight: file != null ? FontWeight.bold : FontWeight.normal, fontSize: 13))),
                 if (file != null) const Icon(Icons.check_circle, color: AppColors.mutedGold),
               ],
             ),
@@ -375,30 +466,49 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
     );
   }
 
-  Widget _buildControls(StepperControlsDetails details) {
+  Widget _buildControls(ControlsDetails details) {
     return Padding(
       padding: const EdgeInsets.only(top: 32),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: _isSubmitting ? null : details.onStepContinue,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.structuralBrown, foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _isSubmitting ? null : details.onStepContinue,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.structuralBrown, foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: _isSubmitting ? const UploadingIndicator() : Text(_currentStep == 3 ? 'BECOME PARTNER' : 'CONTINUE', style: const TextStyle(fontWeight: FontWeight.bold)),
+                ),
               ),
-              child: _isSubmitting ? const UploadingIndicator() : Text(_currentStep == 3 ? 'BECOME PARTNER' : 'CONTINUE', style: const TextStyle(fontWeight: FontWeight.bold)),
-            ),
+              if (_currentStep > 0) ...[
+                const SizedBox(width: 12),
+                IconButton(
+                  onPressed: details.onStepCancel,
+                  icon: const Icon(Icons.arrow_back),
+                  style: IconButton.styleFrom(backgroundColor: Colors.white, padding: const EdgeInsets.all(16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                )
+              ]
+            ],
           ),
-          if (_currentStep > 0) ...[
-            const SizedBox(width: 12),
-            IconButton(
-              onPressed: details.onStepCancel,
-              icon: const Icon(Icons.arrow_back),
-              style: IconButton.styleFrom(backgroundColor: Colors.white, padding: const EdgeInsets.all(16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-            )
-          ]
+          if (_currentStep == 0) ...[
+             const SizedBox(height: 20),
+             TextButton(
+               onPressed: _isSubmitting ? null : _checkExistingPartnerStatus,
+               child: Text(
+                 "Already a Partner? Tap to Verify",
+                 style: GoogleFonts.workSans(
+                   color: AppColors.structuralBrown,
+                   fontWeight: FontWeight.bold,
+                   decoration: TextDecoration.underline,
+                   fontSize: 13,
+                 ),
+               ),
+             ),
+          ],
         ],
       ),
     );

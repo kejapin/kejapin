@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "698029781603",
+    "project_id": "kejapin-46148",
+    "storage_bucket": "kejapin-46148.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:698029781603:android:7c1e3fb9f5d89c40a63e56",
+        "android_client_info": {
+          "package_name": "com.example.client"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgwoXMyOnSuZTbgVOysyEmysDdDnEoj0w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

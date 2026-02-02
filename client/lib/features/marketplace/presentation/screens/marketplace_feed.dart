@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../data/listings_repository.dart';
@@ -58,6 +59,18 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
   }
 
   void _showAdvancedFilters() {
+    // Sync current Quick property type selection to Advanced Filters
+    final initialFilters = Map<String, dynamic>.from(_activeFilters);
+    if (_selectedCategory != 'All') {
+      List<String> currentTypes = initialFilters['propertyTypes'] != null 
+          ? List<String>.from(initialFilters['propertyTypes']) 
+          : [];
+      if (!currentTypes.contains(_selectedCategory)) {
+        currentTypes.add(_selectedCategory);
+      }
+      initialFilters['propertyTypes'] = currentTypes;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -67,11 +80,27 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
         minChildSize: 0.5,
         maxChildSize: 0.95,
         builder: (context, scrollController) => AdvancedFiltersSheet(
-          currentFilters: _activeFilters,
+          currentFilters: initialFilters,
           onApplyFilters: (filters) {
+            
+            // Sync logic: If Advanced Filters returns property types, update Quick Filter UI
+            String newCategory = 'All';
+            if (filters['propertyTypes'] != null && (filters['propertyTypes'] as List).isNotEmpty) {
+              final types = filters['propertyTypes'] as List;
+              if (types.length == 1) {
+                // If exactly one type selected, reflect in Quick Filter
+                newCategory = types.first.toString();
+              } else {
+                // If multiple, Quick Filter should show 'All' (or undefined state, 'All' works)
+                newCategory = 'All';
+              }
+            }
+
             setState(() {
               _activeFilters = filters;
+              _selectedCategory = newCategory;
             });
+
             _cubit.loadListings(
               propertyType: _selectedCategory == 'All' ? null : _selectedCategory,
               filters: filters,
@@ -212,6 +241,42 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                                     ],
                                 ),
                                 ),
+                                // Active Filters Indicator & Clear Button
+                                if (_activeFilters.isNotEmpty || _selectedCategory != 'All')
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'Filters Active',
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.structuralBrown,
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              _activeFilters = {};
+                                              _selectedCategory = 'All';
+                                            });
+                                            _cubit.loadListings(propertyType: null, filters: {});
+                                          },
+                                          child: Text(
+                                            'Clear All',
+                                            style: GoogleFonts.montserrat(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.brickRed,
+                                              decoration: TextDecoration.underline,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 Container(
                                 height: 50,
                                 margin: const EdgeInsets.only(bottom: 12),
@@ -230,12 +295,40 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                                         label: category,
                                         isSelected: _selectedCategory == category,
                                         onSelected: (selected) {
-                                        if (selected) {
-                                            setState(() => _selectedCategory = category);
-                                            context.read<ListingFeedCubit>().loadListings(
-                                                propertyType: category == 'All' ? null : category,
-                                                );
-                                        }
+                                          if (selected) {
+                                              // Smart filter update: Change category but preserve other filters (price, amenities)
+                                              final updatedFilters = Map<String, dynamic>.from(_activeFilters);
+                                              
+                                              if (category == 'All') {
+                                                updatedFilters.remove('propertyTypes');
+                                              } else {
+                                                updatedFilters['propertyTypes'] = [category];
+                                              }
+
+                                              setState(() {
+                                                _selectedCategory = category;
+                                                _activeFilters = updatedFilters;
+                                              });
+
+                                              context.read<ListingFeedCubit>().loadListings(
+                                                  propertyType: category == 'All' ? null : category,
+                                                  filters: updatedFilters,
+                                              );
+                                          } else if (_selectedCategory == category && category != 'All') {
+                                              // Deselect current category -> Switch to 'All'
+                                              final updatedFilters = Map<String, dynamic>.from(_activeFilters);
+                                              updatedFilters.remove('propertyTypes');
+
+                                              setState(() {
+                                                _selectedCategory = 'All';
+                                                _activeFilters = updatedFilters;
+                                              });
+
+                                              context.read<ListingFeedCubit>().loadListings(
+                                                  propertyType: null,
+                                                  filters: updatedFilters,
+                                              );
+                                          }
                                         },
                                     );
                                     }).toList(),

@@ -17,10 +17,12 @@ import 'features/messages/presentation/screens/notifications_screen.dart';
 import 'features/messages/presentation/screens/chat_screen.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
 import 'features/profile/presentation/screens/settings_screen.dart';
+import 'features/profile/presentation/screens/edit_profile_screen.dart';
 import 'features/marketplace/presentation/screens/saved_listings_screen.dart';
 import 'features/auth/presentation/forgot_password_screen.dart';
 import 'features/auth/presentation/reset_password_screen.dart';
 import 'features/auth/presentation/verify_email_pending_screen.dart';
+import 'features/profile/data/profile_repository.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'features/search/data/repositories/search_repository.dart';
@@ -30,21 +32,40 @@ import 'features/search/presentation/screens/all_results_screen.dart';
 import 'features/marketplace/presentation/screens/listing_details_screen.dart';
 import 'features/landlord_features/presentation/screens/create_listing_screen.dart';
 import 'features/landlord_features/presentation/screens/landlord_dashboard_screen.dart';
+import 'features/landlord_features/presentation/screens/manage_listings_screen.dart';
 import 'features/landlord_features/presentation/screens/landlord_details_screen.dart';
 import 'features/search/data/models/search_result.dart';
 import 'features/profile/presentation/screens/apply_landlord_screen.dart';
 import 'features/tenant_dashboard/presentation/screens/tenant_dashboard_screen.dart';
 import 'features/admin_features/presentation/screens/admin_dashboard_screen.dart';
+import 'features/admin_features/presentation/screens/verification_list_screen.dart';
+import 'features/admin_features/presentation/screens/verification_detail_screen.dart';
+import 'features/admin_features/data/admin_repository.dart';
 
 import 'features/tenant_dashboard/presentation/screens/property_review_screen.dart';
+import 'features/profile/presentation/screens/settings/account_security_screen.dart';
+import 'features/profile/presentation/screens/settings/notification_settings_screen.dart';
+import 'features/profile/presentation/screens/settings/payment_methods_screen.dart';
+import 'features/profile/presentation/screens/settings/help_support_screen.dart';
+import 'features/marketplace/domain/listing_entity.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'core/services/notification_service.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Custom Error Handling to make app errors stand out from system logs
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('\n\x1B[31m==================================================\x1B[0m');
+    debugPrint('\x1B[31m⚠️  KEJAPIN APP ERROR: ${details.exception}\x1B[0m');
+    debugPrint('\x1B[31m${details.stack}\x1B[0m');
+    debugPrint('\x1B[31m==================================================\x1B[0m\n');
+  };
 
   await Supabase.initialize(
     url: 'https://jxdanbsfcjkuvrakvnoa.supabase.co',
@@ -53,7 +74,9 @@ void main() async {
 
   // Initialize Firebase (Catch if not configured yet)
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     await NotificationService().initialize();
   } catch (e) {
     debugPrint("Firebase not initialized: $e");
@@ -82,8 +105,35 @@ class _KejapinAppState extends State<KejapinApp> {
       final AuthChangeEvent event = data.event;
       if (event == AuthChangeEvent.passwordRecovery) {
         _router.go('/reset-password');
+      } else if (event == AuthChangeEvent.signedIn) {
+        NotificationService().listenToRealtimeNotifications();
+        if (data.session?.user != null) {
+          _syncProfilePicture(data.session!.user);
+        }
       }
     });
+
+    // Sync profile for already logged-in users on startup
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      _syncProfilePicture(user);
+    }
+  }
+
+  Future<void> _syncProfilePicture(User user) async {
+    try {
+      final sb = Supabase.instance.client;
+      final profile = await sb.from('users').select('profile_picture').eq('id', user.id).single();
+      
+      if (profile['profile_picture'] == null) {
+        final avatarUrl = user.userMetadata?['avatar_url'] ?? user.userMetadata?['picture'];
+        if (avatarUrl != null) {
+          await sb.from('users').update({'profile_picture': avatarUrl}).eq('id', user.id);
+        }
+      }
+    } catch (e) {
+      debugPrint("Error syncing profile picture: $e");
+    }
   }
 
   @override
@@ -168,6 +218,15 @@ final GoRouter _router = GoRouter(
         GoRoute(
           path: '/profile',
           builder: (context, state) => const ProfileScreen(),
+          routes: [
+            GoRoute(
+              path: 'edit',
+              builder: (context, state) {
+                final profile = state.extra as UserProfile;
+                return EditProfileScreen(profile: profile);
+              },
+            ),
+          ],
         ),
         GoRoute(
           path: '/saved',
@@ -186,8 +245,15 @@ final GoRouter _router = GoRouter(
           builder: (context, state) => const LandlordDashboardScreen(),
         ),
         GoRoute(
+          path: '/manage-listings',
+          builder: (context, state) => const ManageListingsScreen(),
+        ),
+        GoRoute(
           path: '/create-listing',
-          builder: (context, state) => const CreateListingScreen(),
+          builder: (context, state) {
+            final listing = state.extra as ListingEntity?;
+            return CreateListingScreen(existingListing: listing);
+          },
         ),
         GoRoute(
           path: '/admin-dashboard',
@@ -202,6 +268,17 @@ final GoRouter _router = GoRouter(
           builder: (context, state) => const ComponentGalleryScreen(),
         ),
         GoRoute(
+          path: '/admin/verifications',
+          builder: (context, state) => const VerificationListScreen(),
+        ),
+        GoRoute(
+          path: '/admin/verifications/detail',
+          builder: (context, state) {
+            final app = state.extra as VerificationApplication;
+            return VerificationDetailScreen(application: app);
+          },
+        ),
+        GoRoute(
           path: '/review/:id',
           builder: (context, state) {
             final id = state.pathParameters['id']!;
@@ -209,24 +286,56 @@ final GoRouter _router = GoRouter(
             return PropertyReviewScreen(propertyId: id, propertyName: name);
           },
         ),
+        GoRoute(
+          path: '/notifications',
+          builder: (context, state) => const NotificationsScreen(),
+        ),
+        GoRoute(
+          path: '/chat',
+          builder: (context, state) {
+            final extras = state.extra as Map<String, dynamic>;
+            return ChatScreen(
+              otherUserId: extras['otherUserId'],
+              otherUserName: extras['otherUserName'],
+              avatarUrl: extras['avatarUrl'],
+              propertyTitle: extras['propertyTitle'],
+              propertyId: extras['propertyId'],
+            );
+          },
+        ),
       ],
     ),
-    GoRoute(
-      path: '/notifications',
-      builder: (context, state) => const NotificationsScreen(),
-    ),
-    GoRoute(
-      path: '/chat',
-      builder: (context, state) {
-        final extras = state.extra as Map<String, dynamic>;
-        return ChatScreen(
-          otherUserId: extras['otherUserId'],
-          otherUserName: extras['otherUserName'],
-          avatarUrl: extras['avatarUrl'],
-          propertyTitle: extras['propertyTitle'],
-        );
-      },
-    ),
+    // Settings Sub-Routes (Outside Shell for full screen focus, or inside if preferred. Let's keep inside Shell actually, or maybe stack? 
+    // The user asked for screens that open when routes are tapped. Usually settings are better with the bottom bar visible? 
+    // Actually standard practice for deep settings is often full screen push. 
+    // Let's put them IN the shell so user can still nav easily? No, usually settings pages have back buttons. 
+    // Let's put them as sub-routes of /settings or just standalone routes. 
+    // Standalone routes inside the shell is easiest for navigation stack preservation if we want bottom bar.
+    // But if we want back button, `GoRoute` at root level or nested under one of the shell branches.
+    // Let's add them to the ShellRoute list for now so they have the bottom bar, OR better yet, 
+    // let's put them outside the shell if we want them to feel like "drilling down" without the distracted bottom nav.
+    // The existing /settings route is inside the shell. I'll put these new ones there too for consistency, 
+    // or arguably better: keep them inside the shell but standard push.
+    
+    // Actually, let's keep them inside ShellRoute to maintain state, but maybe hide bottom bar? 
+    // For simplicity, I will add them to the main ShellRoute list.
+        GoRoute(
+          path: '/settings/security',
+          builder: (context, state) => const AccountSecurityScreen(),
+        ),
+        GoRoute(
+          path: '/settings/notifications',
+          builder: (context, state) => const NotificationSettingsScreen(),
+        ),
+        GoRoute(
+          path: '/settings/payment',
+          builder: (context, state) => const PaymentMethodsScreen(),
+        ),
+        GoRoute(
+          path: '/settings/help',
+          builder: (context, state) => const HelpSupportScreen(),
+        ),
+
     // Search & Details Routes
     GoRoute(
       path: '/search-results',

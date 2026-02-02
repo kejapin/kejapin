@@ -3,7 +3,7 @@ import 'listing_model.dart';
 import '../domain/listing_entity.dart';
 
 class ListingsRepository {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  final SupabaseClient supabase = Supabase.instance.client;
 
   Future<List<ListingEntity>> fetchListings({
     String? propertyType,
@@ -11,7 +11,7 @@ class ListingsRepository {
     Map<String, dynamic>? filters,
   }) async {
     try {
-      var query = _supabase.from('properties').select('*, owner:owner_id(first_name, last_name, profile_picture)');
+      var query = supabase.from('properties').select('*, owner:owner_id(first_name, last_name, profile_picture)');
 
       // Apply initial filters
       if (propertyType != null && propertyType != 'All') {
@@ -32,6 +32,17 @@ class ListingsRepository {
         if (filters['propertyTypes'] != null && (filters['propertyTypes'] as List).isNotEmpty) {
           query = query.inFilter('property_type', (filters['propertyTypes'] as List));
         }
+        if (filters['amenities'] != null && (filters['amenities'] as List).isNotEmpty) {
+          query = query.contains('amenities', filters['amenities']);
+        }
+        if (filters['availableNow'] == true) {
+          query = query.eq('status', 'AVAILABLE');
+        }
+        if (filters['furnishing'] != null) {
+           // Assuming furnishing status is stored in amenities or a dedicated column might exist but missing in model.
+           // We will try finding it in amenities for now as a fallback.
+           query = query.contains('amenities', [filters['furnishing']]);
+        }
       }
       
       final response = await query.order('created_at', ascending: false);
@@ -45,7 +56,7 @@ class ListingsRepository {
   }
 
   Stream<List<ListingEntity>> getListingsStream() {
-    return _supabase
+    return supabase
         .from('properties')
         .stream(primaryKey: ['id'])
         .map((data) {
@@ -60,7 +71,7 @@ class ListingsRepository {
 
   Future<ListingEntity> fetchListingById(String id) async {
     try {
-      final response = await _supabase
+      final response = await supabase
           .from('properties')
           .select('*, owner:owner_id(first_name, last_name, profile_picture)')
           .eq('id', id)
@@ -74,17 +85,17 @@ class ListingsRepository {
   }
 
   Future<void> toggleSaveListing(String propertyId, bool isSaved) async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = supabase.auth.currentUser?.id;
     if (userId == null) throw Exception('Must be logged in to save listings');
 
     try {
       if (isSaved) {
-        await _supabase.from('saved_listings').delete().match({
+        await supabase.from('saved_listings').delete().match({
           'user_id': userId,
           'property_id': propertyId,
         });
       } else {
-        await _supabase.from('saved_listings').insert({
+        await supabase.from('saved_listings').insert({
           'user_id': userId,
           'property_id': propertyId,
         });
@@ -95,11 +106,11 @@ class ListingsRepository {
   }
 
   Future<bool> isListingSaved(String propertyId) async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = supabase.auth.currentUser?.id;
     if (userId == null) return false;
 
     try {
-      final response = await _supabase
+      final response = await supabase
           .from('saved_listings')
           .select()
           .eq('user_id', userId)
@@ -113,11 +124,11 @@ class ListingsRepository {
   }
 
   Future<List<ListingEntity>> fetchSavedListings() async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = supabase.auth.currentUser?.id;
     if (userId == null) return [];
 
     try {
-      final response = await _supabase
+      final response = await supabase
           .from('saved_listings')
           .select('properties(*, owner:owner_id(first_name, last_name, profile_picture))')
           .eq('user_id', userId);
@@ -134,11 +145,11 @@ class ListingsRepository {
   }
 
   Future<void> createListing(Map<String, dynamic> data) async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = supabase.auth.currentUser?.id;
     if (userId == null) throw Exception('Must be logged in to create listings');
 
     try {
-      await _supabase.from('properties').insert({
+      await supabase.from('properties').insert({
         ...data,
         'owner_id': userId,
         'created_at': DateTime.now().toIso8601String(),
@@ -146,6 +157,52 @@ class ListingsRepository {
     } catch (e) {
       print('Error creating listing: $e');
       throw Exception('Failed to create listing: $e');
+    }
+  }
+
+  Future<List<ListingEntity>> fetchMyListings() async {
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) throw Exception('User not logged in');
+
+    try {
+      final response = await supabase
+          .from('properties')
+          .select('*, owner:owner_id(first_name, last_name, profile_picture)')
+          .eq('owner_id', userId)
+          .order('created_at', ascending: false);
+
+      final data = response as List<dynamic>;
+      return data.map((json) => ListingModel.fromJson(json)).toList();
+    } catch (e) {
+      print('Error fetching personal listings: $e');
+      throw Exception('Failed to load your listings');
+    }
+  }
+
+  Future<void> updateListing(String id, Map<String, dynamic> updates) async {
+    try {
+      await supabase.from('properties').update(updates).eq('id', id);
+    } catch (e) {
+      print('Error updating listing $id: $e');
+      throw Exception('Failed to update listing');
+    }
+  }
+
+  Future<void> deleteListing(String id) async {
+    try {
+      await supabase.from('properties').delete().eq('id', id);
+    } catch (e) {
+      print('Error deleting listing $id: $e');
+      throw Exception('Failed to delete listing');
+    }
+  }
+
+  Future<void> toggleListingStatus(String id, String currentStatus) async {
+    final newStatus = currentStatus == 'AVAILABLE' ? 'UNAVAILABLE' : 'AVAILABLE';
+    try {
+      await updateListing(id, {'status': newStatus});
+    } catch (e) {
+      throw Exception('Failed to toggle status');
     }
   }
 }

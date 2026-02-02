@@ -25,6 +25,7 @@ class ListingEntity {
   final double rating;
   final int reviewCount;
   final DateTime createdAt;
+  final String status;
   
   // Real-world infrastructure stats from DB
   final Map<String, double> infrastructureStats;
@@ -56,6 +57,7 @@ class ListingEntity {
     this.rating = 4.5,
     this.reviewCount = 12,
     required this.createdAt,
+    this.status = 'AVAILABLE',
     this.infrastructureStats = const {},
   });
 }

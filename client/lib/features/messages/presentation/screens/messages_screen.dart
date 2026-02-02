@@ -1,10 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../../data/messages_repository.dart';
-import '../../../auth/data/auth_repository.dart';  // For current user check if needed
+import '../../../../core/globals.dart';
+import '../../../../core/widgets/smart_dashboard_panel.dart';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
@@ -17,6 +20,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
   final MessagesRepository _repository = MessagesRepository();
 
   @override
+  void initState() {
+    super.initState();
+    _repository.warmupCache();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
@@ -24,8 +33,10 @@ class _MessagesScreenState extends State<MessagesScreen> {
         title: 'Messages',
         showSearch: false,
       ),
-      body: Column(
+      body: Stack(
         children: [
+          Column(
+            children: [
           // Search Bar
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -45,79 +56,75 @@ class _MessagesScreenState extends State<MessagesScreen> {
             ),
           ),
           
-          // Messages List
           Expanded(
-            child: StreamBuilder<List<MessageEntity>>(
-              stream: _repository.getMessagesStream(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator(color: AppColors.structuralBrown));
-                }
-
-                final messages = snapshot.data ?? [];
-                
-                // Group by conversation (otherUserId) and keep only the latest message
-                final Map<String, MessageEntity> latestMessages = {};
-                for (var msg in messages) {
-                    if (!latestMessages.containsKey(msg.otherUserId)) {
-                        latestMessages[msg.otherUserId] = msg;
-                    }
-                }
-                final conversations = latestMessages.values.toList();
-
-                if (conversations.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[300]),
-                        const SizedBox(height: 16),
-                        Text(
-                          "No messages yet",
-                          style: GoogleFonts.workSans(
-                            fontSize: 18,
-                            color: Colors.grey[400],
-                            fontWeight: FontWeight.w600
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: conversations.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final msg = conversations[index];
-                    final timeStr = "${msg.createdAt.hour}:${msg.createdAt.minute.toString().padLeft(2, '0')}";
-                    
-                    return GestureDetector(
-                      onTap: () => context.push('/chat', extra: {
-                        'otherUserId': msg.otherUserId,
-                        'otherUserName': msg.otherUserName,
-                        'avatarUrl': msg.otherUserAvatar,
-                        'propertyTitle': msg.propertyTitle,
-                      }),
-                      child: _buildMessageTile(
-                        name: msg.otherUserName,
-                        time: timeStr,
-                        property: msg.propertyTitle ?? 'General Inquiry',
-                        message: msg.content,
-                        avatarUrl: msg.otherUserAvatar,
-                        initials: msg.otherUserName.isNotEmpty ? msg.otherUserName[0] : '?',
-                        isUnread: !msg.isRead,
-                      ),
-                    );
-                  },
-                );
-              },
+            child: ValueListenableBuilder<int>(
+              valueListenable: MessagesRepository.cacheVersion,
+              builder: (context, version, _) => _buildMessagesList(_repository.getMessagesStream()),
             ),
           ),
+            ],
+          ),
+          const SmartDashboardPanel(currentRoute: '/messages'),
         ],
       ),
     );
+  }
+
+  Widget _buildMessagesList(Stream<List<MessageEntity>> stream) {
+    return StreamBuilder<List<MessageEntity>>(
+                  stream: stream,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator(color: AppColors.structuralBrown));
+                    }
+                    final messages = snapshot.data ?? [];
+                    final Map<String, MessageEntity> latestMessages = {};
+                    for (var msg in messages) {
+                        if (!latestMessages.containsKey(msg.otherUserId)) {
+                            latestMessages[msg.otherUserId] = msg;
+                        }
+                    }
+                    final conversations = latestMessages.values.toList();
+                    if (conversations.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[300]),
+                            const SizedBox(height: 16),
+                            Text("No messages yet", style: GoogleFonts.workSans(fontSize: 18, color: Colors.grey[400], fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      );
+                    }
+                    return ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: conversations.length,
+                      separatorBuilder: (context, index) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final msg = conversations[index];
+                        final timeStr = "${msg.createdAt.hour}:${msg.createdAt.minute.toString().padLeft(2, '0')}";
+                        return GestureDetector(
+                          onTap: () => context.push('/chat', extra: {
+                            'otherUserId': msg.otherUserId,
+                            'otherUserName': msg.otherUserName,
+                            'avatarUrl': msg.otherUserAvatar,
+                            'propertyTitle': msg.propertyTitle,
+                          }),
+                          child: _buildMessageTile(
+                            name: msg.otherUserName,
+                            time: timeStr,
+                            property: msg.propertyTitle ?? 'General Inquiry',
+                            message: msg.content,
+                            avatarUrl: msg.otherUserAvatar,
+                            initials: msg.otherUserName.isNotEmpty ? msg.otherUserName[0] : '?',
+                            isUnread: !msg.isRead,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
   }
 
   Widget _buildMessageTile({
@@ -153,28 +160,55 @@ class _MessagesScreenState extends State<MessagesScreen> {
               Container(
                 width: 56,
                 height: 56,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.structuralBrown.withOpacity(0.1),
-                  image: avatarUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(avatarUrl),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
                 ),
-                child: avatarUrl == null
-                    ? Center(
-                        child: Text(
-                          initials ?? '',
-                          style: GoogleFonts.workSans(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.structuralBrown,
+                child: ClipOval(
+                  child: (avatarUrl != null && avatarUrl.isNotEmpty)
+                      ? CachedNetworkImage(
+                          imageUrl: avatarUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: AppColors.structuralBrown.withOpacity(0.1),
+                            child: Center(
+                              child: Text(
+                                initials ?? '',
+                                style: GoogleFonts.workSans(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.structuralBrown,
+                                ),
+                              ),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: AppColors.structuralBrown.withOpacity(0.1),
+                            child: Center(
+                              child: Text(
+                                initials ?? '',
+                                style: GoogleFonts.workSans(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.structuralBrown,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      : Container(
+                          color: AppColors.structuralBrown.withOpacity(0.1),
+                          child: Center(
+                            child: Text(
+                              initials ?? '',
+                              style: GoogleFonts.workSans(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.structuralBrown,
+                              ),
+                            ),
                           ),
                         ),
-                      )
-                    : null,
+                ),
               ),
               if (isUnread)
                 Positioned(

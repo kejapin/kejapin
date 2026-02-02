@@ -4,6 +4,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -14,6 +15,7 @@ class ChatScreen extends StatefulWidget {
   final String otherUserName;
   final String? avatarUrl;
   final String? propertyTitle;
+  final String? propertyId;
 
   const ChatScreen({
     super.key,
@@ -21,6 +23,7 @@ class ChatScreen extends StatefulWidget {
     required this.otherUserName,
     this.avatarUrl,
     this.propertyTitle,
+    this.propertyId,
   });
 
   @override
@@ -35,6 +38,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _repository.warmupCache();
     _repository.markConversationAsRead(widget.otherUserId);
   }
 
@@ -47,6 +51,7 @@ class _ChatScreenState extends State<ChatScreen> {
       await _repository.sendMessage(
         recipientId: widget.otherUserId,
         content: content,
+        propertyId: widget.propertyId,
       );
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -70,10 +75,23 @@ class _ChatScreenState extends State<ChatScreen> {
       backgroundColor: AppColors.structuralBrown,
       body: Stack(
         children: [
-          // Background - Mesh or Alabaster for Web
+          // Background - Mesh or Static Gradient for Web
           Positioned.fill(
             child: kIsWeb
-                ? Container(color: AppColors.alabaster)
+                ? Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.structuralBrown,
+                          Color(0xFF4E342E),
+                          Color(0xFF5D4037),
+                          AppColors.structuralBrown,
+                        ],
+                      ),
+                    ),
+                  )
                 : AnimatedMeshGradient(
                     colors: [
                       AppColors.structuralBrown,
@@ -140,14 +158,19 @@ class _ChatScreenState extends State<ChatScreen> {
               icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
             ),
             const SizedBox(width: 4),
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: Colors.white.withOpacity(0.1),
-              backgroundImage: widget.avatarUrl != null ? NetworkImage(widget.avatarUrl!) : null,
-              child: widget.avatarUrl == null
-                  ? Text(widget.otherUserName.isNotEmpty ? widget.otherUserName[0].toUpperCase() : '?', 
-                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
-                  : null,
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.1),
+              ),
+              child: ValueListenableBuilder<int>(
+                valueListenable: MessagesRepository.cacheVersion,
+                builder: (context, version, _) => _buildAvatar(
+                  widget.avatarUrl ?? MessagesRepository.ensureFullUrl(MessagesRepository.getUserCache(widget.otherUserId)?['profile_picture'])
+                ),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -156,12 +179,19 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: [
                   Text(
                     widget.otherUserName,
-                    style: GoogleFonts.workSans(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                    style: GoogleFonts.workSans(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   if (widget.propertyTitle != null)
                     Text(
                       widget.propertyTitle!,
-                      style: GoogleFonts.workSans(color: Colors.white60, fontSize: 11),
+                      style: GoogleFonts.workSans(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -171,6 +201,33 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildAvatar(String? url) {
+    // Resolve URL if relative and not on web (where it's already resolved in the stream)
+    final effectiveUrl = (url != null && !url.startsWith('http')) 
+        ? MessagesRepository.ensureFullUrl(url) 
+        : url;
+
+    return ClipOval(
+      child: effectiveUrl != null && effectiveUrl.isNotEmpty
+          ? CachedNetworkImage(
+              imageUrl: effectiveUrl,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Center(
+                child: Text(widget.otherUserName.isNotEmpty ? widget.otherUserName[0].toUpperCase() : '?', 
+                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+              ),
+              errorWidget: (context, url, error) => Center(
+                child: Text(widget.otherUserName.isNotEmpty ? widget.otherUserName[0].toUpperCase() : '?', 
+                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+              ),
+            )
+          : Center(
+              child: Text(widget.otherUserName.isNotEmpty ? widget.otherUserName[0].toUpperCase() : '?', 
+                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+            ),
     );
   }
 
@@ -276,30 +333,50 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildChatBubble(MessageEntity msg, int index) {
     final isMe = msg.isMe;
+    
+    // Both mobile (animated mesh) and web (static gradient) are now dark
+    final bubbleColor = isMe 
+        ? AppColors.mutedGold 
+        : Colors.white.withOpacity(0.15);
+    
+    const textColor = Colors.white;
+
     return FadeInUp(
       duration: const Duration(milliseconds: 300),
-      child: Align(
-        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
-          decoration: BoxDecoration(
-            color: isMe ? AppColors.mutedGold : Colors.white.withOpacity(0.15),
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(20),
-              topRight: const Radius.circular(20),
-              bottomLeft: isMe ? const Radius.circular(20) : const Radius.circular(4),
-              bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+              decoration: BoxDecoration(
+                color: bubbleColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(20),
+                  topRight: const Radius.circular(20),
+                  bottomLeft: isMe ? const Radius.circular(20) : const Radius.circular(4),
+                  bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(20),
+                ),
+                boxShadow: [
+                   if (isMe) BoxShadow(
+                     color: Colors.black.withOpacity(0.1), 
+                     blurRadius: 4, 
+                     offset: const Offset(0, 2)
+                   )
+                ],
+              ),
+              child: Text(
+                msg.content,
+                style: GoogleFonts.workSans(
+                  color: textColor, 
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
             ),
-            boxShadow: [
-               if (isMe) BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))
-            ],
-          ),
-          child: Text(
-            msg.content,
-            style: GoogleFonts.workSans(color: Colors.white, fontSize: 15),
-          ),
+          ],
         ),
       ),
     );

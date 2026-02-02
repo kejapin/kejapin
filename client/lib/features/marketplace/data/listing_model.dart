@@ -31,6 +31,7 @@ class ListingModel extends ListingEntity {
     super.reviewCount = 12,
     required super.createdAt,
     super.infrastructureStats,
+    super.status = 'AVAILABLE',
   });
 
   factory ListingModel.fromJson(Map<String, dynamic> json) {
@@ -120,6 +121,7 @@ class ListingModel extends ListingEntity {
           ? DateTime.parse(json['created_at']) 
           : DateTime.now(),
       infrastructureStats: infraStats,
+      status: json['status'] ?? 'AVAILABLE',
     );
   }
 }

@@ -1,3 +1,212 @@
+# PROFILE FEATURE BACKUP
+# Date: 2026-02-01
+
+## 1. Profile Repository (features/profile/data/profile_repository.dart)
+```dart
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
+import '../../../../core/constants/api_endpoints.dart';
+
+class UserProfile {
+  final String id;
+  final String email;
+  final String firstName;
+  final String lastName;
+  final String role;
+  final String? profilePicture;
+  final bool isVerified;
+  final String vStatus;
+  final int appAttempts;
+  final String? companyName;
+  final String? companyBio;
+  final String? brandColor;
+  final String? nationalId;
+  final String? kraPin;
+  final String? businessRole;
+  final String? payoutMethod;
+  final String? payoutDetails;
+  final String? phoneNumber;
+
+  UserProfile({
+    required this.id,
+    required this.email,
+    required this.firstName,
+    required this.lastName,
+    required this.role,
+    this.profilePicture,
+    this.isVerified = false,
+    this.vStatus = 'PENDING',
+    this.appAttempts = 0,
+    this.companyName,
+    this.companyBio,
+    this.brandColor,
+    this.nationalId,
+    this.kraPin,
+    this.businessRole,
+    this.payoutMethod,
+    this.payoutDetails,
+    this.phoneNumber,
+  });
+
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    return UserProfile(
+      id: json['id'] ?? '',
+      email: json['email'] ?? '',
+      firstName: json['first_name'] ?? '',
+      lastName: json['last_name'] ?? '',
+      role: json['role'] ?? 'TENANT',
+      profilePicture: json['profile_picture'],
+      isVerified: json['is_verified'] ?? false,
+      vStatus: json['v_status'] ?? 'PENDING',
+      appAttempts: json['app_attempts'] ?? 0,
+      companyName: json['company_name'],
+      companyBio: json['company_bio'],
+      brandColor: json['brand_color'],
+      nationalId: json['national_id'],
+      kraPin: json['kra_pin'],
+      businessRole: json['business_role'],
+      payoutMethod: json['payout_method'],
+      payoutDetails: json['payout_details'],
+      phoneNumber: json['phone_number'],
+    );
+  }
+}
+
+class ProfileRepository {
+  final SupabaseClient supabase = Supabase.instance.client;
+
+  Future<UserProfile> getProfile() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) throw Exception('User not logged in');
+
+    try {
+      // Try fetching from Go backend first (it has the most recent role/status)
+      final response = await http.get(
+        Uri.parse('${ApiEndpoints.baseUrl}/auth/profile'),
+        headers: {'X-User-ID': user.id},
+      ).timeout(const Duration(seconds: 5));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return UserProfile.fromJson(data);
+      }
+      
+      // Fallback to Supabase if backend fails
+      final sbResponse = await supabase
+          .from('users')
+          .select()
+          .eq('id', user.id)
+          .single();
+      
+      return UserProfile.fromJson(sbResponse);
+    } catch (e) {
+      print('Error fetching profile, attempting Supabase fallback: $e');
+      try {
+        final sbResponse = await supabase.from('users').select().eq('id', user.id).single();
+        return UserProfile.fromJson(sbResponse);
+      } catch (e2) {
+        throw Exception('Failed to load profile');
+      }
+    }
+  }
+
+  Future<void> updateProfile({
+    String? firstName,
+    String? lastName,
+    String? profilePicture,
+  }) async {
+    final user = supabase.auth.currentUser;
+    if (user == null) throw Exception('User not logged in');
+
+    final updates = {
+      if (firstName != null) 'first_name': firstName,
+      if (lastName != null) 'last_name': lastName,
+      if (profilePicture != null) 'profile_picture': profilePicture,
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+
+    try {
+      await supabase.from('users').update(updates).eq('id', user.id);
+    } catch (e) {
+      print('Error updating profile: $e');
+      throw Exception('Failed to update profile');
+    }
+  }
+
+  Future<String> uploadProfilePicture(File imageFile) async {
+    final user = supabase.auth.currentUser;
+    if (user == null) throw Exception('User not logged in');
+
+    final fileExt = imageFile.path.split('.').last;
+    final fileName = '${user.id}/${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+
+    try {
+      await supabase.storage.from('profile-pics').upload(
+        fileName,
+        imageFile,
+        fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+      );
+
+      final imageUrl = supabase.storage.from('profile-pics').getPublicUrl(fileName);
+      await updateProfile(profilePicture: imageUrl);
+      return imageUrl;
+    } catch (e) {
+      print('Error uploading profile picture: $e');
+      throw Exception('Failed to upload profile picture: $e');
+    }
+  }
+
+  Future<void> submitLandlordApplication({
+    required Map<String, dynamic> documents,
+    String? companyName,
+    String? companyBio,
+    String? nationalId,
+    String? kraPin,
+    String? businessRole,
+    String? payoutMethod,
+    String? payoutDetails,
+    String? phoneNumber,
+  }) async {
+    final user = supabase.auth.currentUser;
+    if (user == null) throw Exception('User not logged in');
+
+    try {
+      final response = await http.post(
+        Uri.parse(ApiEndpoints.verificationApply),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': user.id,
+        },
+        body: json.encode({
+          'documents': json.encode(documents),
+          'company_name': companyName,
+          'company_bio': companyBio,
+          'national_id': nationalId,
+          'kra_pin': kraPin,
+          'business_role': businessRole,
+          'payout_method': payoutMethod,
+          'payout_details': payoutDetails,
+          'phone_number': phoneNumber,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        final errorData = json.decode(response.body);
+        throw Exception(errorData['error'] ?? 'Server error');
+      }
+      
+    } catch (e) {
+      print('DEBUG: ProfileRepository.submitLandlordApplication error: $e');
+      throw Exception('Failed to submit application: $e');
+    }
+  }
+}
+```
+
+## 2. Profile Screen (features/profile/presentation/screens/profile_screen.dart)
+```dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -38,7 +247,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       useRootNavigator: true, // This ensures it renders ABOVE the bottom nav bar
-      builder: (modalContext) => Container(
+      builder: (context) => Container(
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -52,11 +261,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildOption(Icons.upload, 'Upload Photo', _pickAndUploadImage, modalContext),
-                _buildOption(Icons.face, 'Choose Animated', _showAvatarPicker, modalContext),
+                _buildOption(Icons.upload, 'Upload Photo', _pickAndUploadImage),
+                _buildOption(Icons.face, 'Choose Animated', _showAvatarPicker),
                 _buildOption(Icons.shuffle, 'Generate Random', () {
+                    // Show a sub-dialog or just generate immediately
                     _showRandomAvatarGenerator();
-                }, modalContext),
+                }),
               ],
             ),
             const SizedBox(height: 24),
@@ -74,7 +284,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         context: context,
         useRootNavigator: true,
         backgroundColor: Colors.transparent,
-        isScrollControlled: true, // Allows the modal to size itself properly
         builder: (context) {
             return StatefulBuilder(
                 builder: (context, setState) {
@@ -98,11 +307,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         shape: BoxShape.circle,
                                         border: Border.all(color: AppColors.structuralBrown.withOpacity(0.1), width: 2),
                                     ),
-                                    child: RandomAvatar(
-                                      seed,
-                                      height: 146,
-                                      width: 146,
-                                    ),
+                                    child: SvgPicture.string(svgCode),
                                 ),
                                 const SizedBox(height: 24),
                                 Row(
@@ -120,6 +325,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ElevatedButton(
                                             onPressed: () {
                                                 Navigator.pop(context); // Close generator
+                                                Navigator.pop(context); // Close main sheet
                                                 _uploadGeneratedAvatar(svgCode);
                                             },
                                             style: ElevatedButton.styleFrom(
@@ -148,43 +354,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
-    try {
-      // Upload SVG string as a file
-      final fileName = '${Supabase.instance.client.auth.currentUser!.id}/avatar_${DateTime.now().millisecondsSinceEpoch}.svg';
-      
-      await Supabase.instance.client.storage.from('profile-pics').uploadBinary(
-        fileName,
-        Uint8List.fromList(utf8.encode(svgCode)),
-        fileOptions: const FileOptions(contentType: 'image/svg+xml', cacheControl: '3600', upsert: true),
-      );
-
-      final imageUrl = Supabase.instance.client.storage.from('profile-pics').getPublicUrl(fileName);
-      await _profileRepo.updateProfile(profilePicture: imageUrl);
-      
-      setState(() {
-        _profileFuture = _profileRepo.getProfile();
-      });
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('New avatar generated!')),
-        );
-      }
-    } catch (e) {
-      print('Error generating avatar: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to generate avatar: $e')),
-        );
-      }
-    }
-  }
-
-  Widget _buildOption(IconData icon, String label, VoidCallback onTap, BuildContext modalContext) {
+  Widget _buildOption(IconData icon, String label, VoidCallback onTap) {
     return InkWell(
-      onTap: () async {
-        Navigator.of(modalContext).pop();
-        await Future.delayed(const Duration(milliseconds: 300));
+      onTap: () {
+        Navigator.pop(context);
         onTap();
       },
       child: Column(
@@ -235,6 +408,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+    try {
+      // Upload SVG string as a file
+      final fileName = '${Supabase.instance.client.auth.currentUser!.id}/avatar_${DateTime.now().millisecondsSinceEpoch}.svg';
+      
+      await Supabase.instance.client.storage.from('profile-pics').uploadBinary(
+        fileName,
+        Uint8List.fromList(utf8.encode(svgCode)),
+        fileOptions: const FileOptions(contentType: 'image/svg+xml', cacheControl: '3600', upsert: true),
+      );
+
+      final imageUrl = Supabase.instance.client.storage.from('profile-pics').getPublicUrl(fileName);
+      await _profileRepo.updateProfile(profilePicture: imageUrl);
+      
+      setState(() {
+        _profileFuture = _profileRepo.getProfile();
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('New avatar generated!')),
+        );
+      }
+    } catch (e) {
+      print('Error generating avatar: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to generate avatar: $e')),
+        );
+      }
+    }
+  }
+
   void _showAvatarPicker() {
     final avatars = [
       'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Genie.png',
@@ -243,22 +448,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Cat%20Face.png',
       'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Vampire.png',
       'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Woman%20Genie.png',
-      'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Technologist.png',
-      'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Woman%20Technologist.png',
-      'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Astronaut.png',
-      'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Woman%20Astronaut.png',
-      'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Mage.png',
-      'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Woman%20Mage.png',
-      'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Dog%20Face.png',
-      'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Monkey%20Face.png',
-      'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Unicorn%20Face.png',
-      'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Star-Struck.png',
     ];
 
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      useRootNavigator: true,
       builder: (context) => Container(
         height: 400,
         padding: const EdgeInsets.all(24),
@@ -442,18 +636,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             color: AppColors.structuralBrown,
                           ),
                         ),
-                        if (profile?.username != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
-                            child: Text(
-                              '@${profile!.username}',
-                              style: GoogleFonts.workSans(
-                                fontSize: 16,
-                                color: AppColors.mutedGold,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
                         const SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -484,35 +666,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         
-                        const SizedBox(height: 24),
-                        
-                        // Edit Profile Button
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton.icon(
-                              onPressed: () async {
-                                final result = await context.push('/profile/edit', extra: profile);
-                                if (result == true) {
-                                  setState(() {
-                                    _profileFuture = _profileRepo.getProfile();
-                                  });
-                                }
-                              },
-                              icon: const Icon(Icons.edit_note, size: 20),
-                              label: const Text('EDIT PROFILE'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.structuralBrown,
-                                side: BorderSide(color: AppColors.structuralBrown.withOpacity(0.2)),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 40),
                         
                         // Settings List
                         Padding(
@@ -529,19 +683,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 _buildSettingsTile(
                                   icon: Icons.lock,
                                   title: 'Account Security',
-                                  onTap: () => context.push('/settings/security'),
+                                  onTap: () {},
                                 ),
                                 _buildDivider(),
                                 _buildSettingsTile(
                                   icon: Icons.notifications_active,
                                   title: 'Notification Preferences',
-                                  onTap: () => context.push('/settings/notifications'),
+                                  onTap: () {},
                                 ),
                                 _buildDivider(),
                                 _buildSettingsTile(
                                   icon: Icons.credit_card,
                                   title: 'Payment Methods',
-                                  onTap: () => context.push('/settings/payment'),
+                                  onTap: () {},
                                 ),
                               ]),
                               const SizedBox(height: 24),
@@ -549,7 +703,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 _buildSettingsTile(
                                   icon: Icons.support_agent,
                                   title: 'Help & Support',
-                                  onTap: () => context.push('/settings/help'),
+                                  onTap: () {},
                                 ),
                               ]),
                               
@@ -706,3 +860,198 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
+```
+
+## 3. Custom App Bar (core/widgets/custom_app_bar.dart)
+```dart
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../constants/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import '../widgets/glass_container.dart';
+import '../../features/search/presentation/widgets/universal_search_bar.dart';
+
+import '../../features/messages/data/notifications_repository.dart';
+import '../../features/profile/data/profile_repository.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../globals.dart';
+
+class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
+  final String title;
+  final bool showSearch;
+  final bool showNotification;
+  final bool showMenu;
+  final VoidCallback? onNotificationPressed;
+  final VoidCallback? onProfilePressed;
+  final VoidCallback? onMenuPressed;
+
+  const CustomAppBar({
+    super.key,
+    this.title = 'kejapin',
+    this.showSearch = true,
+    this.showNotification = true,
+    this.showMenu = true,
+    this.onNotificationPressed,
+    this.onProfilePressed,
+    this.onMenuPressed,
+  });
+
+  @override
+  State<CustomAppBar> createState() => _CustomAppBarState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class _CustomAppBarState extends State<CustomAppBar> {
+  bool _isSearchActive = false;
+  final NotificationsRepository _notifRepo = NotificationsRepository();
+  final ProfileRepository _profileRepo = ProfileRepository();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      flexibleSpace: GlassContainer(
+         // ... (frosted glass)
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
+        blur: 40,
+        opacity: 0.75, 
+        color: AppColors.structuralBrown,
+        borderColor: AppColors.champagne.withOpacity(0.1),
+        child: Container(),
+      ),
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      leadingWidth: 56,
+      leading: _isSearchActive
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back, color: AppColors.champagne),
+              onPressed: () => setState(() => _isSearchActive = false),
+            )
+          : (widget.showMenu
+              ? IconButton(
+                  icon: const Icon(Icons.menu, color: AppColors.champagne),
+                  onPressed: widget.onMenuPressed ?? () => rootScaffoldKey.currentState?.openDrawer(),
+                )
+              : null),
+      title: _isSearchActive
+          ? const UniversalSearchBar()
+          : Row(
+              children: [
+                Image.asset(
+                  'assets/images/logo.png',
+                  height: 24,
+                  color: AppColors.champagne,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.home_filled, size: 24, color: AppColors.champagne),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  widget.title,
+                  style: GoogleFonts.montserrat(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.champagne,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
+            ),
+      centerTitle: false,
+      actions: [
+        if (!_isSearchActive && widget.showSearch)
+          IconButton(
+            icon: const Icon(Icons.search, color: AppColors.champagne),
+            onPressed: () => setState(() => _isSearchActive = true),
+          ),
+        if (widget.showNotification)
+          StreamBuilder<List<NotificationEntity>>(
+            stream: _notifRepo.getNotificationsStream(),
+            builder: (context, snapshot) {
+              final unreadCount = snapshot.data?.where((n) => !n.isRead).length ?? 0;
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined, color: AppColors.champagne),
+                    onPressed: widget.onNotificationPressed ?? () => context.push('/notifications'),
+                  ),
+                  if (unreadCount > 0)
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: AppColors.mutedGold,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.structuralBrown, width: 1.5),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        Padding(
+          padding: const EdgeInsets.only(right: 16, left: 8),
+          child: GestureDetector(
+            onTap: widget.onProfilePressed,
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.structuralBrown.withOpacity(0.1)),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: FutureBuilder<UserProfile>(
+                    future: _profileRepo.getProfile(),
+                    builder: (context, snapshot) {
+                        String? imageUrl;
+                        if (snapshot.hasData) {
+                             imageUrl = snapshot.data!.profilePicture;
+                        }
+                        
+                        // Fallback logic
+                        if (imageUrl == null || imageUrl.isEmpty) {
+                            final user = Supabase.instance.client.auth.currentUser;
+                            if (user != null) {
+                                final avatarUrl = user.userMetadata?['avatar_url'] ?? user.userMetadata?['picture'];
+                                if (avatarUrl != null) {
+                                    imageUrl = avatarUrl;
+                                }
+                            }
+                        }
+                        
+                        imageUrl ??= 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Technologist.png';
+
+                        if (imageUrl!.toLowerCase().endsWith('.svg')) {
+                            return SvgPicture.network(
+                                imageUrl,
+                                fit: BoxFit.cover,
+                                placeholderBuilder: (BuildContext context) => const Icon(Icons.person, size: 20, color: Colors.grey),
+                            );
+                        }
+
+                        return CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Icon(Icons.person, size: 20, color: Colors.grey),
+                            errorWidget: (context, url, error) => const Icon(Icons.person, size: 20, color: Colors.grey),
+                        );
+                    }
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+```

@@ -38,6 +38,14 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
+      ).apply(
+        fontFamily: GoogleFonts.lato().fontFamily,
+        fontFamilyFallback: [
+          'Noto Sans',
+          'Apple Color Emoji',
+          'Segoe UI Emoji',
+          'Noto Color Emoji',
+        ],
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

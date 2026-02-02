@@ -97,10 +97,6 @@ class _MapScreenState extends State<MapScreen> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: CustomAppBar(
-        title: _isNavigating ? 'Navigating...' : (widget.extra?.title ?? 'Map'),
-        showSearch: false,
-      ),
       body: Stack(
         children: [
           FlutterMap(
@@ -168,6 +164,27 @@ class _MapScreenState extends State<MapScreen> {
                 ],
               ),
             ],
+
+          ),
+
+          // Custom Back Button Overlay
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            left: 20,
+            child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: GlassmorphicContainer(
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    blur: 20,
+                    alignment: Alignment.center,
+                    border: 2,
+                    linearGradient: LinearGradient(colors: [Colors.black.withOpacity(0.6), Colors.black.withOpacity(0.4)]),
+                    borderGradient: LinearGradient(colors: [AppColors.champagne.withOpacity(0.5), Colors.transparent]),
+                    child: const Icon(Icons.arrow_back, color: AppColors.champagne),
+                ),
+            ),
           ),
           
           // Navigation Info Card
