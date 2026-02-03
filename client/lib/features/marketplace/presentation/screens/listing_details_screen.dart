@@ -39,6 +39,15 @@ class ListingDetailsScreen extends StatefulWidget {
   State<ListingDetailsScreen> createState() => _ListingDetailsScreenState();
 }
 
+class PageData {
+  final ListingEntity listing;
+  final List<LifePin> lifePins;
+  final Map<String, CommuteResult> commutes;
+  final bool isSaved;
+
+  PageData(this.listing, this.lifePins, this.commutes, this.isSaved);
+}
+
 class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   final ListingsRepository _listingsRepo = ListingsRepository();
   final LifePinRepository _lifePinRepo = LifePinRepository();
@@ -48,54 +57,86 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   final MapController _mapController = MapController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // Use nullable to check if already loaded
-  Future<ListingEntity>? _listingFuture;
-  Future<List<LifePin>>? _lifePinsFuture;
-  final Map<String, CommuteResult> _commuteResults = {};
-  
+  Future<PageData>? _pageDataFuture;
   late bool _showMap;
   bool _isSaved = false;
   bool _isSaving = false;
-  // Index and Controller moved to ListingImageGallery to prevent whole-screen rebuilds
 
   @override
   void initState() {
     super.initState();
     _showMap = widget.activeViewMode == 'map';
-    // Initialize futures only once
-    _listingFuture ??= _listingsRepo.fetchListingById(widget.id);
-    _lifePinsFuture ??= _lifePinRepo.getLifePins();
-    _calculateCommutes();
-    _checkSavedStatus();
+    _pageDataFuture = _loadPageData().then((data) {
+      if (mounted) {
+        setState(() => _isSaved = data.isSaved);
+      }
+      return data;
+    });
   }
 
   @override
   void dispose() {
-    // Controller disposal handled in ListingImageGallery
     super.dispose();
   }
 
-  Future<void> _checkSavedStatus() async {
-    try {
-      final isSaved = await _listingsRepo.isListingSaved(widget.id);
-      if (mounted) {
-        setState(() => _isSaved = isSaved);
-      }
-    } catch (e) {
-      debugPrint("Error checking saved status: $e");
+  Future<PageData> _loadPageData() async {
+    final listing = await _listingsRepo.fetchListingById(widget.id);
+    final lifePins = await _lifePinRepo.getLifePins();
+    
+    bool isSaved = false;
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      isSaved = await _listingsRepo.isListingSaved(user.id, listing.id);
     }
+
+    final Map<String, CommuteResult> commutes = {};
+    if (lifePins.isNotEmpty) {
+      final futures = lifePins.map((pin) async {
+        try {
+          final result = await _commuteService.calculateCommute(
+            origin: LatLng(listing.latitude, listing.longitude),
+            destination: LatLng(pin.latitude, pin.longitude),
+            mode: pin.transportMode,
+          );
+          return MapEntry(pin.id, result);
+        } catch (e) {
+          return null;
+        }
+      });
+      
+      final results = await Future.wait(futures);
+      for (final entry in results) {
+        if (entry != null) {
+          commutes[entry.key] = entry.value;
+        }
+      }
+    }
+    
+    return PageData(listing, lifePins, commutes, isSaved);
   }
 
   Future<void> _toggleSave() async {
     if (_isSaving) return;
+
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login to save listings')),
+      );
+      return;
+    }
+
     setState(() => _isSaving = true);
+
     try {
       await _listingsRepo.toggleSaveListing(widget.id, _isSaved);
+      
       if (mounted) {
         setState(() {
           _isSaved = !_isSaved;
           _isSaving = false;
         });
+        
         if (_isSaved) {
            _notificationsRepo.createNotification(
              title: AppLocalizations.of(context)!.propertyPinned,
@@ -137,38 +178,12 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
     }
   }
 
-  Future<void> _calculateCommutes() async {
-    try {
-      if (_listingFuture == null || _lifePinsFuture == null) return;
-      
-      final listing = await _listingFuture!;
-      final pins = await _lifePinsFuture!;
-
-      if (mounted) {
-         for (final pin in pins) {
-          final result = await _commuteService.calculateCommute(
-            origin: LatLng(listing.latitude, listing.longitude),
-            destination: LatLng(pin.latitude, pin.longitude),
-            mode: pin.transportMode,
-          );
-          if (mounted) {
-            setState(() {
-              _commuteResults[pin.id] = result;
-            });
-          }
-         }
-      }
-    } catch (e) {
-      print('Error calculating commutes: $e');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: AppColors.alabaster,
-      drawer: const AppDrawer(), // Add drawer directly to this Scaffold
+      drawer: const AppDrawer(),
       appBar: CustomAppBar(
         title: AppLocalizations.of(context)!.propertyDetails,
         showSearch: false,
@@ -176,8 +191,8 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
           _scaffoldKey.currentState?.openDrawer();
         },
       ),
-      body: FutureBuilder(
-        future: Future.wait([_listingFuture!, _lifePinsFuture!]),
+      body: FutureBuilder<PageData>(
+        future: _pageDataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -186,9 +201,14 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
+          
+          if (!snapshot.hasData) {
+             return const Center(child: Text('No data found'));
+          }
 
-          final listing = snapshot.data![0] as ListingEntity;
-          final lifePins = snapshot.data![1] as List<LifePin>;
+          final data = snapshot.data!;
+          final listing = data.listing;
+          final lifePins = data.lifePins;
 
           return Stack(
             children: [
@@ -207,14 +227,14 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                               children: [
                                 _buildTitleSection(listing),
                                 const SizedBox(height: 24),
-                                _buildCommuteSection(lifePins),
+                                _buildCommuteSection(lifePins, data.commutes),
                                 const SizedBox(height: 24),
                                 _buildEfficiencySection(listing),
                                 const SizedBox(height: 24),
                                 _buildDescriptionSection(listing),
                                 const SizedBox(height: 24),
                                 _buildAmenitiesSection(listing),
-                                const SizedBox(height: 20), // Extra padding for bottom list item
+                                const SizedBox(height: 20),
                               ],
                             ),
                           ),
@@ -225,7 +245,6 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                   _buildBottomBar(listing),
                 ],
               ),
-              // Floating Toggle Button moved into Stack correctly if needed, or keep in header
               Positioned(
                  top: 16,
                  left: 0, 
@@ -490,7 +509,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
     );
   }
 
-  Widget _buildCommuteSection(List<LifePin> lifePins) {
+  Widget _buildCommuteSection(List<LifePin> lifePins, Map<String, CommuteResult> commuteResults) {
     if (lifePins.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -508,7 +527,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
             itemCount: lifePins.length,
             itemBuilder: (context, index) {
               final pin = lifePins[index];
-              final commute = _commuteResults[pin.id];
+              final commute = commuteResults[pin.id];
 
               return Container(
                 width: 160,
