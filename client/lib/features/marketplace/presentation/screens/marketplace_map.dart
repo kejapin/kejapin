@@ -16,9 +16,8 @@ import 'package:go_router/go_router.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/services/geo_service.dart';
 import '../../domain/listing_entity.dart';
-import '../../../profile/domain/life_pin_model.dart';
-import '../../../profile/data/life_pin_repository.dart';
 
 class MarketplaceMap extends StatelessWidget {
   final List<ListingEntity> listings;
@@ -58,18 +57,16 @@ class _MarketplaceMapView extends StatefulWidget {
 class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerProviderStateMixin {
   final MapController _mapController = MapController();
   final PanelController _panelController = PanelController();
-  final LifePinRepository _lifePinRepo = LifePinRepository();
   
   double _currentZoom = 13.0;
   LatLng? _userLocation;
-  List<LifePin> _lifePins = [];
-  ListingEntity? _lastSelectedListing; // Track for re-centering on dismiss
+  Map<String, NearbyAmenity> _nearbyAmenities = {};
+  ListingEntity? _lastSelectedListing;
 
   @override
   void initState() {
     super.initState();
     _fetchLocation();
-    _fetchLifePins();
   }
 
   Future<void> _fetchLocation() async {
@@ -92,16 +89,21 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
     }
   }
 
-  Future<void> _fetchLifePins() async {
+  Future<void> _fetchNearbyAmenities(ListingEntity listing) async {
     try {
-      final pins = await _lifePinRepo.getLifePins();
+      final amenities = await GeoService.getNearbyAmenities(
+        latitude: listing.latitude,
+        longitude: listing.longitude,
+        radiusMeters: 1500,
+      );
+      
       if (mounted) {
         setState(() {
-          _lifePins = pins;
+          _nearbyAmenities = amenities;
         });
       }
     } catch (e) {
-      debugPrint("Life Pins error: $e");
+      debugPrint("Amenities fetch error: $e");
     }
   }
 
@@ -121,22 +123,23 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
            _handleClosestToMe(state);
         }
 
-        // Handle Listing Selection (Modal Open)
+        // Handle Listing Selection
         if (state.selectedListing != null) {
           _lastSelectedListing = state.selectedListing;
           _panelController.open();
           
-          // Center pin in TOP HALF of visible area (above sheet)
-          // Sheet takes 60% from bottom. Visible area is top 40%.
-          // We want pin centered in that top 40%, which is at 20% from top of screen.
+          // Fetch nearby amenities for this listing
+          await _fetchNearbyAmenities(state.selectedListing!);
+          
+          // Center pin in visible area
           final pin = LatLng(state.selectedListing!.latitude, state.selectedListing!.longitude);
           
           _mapController.fitCamera(
             CameraFit.coordinates(
               coordinates: [pin],
               padding: EdgeInsets.only(
-                bottom: screenHeight * 0.5, // Push content up
-                top: screenHeight * 0.1, // Some top padding
+                bottom: screenHeight * 0.5,
+                top: screenHeight * 0.1,
                 left: 20,
                 right: 20,
               ),
@@ -144,10 +147,13 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
             ),
           );
         } else if (_lastSelectedListing != null) {
-           // Modal dismissed - re-center the pin normally (lines will disappear via rebuild)
+           // Modal dismissed - re-center and clear amenities
            final pin = LatLng(_lastSelectedListing!.latitude, _lastSelectedListing!.longitude);
            _mapController.move(pin, _currentZoom < 14 ? 14.0 : _currentZoom);
            _lastSelectedListing = null;
+           setState(() {
+             _nearbyAmenities = {};
+           });
            _panelController.close();
         }
       },
@@ -213,11 +219,11 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                       userAgentPackageName: 'com.kejapin.client',
                     ),
                     
-                    // Polylines Layer (Only when selected)
-                    if (state.selectedListing != null)
+                    // Polylines Layer - Lines to amenities
+                    if (state.selectedListing != null && _nearbyAmenities.isNotEmpty)
                       PolylineLayer(
                         polylines: [
-                          // Line from user to listing
+                          // Line from user to listing (main connection)
                           if (_userLocation != null)
                             Polyline(
                               points: [
@@ -228,14 +234,15 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                               strokeWidth: 3.0,
                             ),
                           
-                          // Lines from listing to each Life Pin
-                          ..._lifePins.map((pin) {
+                          // Lines from listing to each nearby amenity
+                          ..._nearbyAmenities.entries.map((entry) {
+                            final amenity = entry.value;
                             return Polyline(
                               points: [
                                 LatLng(state.selectedListing!.latitude, state.selectedListing!.longitude),
-                                LatLng(pin.latitude, pin.longitude),
+                                amenity.position,
                               ],
-                              color: _getColorForLifePin(pin.label),
+                              color: _getColorForAmenityType(entry.key).withOpacity(0.6),
                               strokeWidth: 2.0,
                             );
                           }).toList(),
@@ -263,25 +270,35 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                         ],
                       ),
                     
-                    // Life Pin Markers (Only when listing selected)
-                    if (state.selectedListing != null && _lifePins.isNotEmpty)
+                    // Amenity Markers (only when listing selected)
+                    if (state.selectedListing != null && _nearbyAmenities.isNotEmpty)
                       MarkerLayer(
-                        markers: _lifePins.map((pin) {
+                        markers: _nearbyAmenities.entries.map((entry) {
+                          final amenity = entry.value;
                           return Marker(
-                            point: LatLng(pin.latitude, pin.longitude),
-                            width: 30,
-                            height: 30,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: _getColorForLifePin(pin.label),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2),
-                                boxShadow: const [BoxShadow(blurRadius: 4, color: Colors.black26)],
-                              ),
-                              child: Icon(
-                                _getIconForLifePin(pin.label),
-                                color: Colors.white,
-                                size: 14,
+                            point: amenity.position,
+                            width: 32,
+                            height: 32,
+                            child: FadeIn(
+                              duration: const Duration(milliseconds: 400),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: _getColorForAmenityType(entry.key),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 2.5),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: _getColorForAmenityType(entry.key).withOpacity(0.4),
+                                      blurRadius: 6,
+                                      spreadRadius: 2,
+                                    )
+                                  ],
+                                ),
+                                child: Icon(
+                                  _getIconForAmenityType(entry.key),
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
                               ),
                             ),
                           );
@@ -342,7 +359,7 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                         ),
                       ),
                       
-                      // Reset Filters Button (only show if any filter is active)
+                      // Reset Filters Button
                       if (state.isClosestToMeActive || state.isCheapestActive || 
                           (state.searchQuery != null && state.searchQuery!.isNotEmpty))
                         Padding(
@@ -491,22 +508,58 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
     return filtered;
   }
   
-  Color _getColorForLifePin(String label) {
-    final lower = label.toLowerCase();
-    if (lower.contains('work') || lower.contains('office')) return Colors.blue;
-    if (lower.contains('school') || lower.contains('university')) return Colors.purple;
-    if (lower.contains('gym') || lower.contains('fitness')) return Colors.orange;
-    if (lower.contains('home')) return AppColors.sageGreen;
-    return AppColors.mutedGold;
+  Color _getColorForAmenityType(String type) {
+    switch (type) {
+      case AmenityCategory.healthcare:
+        return const Color(0xFFE53935); // Red
+      case AmenityCategory.education:
+        return const Color(0xFF7E57C2); // Purple
+      case AmenityCategory.shopping:
+        return const Color(0xFF26A69A); // Teal
+      case AmenityCategory.parking:
+        return const Color(0xFF5C6BC0); // Indigo
+      case AmenityCategory.restaurant:
+        return const Color(0xFFFF7043); // Deep Orange
+      case AmenityCategory.bank:
+        return const Color(0xFF66BB6A); // Green
+      case AmenityCategory.public_transport:
+        return const Color(0xFF42A5F5); // Blue
+      case AmenityCategory.gym:
+        return const Color(0xFFEC407A); // Pink
+      case AmenityCategory.entertainment:
+        return const Color(0xFFAB47BC); // Deep Purple
+      case AmenityCategory.security:
+        return const Color(0xFF8D6E63); // Brown
+      default:
+        return AppColors.mutedGold;
+    }
   }
 
-  IconData _getIconForLifePin(String label) {
-    final lower = label.toLowerCase();
-    if (lower.contains('work') || lower.contains('office')) return Icons.work;
-    if (lower.contains('school') || lower.contains('university')) return Icons.school;
-    if (lower.contains('gym') || lower.contains('fitness')) return Icons.fitness_center;
-    if (lower.contains('home')) return Icons.home;
-    return Icons.place;
+  IconData _getIconForAmenityType(String type) {
+    switch (type) {
+      case AmenityCategory.healthcare:
+        return Icons.local_hospital;
+      case AmenityCategory.education:
+        return Icons.school;
+      case AmenityCategory.shopping:
+        return Icons.shopping_cart;
+      case AmenityCategory.parking:
+        return Icons.local_parking;
+      case AmenityCategory.restaurant:
+        return Icons.restaurant;
+      case AmenityCategory.bank:
+        return Icons.account_balance;
+      case AmenityCategory.public_transport:
+        return Icons.directions_bus;
+      case AmenityCategory.gym:
+        return Icons.fitness_center;
+      case AmenityCategory.entertainment:
+        return Icons.theaters;
+      case AmenityCategory.security:
+        return Icons.security;
+      default:
+        return Icons.place;
+    }
   }
 }
 
