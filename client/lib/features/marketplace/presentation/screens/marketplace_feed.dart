@@ -127,9 +127,15 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
             ? BlocBuilder<ListingFeedCubit, ListingFeedState>(
                 builder: (context, state) {
                   if (state is ListingFeedLoaded) {
-                    return MarketplaceMap(listings: state.listings);
+                    return MarketplaceMap(
+                      listings: state.listings,
+                      onShowFilters: _showAdvancedFilters,
+                    );
                   }
-                  return const MarketplaceMap(listings: []);
+                  return MarketplaceMap(
+                    listings: const [],
+                    onShowFilters: _showAdvancedFilters,
+                  );
                 },
               )
             : RefreshIndicator(
