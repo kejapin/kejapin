@@ -17,6 +17,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/listing_entity.dart';
+import '../../../profile/domain/life_pin_model.dart';
+import '../../../profile/data/life_pin_repository.dart';
 
 class MarketplaceMap extends StatelessWidget {
   final List<ListingEntity> listings;
@@ -56,19 +58,22 @@ class _MarketplaceMapView extends StatefulWidget {
 class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerProviderStateMixin {
   final MapController _mapController = MapController();
   final PanelController _panelController = PanelController();
+  final LifePinRepository _lifePinRepo = LifePinRepository();
   
   double _currentZoom = 13.0;
   LatLng? _userLocation;
+  List<LifePin> _lifePins = [];
+  ListingEntity? _lastSelectedListing; // Track for re-centering on dismiss
 
   @override
   void initState() {
     super.initState();
     _fetchLocation();
+    _fetchLifePins();
   }
 
   Future<void> _fetchLocation() async {
     try {
-      // Check permissions logic simplistic for brevity
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -87,10 +92,23 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
     }
   }
 
+  Future<void> _fetchLifePins() async {
+    try {
+      final pins = await _lifePinRepo.getLifePins();
+      if (mounted) {
+        setState(() {
+          _lifePins = pins;
+        });
+      }
+    } catch (e) {
+      debugPrint("Life Pins error: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // We access Cubit here to read state in filtering
     final cubit = context.read<MapViewCubit>();
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return BlocListener<MapViewCubit, MapViewState>(
       listenWhen: (previous, current) {
@@ -105,62 +123,46 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
 
         // Handle Listing Selection (Modal Open)
         if (state.selectedListing != null) {
+          _lastSelectedListing = state.selectedListing;
           _panelController.open();
           
-          // Smart Auto-Move: Center the pin in the top viewing area.
-          // Viewing area is Top 40% (since 60% covered). Center is 20%.
-          // We need to shift map so pin is at 20% from top.
+          // Center pin in TOP HALF of visible area (above sheet)
+          // Sheet takes 60% from bottom. Visible area is top 40%.
+          // We want pin centered in that top 40%, which is at 20% from top of screen.
           final pin = LatLng(state.selectedListing!.latitude, state.selectedListing!.longitude);
           
-          // We can use CameraFit to pad bottom!
           _mapController.fitCamera(
             CameraFit.coordinates(
               coordinates: [pin],
               padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).size.height * 0.5, // Push pin up
-                top: 50,
+                bottom: screenHeight * 0.5, // Push content up
+                top: screenHeight * 0.1, // Some top padding
                 left: 20,
-                right: 20
+                right: 20,
               ),
-              maxZoom: min(16.0, _currentZoom < 14 ? 15.0 : _currentZoom), // Ensure decent zoom
+              maxZoom: _currentZoom < 14 ? 15.0 : _currentZoom.clamp(14.0, 17.0),
             ),
           );
-        } else {
-           // Modal Closed logic
-           // "map moves again centering the pin and lines disappear"
-           // Wait, if we close modal, maybe we want to keep map where it is?
-           // Or re-center on the last selected to see it fully?
-           // User said: "map moves again centering the pin".
-           // This means we remove the padding/offset.
-           
-           // We only do this if we had a selection previously? 
-           // Usually just leaving it is fine but user asked explicitly.
-           // Since 'selectedListing' becomes null here, we can't get coordinates easily unless we cached it.
-           // But actually if user taps map to close, they want to explore.
-           // Let's just reset padding/view if needed, or do nothing.
-           // _panelController.close() handles sheet.
-           
+        } else if (_lastSelectedListing != null) {
+           // Modal dismissed - re-center the pin normally (lines will disappear via rebuild)
+           final pin = LatLng(_lastSelectedListing!.latitude, _lastSelectedListing!.longitude);
+           _mapController.move(pin, _currentZoom < 14 ? 14.0 : _currentZoom);
+           _lastSelectedListing = null;
            _panelController.close();
         }
       },
       child: BlocBuilder<MapViewCubit, MapViewState>(
         builder: (context, state) {
-          // Process Listings
           final displayListings = _processListings(widget.listings, state);
 
           return SlidingUpPanel(
             controller: _panelController,
             minHeight: 0, 
-            maxHeight: MediaQuery.of(context).size.height * 0.6,
+            maxHeight: screenHeight * 0.6,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             parallaxEnabled: true,
             parallaxOffset: 0.5,
-            backdropEnabled: false, // User wants to see map still? "still see the pin".
-            // If backdrop is true, map is dimmed. User wants to see pin at top.
-            // Let's disable backdrop or make it very light.
-            // Actually, if map interacts, we need backdrop false or tap pass-through.
-            // Default panel handles taps on body by closing?
-            // User: "if user dismises the modal map moves again".
+            backdropEnabled: false,
             
             panelBuilder: (scrollController) {
               if (state.selectedListing == null) return const SizedBox.shrink();
@@ -186,7 +188,7 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
             },
             
             onPanelClosed: () {
-              context.read<MapViewCubit>().closeBottomSheet();
+              cubit.closeBottomSheet();
             },
 
             body: Stack(
@@ -194,7 +196,7 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                 FlutterMap(
                   mapController: _mapController,
                   options: MapOptions(
-                    initialCenter: const LatLng(-1.2921, 36.8219), // Nairobi
+                    initialCenter: const LatLng(-1.2921, 36.8219),
                     initialZoom: 13.0,
                     onPositionChanged: (pos, _) {
                        if (pos.zoom != null && pos.zoom != _currentZoom) {
@@ -202,7 +204,7 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                        }
                     },
                     onTap: (_, __) {
-                      context.read<MapViewCubit>().closeBottomSheet();
+                      cubit.closeBottomSheet();
                     },
                   ),
                   children: [
@@ -211,19 +213,32 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                       userAgentPackageName: 'com.kejapin.client',
                     ),
                     
-                    // Lines Layer (Only when selected)
-                    if (state.selectedListing != null && _userLocation != null)
+                    // Polylines Layer (Only when selected)
+                    if (state.selectedListing != null)
                       PolylineLayer(
                         polylines: [
-                          Polyline(
-                            points: [
-                              _userLocation!,
-                              LatLng(state.selectedListing!.latitude, state.selectedListing!.longitude)
-                            ],
-                            color: AppColors.structuralBrown,
-                            strokeWidth: 3.0,
-                            // pattern: StrokePattern.dotted(), // Uncomment if StrokePattern is available in this version
-                          ),
+                          // Line from user to listing
+                          if (_userLocation != null)
+                            Polyline(
+                              points: [
+                                _userLocation!,
+                                LatLng(state.selectedListing!.latitude, state.selectedListing!.longitude)
+                              ],
+                              color: AppColors.structuralBrown,
+                              strokeWidth: 3.0,
+                            ),
+                          
+                          // Lines from listing to each Life Pin
+                          ..._lifePins.map((pin) {
+                            return Polyline(
+                              points: [
+                                LatLng(state.selectedListing!.latitude, state.selectedListing!.longitude),
+                                LatLng(pin.latitude, pin.longitude),
+                              ],
+                              color: _getColorForLifePin(pin.label),
+                              strokeWidth: 2.0,
+                            );
+                          }).toList(),
                         ],
                       ),
                     
@@ -233,31 +248,57 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                         markers: [
                           Marker(
                             point: _userLocation!,
-                            width: 20,
-                            height: 20,
+                            width: 24,
+                            height: 24,
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.blueAccent,
+                                color: AppColors.sageGreen,
                                 shape: BoxShape.circle,
                                 border: Border.all(color: Colors.white, width: 2),
                                 boxShadow: const [BoxShadow(blurRadius: 5, color: Colors.black26)],
                               ),
+                              child: const Icon(Icons.person, color: Colors.white, size: 12),
                             ),
                           ),
                         ],
                       ),
                     
-                    // Markers Layer
+                    // Life Pin Markers (Only when listing selected)
+                    if (state.selectedListing != null && _lifePins.isNotEmpty)
+                      MarkerLayer(
+                        markers: _lifePins.map((pin) {
+                          return Marker(
+                            point: LatLng(pin.latitude, pin.longitude),
+                            width: 30,
+                            height: 30,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: _getColorForLifePin(pin.label),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 2),
+                                boxShadow: const [BoxShadow(blurRadius: 4, color: Colors.black26)],
+                              ),
+                              child: Icon(
+                                _getIconForLifePin(pin.label),
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    
+                    // Property Markers Layer
                     MarkerClusterLayerWidget(
                       options: MarkerClusterLayerOptions(
-                        maxClusterRadius: 100, // Reduced radius for better accuracy
+                        maxClusterRadius: 100,
                         size: const Size(100, 60),
                         alignment: Alignment.center,
                         padding: const EdgeInsets.all(50),
                         markers: displayListings.map((listing) {
                           return Marker(
                             point: LatLng(listing.latitude, listing.longitude),
-                            width: _currentZoom > 15.5 ? 160 : 80, // Dynamic size
+                            width: _currentZoom > 15.5 ? 160 : 80,
                             height: _currentZoom > 15.5 ? 70 : 40,
                             child: _buildProgressiveMarker(listing, state),
                           );
@@ -265,9 +306,7 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                         builder: (context, markers) {
                            return ClusterMarker(
                              count: markers.length,
-                             onTap: () {
-                               // Default is zoom, which is fine
-                             },
+                             onTap: () {},
                            );
                         },
                       ),
@@ -302,6 +341,45 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                           },
                         ),
                       ),
+                      
+                      // Reset Filters Button (only show if any filter is active)
+                      if (state.isClosestToMeActive || state.isCheapestActive || 
+                          (state.searchQuery != null && state.searchQuery!.isNotEmpty))
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: GestureDetector(
+                            onTap: () => cubit.clearFilters(),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.clear, size: 14, color: AppColors.structuralBrown),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Clear Filters',
+                                    style: TextStyle(
+                                      color: AppColors.structuralBrown,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -314,11 +392,6 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
   }
 
   Widget _buildProgressiveMarker(ListingEntity listing, MapViewState state) {
-    // Zoom Logic
-    // < 12: Dot (Actually Cluster handles this if radius is large, but if single item exists)
-    // 12 - 15.5: PricePill (Gold)
-    // > 15.5: SmallCard
-
     if (_currentZoom < 12.0) {
       return GestureDetector(
         onTap: () => context.read<MapViewCubit>().selectListing(listing),
@@ -355,20 +428,14 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
 
   void _handleClosestToMe(MapViewState state) {
      if (_userLocation == null) {
-        // Trigger fetch if null?
-        // _fetchLocation(); // Assumes user will wait. 
-        // Or show snackbar "Getting location..."
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Getting your location...')),
+        );
         return;
      }
      
-     // Find closest listing
      ListingEntity? closest;
      double minDistance = double.infinity;
-     
-     // Note: We use the already processed lists if possible, OR logic in Cubit
-     // But here we need to act on the full list or filtered list.
-     // Let's use widget.listings for full scope search or filtered?
-     // Filters apply. So process list first.
      
      final candidates = _processListings(widget.listings, state);
      if (candidates.isEmpty) return;
@@ -385,10 +452,6 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
      }
      
      if (closest != null) {
-        // Select it AND Move Map
-        // Selecting it will trigger the other listener to Move Map!
-        // But we want it centered? Or with sheet?
-        // If we select, sheet opens. So "Move with Padding" applies.
         context.read<MapViewCubit>().selectListing(closest);
      }
   }
@@ -398,7 +461,7 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
 
     List<ListingEntity> filtered = List.from(listings);
 
-    // 1. Text Search
+    // Text Search
     if (state.searchQuery != null && state.searchQuery!.isNotEmpty) {
       final q = state.searchQuery!.toLowerCase();
       filtered = filtered.where((l) => 
@@ -408,7 +471,7 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
       ).toList();
     }
 
-    // 2. Sorting
+    // Sorting
     if (state.isCheapestActive && !state.isClosestToMeActive) {
        filtered.sort((a, b) => a.priceAmount.compareTo(b.priceAmount));
     } else if (state.isClosestToMeActive && _userLocation != null) {
@@ -418,22 +481,32 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
           return da.compareTo(db);
        });
     } else if (state.isClosestToMeActive && state.isCheapestActive && _userLocation != null) {
-         // Combined sort: normalized score? simple: distance primary?
-         // User said: "closest and cheapest".
-         // Let's sort by distance first, then price? 
-         // Or simple: Sort by Price * Distance Factor?
-         // Simplest effective: Sort by Price, but valid only within X km?
-         // Let's stick to Distance sort as "closest" is usually primary intent for geography.
           filtered.sort((a, b) {
             final da = Geolocator.distanceBetween(_userLocation!.latitude, _userLocation!.longitude, a.latitude, a.longitude);
             final db = Geolocator.distanceBetween(_userLocation!.latitude, _userLocation!.longitude, b.latitude, b.longitude);
-            return da.compareTo(db); // Priority to location
+            return da.compareTo(db);
          });
     }
 
     return filtered;
   }
   
-  double min(double a, double b) => a < b ? a : b;
+  Color _getColorForLifePin(String label) {
+    final lower = label.toLowerCase();
+    if (lower.contains('work') || lower.contains('office')) return Colors.blue;
+    if (lower.contains('school') || lower.contains('university')) return Colors.purple;
+    if (lower.contains('gym') || lower.contains('fitness')) return Colors.orange;
+    if (lower.contains('home')) return AppColors.sageGreen;
+    return AppColors.mutedGold;
+  }
+
+  IconData _getIconForLifePin(String label) {
+    final lower = label.toLowerCase();
+    if (lower.contains('work') || lower.contains('office')) return Icons.work;
+    if (lower.contains('school') || lower.contains('university')) return Icons.school;
+    if (lower.contains('gym') || lower.contains('fitness')) return Icons.fitness_center;
+    if (lower.contains('home')) return Icons.home;
+    return Icons.place;
+  }
 }
 
