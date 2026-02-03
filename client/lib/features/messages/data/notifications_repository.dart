@@ -118,9 +118,21 @@ class NotificationsRepository {
       await _supabase
           .from('notifications')
           .update({'is_read': true})
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .eq('is_read', false); // Only update unread ones
     } catch (e) {
       print('Error marking all notifications as read: $e');
+    }
+  }
+
+  Future<void> deleteNotification(String id) async {
+    try {
+      await _supabase
+          .from('notifications')
+          .delete()
+          .eq('id', id);
+    } catch (e) {
+      print('Error deleting notification: $e');
     }
   }
 }

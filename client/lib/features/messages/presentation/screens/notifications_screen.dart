@@ -21,9 +21,17 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
   final _repository = NotificationsRepository();
+  bool _isMarkingAll = false;
 
   Future<void> _markAllRead() async {
+    setState(() => _isMarkingAll = true);
     await _repository.markAllAsRead();
+    if (mounted) {
+      setState(() => _isMarkingAll = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('All notifications marked as read')),
+      );
+    }
   }
 
   @override
@@ -32,6 +40,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       stream: _repository.getNotificationsStream(),
       builder: (context, snapshot) {
         final notifications = snapshot.data ?? [];
+        final hasUnread = notifications.any((n) => !n.isRead);
+
         return Scaffold(
           body: Stack(
             children: [
@@ -53,7 +63,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               SafeArea(
                 child: Column(
                   children: [
-                    _buildHeader(context, notifications),
+                    _buildHeader(context, notifications, hasUnread),
                     Expanded(
                       child: snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData
                           ? const Center(child: CircularProgressIndicator(color: AppColors.mutedGold))
@@ -72,9 +82,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, List<NotificationEntity> notifications) {
+  Widget _buildHeader(BuildContext context, List<NotificationEntity> notifications, bool hasUnread) {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Row(
         children: [
           GestureDetector(
@@ -96,19 +106,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ),
           ),
           const Spacer(),
-          if (notifications.isNotEmpty)
-            TextButton(
-              onPressed: _markAllRead,
-              child: Text(
-                AppLocalizations.of(context)!.markAllRead,
-                style: const TextStyle(
-                  color: AppColors.mutedGold,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
+          if (hasUnread)
+            _isMarkingAll 
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.mutedGold))
+              : TextButton.icon(
+                  onPressed: _markAllRead,
+                  icon: const Icon(Icons.done_all, color: AppColors.mutedGold, size: 16),
+                  label: Text(
+                    AppLocalizations.of(context)!.markAllRead,
+                    style: const TextStyle(
+                      color: AppColors.mutedGold,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
                 ),
-              ),
-            ),
         ],
       ),
     );
@@ -198,68 +211,122 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       delay: Duration(milliseconds: 50 * index),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        child: InkWell(
-          onTap: () {
-            _repository.markAsRead(notification.id);
-            if (notification.route != null) {
-              context.push(notification.route!);
-            }
+        child: Dismissible(
+          key: Key(notification.id),
+          direction: DismissDirection.endToStart,
+          background: Container(
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.only(right: 20),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(Icons.delete_outline, color: Colors.redAccent),
+          ),
+          onDismissed: (_) {
+            _repository.deleteNotification(notification.id);
           },
-          borderRadius: BorderRadius.circular(16),
-          child: GlassContainer(
+          child: InkWell(
+            onTap: () async {
+              if (!notification.isRead) {
+                await _repository.markAsRead(notification.id);
+              }
+              if (mounted && notification.route != null) {
+                context.push(notification.route!);
+              }
+            },
             borderRadius: BorderRadius.circular(16),
-            opacity: notification.isRead ? 0.1 : 0.25,
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: iconColor.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: iconColor, size: 20),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            child: GlassContainer(
+              borderRadius: BorderRadius.circular(16),
+              opacity: notification.isRead ? 0.08 : 0.22,
+              borderColor: notification.isRead ? Colors.white10 : AppColors.mutedGold.withOpacity(0.3),
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Stack(
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            notification.title,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: notification.isRead ? FontWeight.w500 : FontWeight.bold,
-                              fontSize: 14,
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: iconColor.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(icon, color: iconColor, size: 20),
+                      ),
+                      if (!notification.isRead)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: AppColors.mutedGold,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppColors.structuralBrown, width: 2),
                             ),
                           ),
-                          Text(
-                            DateFormat.jm().format(notification.createdAt),
-                            style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        notification.message,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 13,
-                          height: 1.4,
                         ),
-                      ),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                notification.title,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: notification.isRead ? FontWeight.w500 : FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              _getTimeAgo(notification.createdAt),
+                              style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          notification.message,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(notification.isRead ? 0.6 : 0.9),
+                            fontSize: 13,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  String _getTimeAgo(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d ago';
+    } else {
+      return DateFormat('MMM d').format(date);
+    }
   }
 }

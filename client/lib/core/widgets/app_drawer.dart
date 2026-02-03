@@ -172,7 +172,7 @@ class AppDrawer extends StatelessWidget {
                             const Divider(color: Colors.white10),
                             _DrawerItem(
                               icon: Icons.language_outlined,
-                              title: AppLocalizations.of(context)!.settings,
+                              title: AppLocalizations.of(context)!.languagePreference,
                               onTap: () {
                                 Navigator.pop(context);
                                 _showLanguageSelector(context);
