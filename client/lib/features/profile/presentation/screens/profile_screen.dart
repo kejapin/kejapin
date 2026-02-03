@@ -10,7 +10,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:random_avatar/random_avatar.dart';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 import '../../../../features/auth/data/auth_repository.dart';
 import '../../data/profile_repository.dart';
@@ -218,7 +217,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     try {
-      await _profileRepo.uploadProfilePicture(File(image.path));
+      final bytes = await image.readAsBytes();
+      final ext = image.name.split('.').last; // XFile.name usually has extension
+      
+      await _profileRepo.uploadProfilePicture(bytes, ext);
+      
       setState(() {
         _profileFuture = _profileRepo.getProfile();
       });

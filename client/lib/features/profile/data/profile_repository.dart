@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:io';
 import '../../../../core/constants/api_endpoints.dart';
 
@@ -176,17 +177,16 @@ class ProfileRepository {
     }
   }
 
-  Future<String> uploadProfilePicture(File imageFile) async {
+  Future<String> uploadProfilePicture(Uint8List bytes, String fileExt) async {
     final user = supabase.auth.currentUser;
     if (user == null) throw Exception('User not logged in');
 
-    final fileExt = imageFile.path.split('.').last;
     final fileName = '${user.id}/${DateTime.now().millisecondsSinceEpoch}.$fileExt';
 
     try {
-      await supabase.storage.from('profile-pics').upload(
+      await supabase.storage.from('profile-pics').uploadBinary(
         fileName,
-        imageFile,
+        bytes,
         fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
       );
 
