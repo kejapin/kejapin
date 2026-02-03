@@ -726,9 +726,13 @@ class _ChatScreenState extends State<ChatScreen> {
         case 'schedule':
           final date = DateTime.parse(msg.metadata!['date']);
           final title = msg.metadata!['title'] ?? 'Event';
+          final description = msg.metadata!['description'];
+          final location = msg.metadata!['location'];
           content = ScheduleBubble(
             date: date, 
             title: title, 
+            description: description,
+            location: location,
             isMe: isMe,
             onConfirm: () => _handleScheduleResponse(title, date, 'Confirmed'),
             onReschedule: () => _handleScheduleAppointment(initialTitle: title, initialDate: date),
