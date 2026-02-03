@@ -20,6 +20,7 @@ import 'features/messages/presentation/screens/messages_screen.dart';
 import 'features/messages/presentation/screens/notifications_screen.dart';
 import 'features/messages/presentation/screens/chat_screen.dart';
 
+import 'features/messages/presentation/screens/user_info_screen.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
 import 'features/profile/presentation/screens/settings_screen.dart';
 import 'features/profile/presentation/screens/edit_profile_screen.dart';
@@ -349,7 +350,17 @@ final GoRouter _router = GoRouter(
       },
     ),
 
-    // Search & Details Routes (Outside shell for full-screen feel)
+    GoRoute(
+      path: '/user-info',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>;
+        return UserInfoScreen(
+          userId: extra['userId'],
+          userName: extra['userName'],
+          avatarUrl: extra['avatarUrl'],
+        );
+      },
+    ),
     GoRoute(
       path: '/search-results',
       builder: (context, state) {

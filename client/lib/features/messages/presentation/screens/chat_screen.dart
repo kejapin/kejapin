@@ -268,17 +268,22 @@ class _ChatScreenState extends State<ChatScreen> {
               icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
             ),
             const SizedBox(width: 4),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.1),
+            GestureDetector(
+              onTap: () => _showProfileModal(
+                 widget.avatarUrl ?? MessagesRepository.ensureFullUrl(MessagesRepository.getUserCache(widget.otherUserId)?['profile_picture'])
               ),
-              child: ValueListenableBuilder<int>(
-                valueListenable: MessagesRepository.cacheVersion,
-                builder: (context, version, _) => _buildAvatar(
-                  widget.avatarUrl ?? MessagesRepository.ensureFullUrl(MessagesRepository.getUserCache(widget.otherUserId)?['profile_picture'])
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.1),
+                ),
+                child: ValueListenableBuilder<int>(
+                  valueListenable: MessagesRepository.cacheVersion,
+                  builder: (context, version, _) => _buildAvatar(
+                    widget.avatarUrl ?? MessagesRepository.ensureFullUrl(MessagesRepository.getUserCache(widget.otherUserId)?['profile_picture'])
+                  ),
                 ),
               ),
             ),
@@ -306,6 +311,129 @@ class _ChatScreenState extends State<ChatScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                 ],
+              ),
+            ),
+            // Menu Button
+            Material(
+              color: Colors.transparent,
+              child: PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert, color: Colors.white),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                color: Colors.white,
+                onSelected: (value) {
+                  if (value == 'info') {
+                    _navigateToUserInfo();
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    value: 'info',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline, color: AppColors.structuralBrown),
+                        const SizedBox(width: 12),
+                        Text(AppLocalizations.of(context)!.userInfo, style: GoogleFonts.workSans(color: AppColors.structuralBrown)),
+                      ],
+                    ),
+                  ),
+                  // Future items can be added here
+                  PopupMenuItem<String>(
+                    value: 'report',
+                    enabled: false,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.flag_outlined, color: Colors.grey),
+                        const SizedBox(width: 12),
+                        Text(AppLocalizations.of(context)!.reportUser, style: GoogleFonts.workSans(color: Colors.grey)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToUserInfo() {
+    context.push('/user-info', extra: {
+      'userId': widget.otherUserId,
+      'userName': widget.otherUserName,
+      'avatarUrl': widget.avatarUrl ?? MessagesRepository.getUserCache(widget.otherUserId)?['profile_picture'],
+    });
+  }
+
+  void _showProfileModal(String? url) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: double.infinity,
+              constraints: const BoxConstraints(maxHeight: 500),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    child: Hero(
+                      tag: 'profile_pic_modal_${widget.otherUserId}',
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: Colors.grey[100],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: _buildAvatar(url), // Reusing existing buildAvatar but it returns ClipOval. Might need adjustments.
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        widget.otherUserName,
+                        style: GoogleFonts.workSans(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.structuralBrown,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                           Navigator.pop(context);
+                           _navigateToUserInfo();
+                        },
+                        icon: const Icon(Icons.info_outline, color: AppColors.mutedGold, size: 28),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                  child: const Icon(Icons.close, size: 20, color: Colors.black),
+                ),
               ),
             ),
           ],

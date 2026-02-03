@@ -121,7 +121,14 @@ class _MessagesScreenState extends State<MessagesScreen> {
                             message: msg.content,
                             avatarUrl: msg.otherUserAvatar,
                             initials: msg.otherUserName.isNotEmpty ? msg.otherUserName[0] : '?',
+                            initials: msg.otherUserName.isNotEmpty ? msg.otherUserName[0] : '?',
                             isUnread: !msg.isRead,
+                            onAvatarTap: () => _showProfileModal(
+                                context, 
+                                msg.otherUserAvatar, 
+                                msg.otherUserName, 
+                                msg.otherUserId
+                            ),
                           ),
                         );
                       },
@@ -130,6 +137,121 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 );
   }
 
+  void _showProfileModal(BuildContext context, String? url, String name, String userId) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: double.infinity,
+              constraints: const BoxConstraints(maxHeight: 500),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    child: Hero(
+                      tag: 'profile_pic_modal_$userId',
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: Colors.grey[100],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: _buildAvatar(url, name), 
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        name,
+                        style: GoogleFonts.workSans(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.structuralBrown,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                           Navigator.pop(context); // Close modal
+                           context.push('/user-info', extra: {
+                             'userId': userId,
+                             'userName': name,
+                             'avatarUrl': url,
+                           });
+                        },
+                        icon: const Icon(Icons.info_outline, color: AppColors.mutedGold, size: 28),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+             Positioned(
+              top: 0,
+              right: 0,
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                  child: const Icon(Icons.close, size: 20, color: Colors.black),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatar(String? url, String name) {
+    if (url == null || url.isEmpty) {
+        return Container(
+          color: AppColors.structuralBrown.withOpacity(0.1),
+          child: Center(
+            child: Text(
+              name.isNotEmpty ? name[0].toUpperCase() : '?',
+              style: GoogleFonts.workSans(fontSize: 40, fontWeight: FontWeight.bold, color: AppColors.structuralBrown),
+            ),
+          ),
+        );
+    }
+    final isSvg = url.toLowerCase().endsWith('.svg');
+    final isLottie = url.toLowerCase().endsWith('.json');
+
+    return isSvg 
+        ? SvgPicture.network(url, fit: BoxFit.cover)
+        : isLottie
+            ? Lottie.network(url, fit: BoxFit.cover)
+            : CachedNetworkImage(
+                imageUrl: url,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, err) => const Icon(Icons.error),
+              );
+  }
+
+  Widget _buildMessageTile({
+    required String name,
+    required String time,
+    required String property,
+    required String message,
+    String? avatarUrl,
   Widget _buildMessageTile({
     required String name,
     required String time,
@@ -138,6 +260,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
     String? avatarUrl,
     String? initials,
     bool isUnread = false,
+    VoidCallback? onAvatarTap,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -158,7 +281,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Avatar
-          Stack(
+          GestureDetector(
+             onTap: onAvatarTap,
+             child: Stack(
             children: [
               Container(
                 width: 56,
@@ -255,6 +380,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   ),
                 ),
             ],
+          ),
           ),
           const SizedBox(width: 16),
           // Content
