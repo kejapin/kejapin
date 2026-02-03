@@ -372,8 +372,9 @@ class MessagesRepository {
             message: content,
             type: 'MESSAGE',
             metadata: {
-                'sender_id': user.id,
-                'sender_avatar': senderAvatar,
+                'otherUserId': user.id,
+                'otherUserName': senderName,
+                'avatarUrl': senderAvatar,
             },
             route: '/chat' // App will handle extra data on tap
         );

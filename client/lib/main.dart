@@ -343,9 +343,9 @@ final GoRouter _router = GoRouter(
         final queryParams = state.uri.queryParameters;
         
         return ChatScreen(
-          otherUserId: extras['otherUserId'] ?? queryParams['otherUserId'] ?? '',
-          otherUserName: extras['otherUserName'] ?? queryParams['otherUserName'] ?? 'Chat',
-          avatarUrl: extras['avatarUrl'] ?? queryParams['avatarUrl'],
+          otherUserId: extras['otherUserId'] ?? queryParams['otherUserId'] ?? queryParams['sender_id'] ?? '',
+          otherUserName: extras['otherUserName'] ?? queryParams['otherUserName'] ?? queryParams['sender_name'] ?? 'Chat',
+          avatarUrl: extras['avatarUrl'] ?? queryParams['avatarUrl'] ?? queryParams['sender_avatar'],
           propertyTitle: extras['propertyTitle'] ?? queryParams['propertyTitle'],
           propertyId: extras['propertyId'] ?? queryParams['propertyId'],
         );
