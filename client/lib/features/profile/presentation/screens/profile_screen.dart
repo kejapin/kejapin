@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
 import 'package:random_avatar/random_avatar.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -695,6 +696,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         width: 120, // specific size for consistency
         height: 120,
         placeholderBuilder: (BuildContext context) => const CircularProgressIndicator(),
+      );
+    }
+    
+    if (imageUrl.toLowerCase().endsWith('.json')) {
+      return Lottie.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        width: 120,
+        height: 120,
+        errorBuilder: (context, error, stackTrace) => const Icon(Icons.error_outline, size: 60, color: Colors.grey),
       );
     }
 
