@@ -1,8 +1,6 @@
-```
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:client/l10n/app_localizations.dart';
-import 'package:client/features/marketplace/presentation/widgets/property_bubble.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -217,7 +215,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
                                 ),
                               ),
                             ))
-                      : Container(
                       : Container(
                           color: AppColors.structuralBrown.withOpacity(0.1),
                           child: Center(
