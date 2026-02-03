@@ -309,6 +309,32 @@ class MessagesRepository {
     cacheVersion.value++;
   }
 
+  Future<void> createAppointment({
+    required String recipientId,
+    required String title,
+    required DateTime date,
+    String? propertyId,
+    Map<String, dynamic>? metadata,
+  }) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    try {
+      await _supabase.from('appointments').insert({
+        'requester_id': user.id,
+        'recipient_id': recipientId,
+        'title': title,
+        'start_time': date.toIso8601String(),
+        'property_id': propertyId,
+        'status': 'pending',
+        'metadata': metadata ?? {},
+      });
+    } catch (e) {
+      print('Error creating appointment: $e');
+      // Non-blocking, continue
+    }
+  }
+
   Future<void> sendMessage({
     required String recipientId,
     required String content,

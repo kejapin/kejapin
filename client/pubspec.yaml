@@ -87,6 +87,7 @@ dependencies:
   flutter_map_location_marker: ^10.0.2
   sliding_up_panel: ^2.0.0+1
   equatable: ^2.0.8
+  add_2_calendar: ^3.0.1
 
 dev_dependencies:
   flutter_test:

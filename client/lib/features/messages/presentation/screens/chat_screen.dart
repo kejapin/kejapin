@@ -1084,6 +1084,14 @@ class _ChatScreenState extends State<ChatScreen> {
     );
 
     if (result != null) {
+      await _repository.createAppointment(
+        recipientId: widget.otherUserId,
+        title: result['title'],
+        date: DateTime.parse(result['date']),
+        propertyId: widget.propertyId,
+        metadata: result,
+      );
+
       await _repository.sendMessage(
         recipientId: widget.otherUserId,
         content: '📅 Scheduled: ${result['title']}',
