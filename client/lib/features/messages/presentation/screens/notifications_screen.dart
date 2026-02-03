@@ -232,7 +232,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 await _repository.markAsRead(notification.id);
               }
               if (mounted && notification.route != null) {
-                context.push(notification.route!);
+                String route = notification.route!;
+                
+                // If the route doesn't already have query params, append from metadata
+                if (!route.contains('?') && notification.metadata != null) {
+                  final params = <String, String>{};
+                  notification.metadata!.forEach((key, value) {
+                    params[key] = value.toString();
+                  });
+                  
+                  if (params.isNotEmpty) {
+                    final query = Uri(queryParameters: params).query;
+                    route = '$route?$query';
+                  }
+                }
+                
+                context.push(route);
               }
             },
             borderRadius: BorderRadius.circular(16),

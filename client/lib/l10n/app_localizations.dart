@@ -129,6 +129,12 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
+  /// No description provided for @languagePreference.
+  ///
+  /// In en, this message translates to:
+  /// **'Language Preference'**
+  String get languagePreference;
+
   /// No description provided for @becomePartner.
   ///
   /// In en, this message translates to:

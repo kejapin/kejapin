@@ -338,14 +338,18 @@ final GoRouter _router = GoRouter(
     // Chat Route (Outside shell for full-screen immersive chat without bottom nav)
     GoRoute(
       path: '/chat',
+    GoRoute(
+      path: '/chat',
       builder: (context, state) {
-        final extras = state.extra as Map<String, dynamic>;
+        final extras = state.extra as Map<String, dynamic>? ?? {};
+        final queryParams = state.uri.queryParameters;
+        
         return ChatScreen(
-          otherUserId: extras['otherUserId'],
-          otherUserName: extras['otherUserName'],
-          avatarUrl: extras['avatarUrl'],
-          propertyTitle: extras['propertyTitle'],
-          propertyId: extras['propertyId'],
+          otherUserId: extras['otherUserId'] ?? queryParams['otherUserId'] ?? '',
+          otherUserName: extras['otherUserName'] ?? queryParams['otherUserName'] ?? 'Chat',
+          avatarUrl: extras['avatarUrl'] ?? queryParams['avatarUrl'],
+          propertyTitle: extras['propertyTitle'] ?? queryParams['propertyTitle'],
+          propertyId: extras['propertyId'] ?? queryParams['propertyId'],
         );
       },
     ),
@@ -353,11 +357,13 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/user-info',
       builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>;
+        final extra = state.extra as Map<String, dynamic>? ?? {};
+        final queryParams = state.uri.queryParameters;
+        
         return UserInfoScreen(
-          userId: extra['userId'],
-          userName: extra['userName'],
-          avatarUrl: extra['avatarUrl'],
+          userId: extra['userId'] ?? queryParams['userId'] ?? '',
+          userName: extra['userName'] ?? queryParams['userName'] ?? 'User',
+          avatarUrl: extra['avatarUrl'] ?? queryParams['avatarUrl'],
         );
       },
     ),

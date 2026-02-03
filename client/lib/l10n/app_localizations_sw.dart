@@ -24,6 +24,9 @@ class AppLocalizationsSw extends AppLocalizations {
   String get settings => 'Mipangilio';
 
   @override
+  String get languagePreference => 'Upendeleo wa Lugha';
+
+  @override
   String get becomePartner => 'Kuwa Mshirika';
 
   @override
@@ -1095,6 +1098,9 @@ class AppLocalizationsSwKe extends AppLocalizationsSw {
 
   @override
   String get settings => 'Settings';
+
+  @override
+  String get languagePreference => 'Settings za Lugha';
 
   @override
   String get becomePartner => 'Kuwa Partner';
