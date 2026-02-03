@@ -731,7 +731,7 @@ class _ChatScreenState extends State<ChatScreen> {
             title: title, 
             isMe: isMe,
             onConfirm: () => _handleScheduleResponse(title, date, 'Confirmed'),
-            onReschedule: () => _handleScheduleResponse(title, date, 'Reschedule requested for'),
+            onReschedule: () => _handleScheduleAppointment(initialTitle: title, initialDate: date),
           );
           break;
         case 'image':
@@ -1074,10 +1074,13 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  Future<void> _handleScheduleAppointment() async {
+  Future<void> _handleScheduleAppointment({String? initialTitle, DateTime? initialDate}) async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => const SchedulePickerDialog(),
+      builder: (context) => SchedulePickerDialog(
+        initialDate: initialDate, 
+        initialType: initialTitle
+      ),
     );
 
     if (result != null) {

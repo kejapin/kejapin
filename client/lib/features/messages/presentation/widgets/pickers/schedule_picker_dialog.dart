@@ -6,16 +6,19 @@ import '../../../../../core/widgets/glass_container.dart';
 import '../../../../../l10n/app_localizations.dart';
 
 class SchedulePickerDialog extends StatefulWidget {
-  const SchedulePickerDialog({super.key});
+  final DateTime? initialDate;
+  final String? initialType; // e.g., 'viewing'
+
+  const SchedulePickerDialog({super.key, this.initialDate, this.initialType});
 
   @override
   State<SchedulePickerDialog> createState() => _SchedulePickerDialogState();
 }
 
 class _SchedulePickerDialogState extends State<SchedulePickerDialog> {
-  DateTime _selectedDate = DateTime.now();
-  TimeOfDay _selectedTime = TimeOfDay.now();
-  String _selectedType = 'viewing';
+  late DateTime _selectedDate;
+  late TimeOfDay _selectedTime;
+  late String _selectedType;
 
   final List<Map<String, dynamic>> _appointmentTypes = [
     {'id': 'viewing', 'label': 'Property Viewing', 'icon': Icons.visibility},
@@ -24,6 +27,20 @@ class _SchedulePickerDialogState extends State<SchedulePickerDialog> {
     {'id': 'meeting', 'label': 'Meeting', 'icon': Icons.people},
     {'id': 'other', 'label': 'Other', 'icon': Icons.event},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.initialDate ?? DateTime.now();
+    _selectedTime = widget.initialDate != null 
+        ? TimeOfDay.fromDateTime(widget.initialDate!) 
+        : TimeOfDay.now();
+    _selectedType = widget.initialType != null 
+        ? _appointmentTypes.any((t) => t['label'] == widget.initialType) // Match by label (usually title) or id? logic below
+           ? _appointmentTypes.firstWhere((t) => t['label'] == widget.initialType)['id'] // If passed label
+           : (widget.initialType!.toLowerCase().contains('viewing') ? 'viewing' : 'viewing')
+        : 'viewing';
+  }
 
   Future<void> _selectTime() async {
     final TimeOfDay? picked = await showTimePicker(
