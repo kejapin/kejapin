@@ -6,9 +6,11 @@ import 'package:mesh_gradient/mesh_gradient.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:io';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../data/messages_repository.dart';
@@ -17,6 +19,12 @@ import '../widgets/bubbles/property_bubble.dart';
 import '../widgets/bubbles/location_bubble.dart';
 import '../widgets/bubbles/payment_bubble.dart';
 import '../widgets/bubbles/schedule_bubble.dart';
+import '../widgets/pickers/property_picker_dialog.dart';
+import '../widgets/pickers/payment_request_dialog.dart';
+import '../widgets/pickers/schedule_picker_dialog.dart';
+import '../widgets/pickers/location_picker_dialog.dart';
+import '../widgets/bubbles/image_bubble.dart';
+import '../widgets/bubbles/document_bubble.dart';
 import 'dart:convert';
 
 class ChatScreen extends StatefulWidget {
@@ -350,14 +358,19 @@ class _ChatScreenState extends State<ChatScreen> {
     
     // Check for rich content using type field
     if (msg.type != 'text' && msg.metadata != null) {
-      Widget bubbleContent;
+      Widget? bubbleContent;
 
       switch (msg.type) {
         case 'property':
           bubbleContent = PropertyBubble(propertyData: msg.metadata!, isMe: isMe);
           break;
         case 'location':
-          bubbleContent = LocationBubble(locationName: msg.metadata!['name'] ?? 'Unknown Location', isMe: isMe);
+          bubbleContent = LocationBubble(
+            locationName: msg.metadata!['name'] ?? 'Unknown Location',
+            latitude: msg.metadata!['latitude']?.toDouble(),
+            longitude: msg.metadata!['longitude']?.toDouble(),
+            isMe: isMe,
+          );
           break;
         case 'payment':
           final amount = msg.metadata!['amount'] is int 
@@ -376,13 +389,26 @@ class _ChatScreenState extends State<ChatScreen> {
             isMe: isMe
           );
           break;
+        case 'image':
+          bubbleContent = ImageBubble(
+            imageUrl: msg.metadata!['url'] ?? '',
+            isMe: isMe,
+          );
+          break;
+        case 'document':
+          bubbleContent = DocumentBubble(
+            documentUrl: msg.metadata!['url'] ?? '',
+            documentName: msg.metadata!['name'] ?? 'Document',
+            isMe: isMe,
+          );
+          break;
         default:
-          // Unknown type, fallback to text rendering below
+          // Unknown type, will fallback to text rendering below
           break;
       }
 
       // Only return early if we successfully created a bubble
-      if (msg.type == 'property' || msg.type == 'location' || msg.type == 'payment' || msg.type == 'schedule') {
+      if (bubbleContent != null) {
         return FadeInUp(
           duration: const Duration(milliseconds: 300),
           child: Padding(
@@ -456,74 +482,241 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _handleAttachmentAction(String id) {
-    // Build structured message with type and metadata
-    Map<String, dynamic> metadata = {};
-    String type = id;
-
-    switch (id) {
-      case 'property':
-        type = 'property';
-        metadata = {
-          'title': widget.propertyTitle ?? 'Luxurious Apartment',
-          'price': 'KES 45,000/mo',
-          'image': 'https://qph.cf2.quoracdn.net/main-qimg-14138122606822216127117600746978.webp'
-        };
-        break;
-      case 'location':
-        type = 'location';
-        metadata = {'name': 'Westlands Stage, Nairobi'};
-        break;
-      case 'payment':
-        type = 'payment';
-        metadata = {'amount': 45000, 'title': 'Rent: October 2024'};
-        break;
-      case 'schedule':
-        type = 'schedule';
-        metadata = {
-          'date': DateTime.now().add(const Duration(days: 1)).toIso8601String(), 
-          'title': 'Viewing Appointment'
-        };
-        break;
-      default:
-        // For others, just show a message for now
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("$id attachment not yet implemented")),
-        );
-        return;
-    }
-
-    // Generate a user-friendly preview text for the content field
-    String contentPreview;
-    switch (type) {
-      case 'property':
-        contentPreview = '🏠 Shared property: ${metadata['title']}';
-        break;
-      case 'location':
-        contentPreview = '📍 Shared location: ${metadata['name']}';
-        break;
-      case 'payment':
-        contentPreview = '💰 Payment request: ${metadata['title']}';
-        break;
-      case 'schedule':
-        contentPreview = '📅 Scheduled: ${metadata['title']}';
-        break;
-      default:
-        contentPreview = 'Shared $type';
-    }
-
+  Future<void> _handleAttachmentAction(String id) async {
     try {
-      _repository.sendMessage(
-        recipientId: widget.otherUserId,
-        content: contentPreview,
-        propertyId: widget.propertyId,
-        type: type,
-        metadata: metadata,
-      );
+      switch (id) {
+        case 'gallery':
+          await _handleGalleryPick();
+          break;
+        case 'camera':
+          await _handleCameraPick();
+          break;
+        case 'location':
+          await _handleLocationShare();
+          break;
+        case 'property':
+          await _handlePropertyShare();
+          break;
+        case 'payment':
+          await _handlePaymentRequest();
+          break;
+        case 'schedule':
+          await _handleScheduleAppointment();
+          break;
+        case 'lease':
+          await _handleLeaseDocument();
+          break;
+        case 'repair':
+          await _handleRepairRequest();
+          break;
+        default:
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('$id feature coming soon')),
+          );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error sending attachment: $e")),
+        SnackBar(content: Text('Error: $e')),
       );
     }
+  }
+
+  Future<void> _handleGalleryPick() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    
+    if (image != null) {
+      await _uploadAndSendImage(image, 'gallery');
+    }
+  }
+
+  Future<void> _handleCameraPick() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+    
+    if (image != null) {
+      await _uploadAndSendImage(image, 'camera');
+    }
+  }
+
+  Future<void> _uploadAndSendImage(XFile image, String source) async {
+    try {
+      // Show loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: AppColors.mutedGold),
+        ),
+      );
+
+      final file = File(image.path);
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${image.name}';
+      final supabase = Supabase.instance.client;
+
+      // Upload to Supabase Storage
+      await supabase.storage
+          .from('chat-media')
+          .upload('images/$fileName', file);
+
+      final imageUrl = supabase.storage
+          .from('chat-media')
+          .getPublicUrl('images/$fileName');
+
+      Navigator.pop(context); // Close loading
+
+      // Send message with image
+      await _repository.sendMessage(
+        recipientId: widget.otherUserId,
+        content: source == 'camera' ? '📷 Sent a photo' : '🖼️ Sent an image',
+        propertyId: widget.propertyId,
+        type: 'image',
+        metadata: {'url': imageUrl, 'source': source},
+      );
+    } catch (e) {
+      Navigator.pop(context); // Close loading
+      rethrow;
+    }
+  }
+
+  Future<void> _handleLocationShare() async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => const LocationPickerDialog(),
+    );
+
+    if (result != null) {
+      await _repository.sendMessage(
+        recipientId: widget.otherUserId,
+        content: '📍 Shared location: ${result['name']}',
+        propertyId: widget.propertyId,
+        type: 'location',
+        metadata: result,
+      );
+    }
+  }
+
+  Future<void> _handlePropertyShare() async {
+    final property = await showDialog(
+      context: context,
+      builder: (context) => const PropertyPickerDialog(),
+    );
+
+    if (property != null) {
+      await _repository.sendMessage(
+        recipientId: widget.otherUserId,
+        content: '🏠 Shared property: ${property.title}',
+        propertyId: property.id,
+        type: 'property',
+        metadata: {
+          'title': property.title,
+          'price': 'KES ${property.price.toStringAsFixed(0)}/mo',
+          'image': property.photos.isNotEmpty ? property.photos.first : null,
+          'id': property.id,
+        },
+      );
+    }
+  }
+
+  Future<void> _handlePaymentRequest() async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => const PaymentRequestDialog(),
+    );
+
+    if (result != null) {
+      await _repository.sendMessage(
+        recipientId: widget.otherUserId,
+        content: '💰 Payment request: ${result['title']}',
+        propertyId: widget.propertyId,
+        type: 'payment',
+        metadata: result,
+      );
+    }
+  }
+
+  Future<void> _handleScheduleAppointment() async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => const SchedulePickerDialog(),
+    );
+
+    if (result != null) {
+      await _repository.sendMessage(
+        recipientId: widget.otherUserId,
+        content: '📅 Scheduled: ${result['title']}',
+        propertyId: widget.propertyId,
+        type: 'schedule',
+        metadata: result,
+      );
+    }
+  }
+
+  Future<void> _handleLeaseDocument() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx'],
+    );
+
+    if (result != null && result.files.single.path != null) {
+      try {
+        // Show loading
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(color: AppColors.mutedGold),
+          ),
+        );
+
+        final file = File(result.files.single.path!);
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}_${result.files.single.name}';
+        final supabase = Supabase.instance.client;
+
+        await supabase.storage
+            .from('chat-media')
+            .upload('documents/$fileName', file);
+
+        final fileUrl = supabase.storage
+            .from('chat-media')
+            .getPublicUrl('documents/$fileName');
+
+        Navigator.pop(context); // Close loading
+
+        await _repository.sendMessage(
+          recipientId: widget.otherUserId,
+          content: '📄 Shared document: ${result.files.single.name}',
+          propertyId: widget.propertyId,
+          type: 'document',
+          metadata: {
+            'url': fileUrl,
+            'name': result.files.single.name,
+            'type': 'lease',
+          },
+        );
+      } catch (e) {
+        Navigator.pop(context); // Close loading
+        rethrow;
+      }
+    }
+  }
+
+  Future<void> _handleRepairRequest() async {
+    // For now, send a simple repair request - can be enhanced with a form
+    await _repository.sendMessage(
+      recipientId: widget.otherUserId,
+      content: '🔧 Repair request submitted',
+      propertyId: widget.propertyId,
+      type: 'repair',
+      metadata: {
+        'title': 'Repair Needed',
+        'priority': 'medium',
+        'created_at': DateTime.now().toIso8601String(),
+      },
+    );
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Repair request sent')),
+    );
   }
 }
