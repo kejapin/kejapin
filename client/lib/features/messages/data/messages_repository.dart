@@ -118,6 +118,11 @@ class MessagesRepository {
       }
     }
     
+    // Decode first to avoid double encoding (e.g. %20 -> %2520)
+    try {
+      url = Uri.decodeFull(url);
+    } catch (_) {}
+
     return Uri.encodeFull(url);
   }
 
