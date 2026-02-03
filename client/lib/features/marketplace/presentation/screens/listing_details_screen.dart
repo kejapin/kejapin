@@ -22,6 +22,8 @@ import 'package:client/features/marketplace/domain/listing_entity.dart';
 import 'package:client/features/profile/data/life_pin_repository.dart';
 import 'package:client/features/profile/domain/life_pin_model.dart';
 import 'package:client/features/messages/data/notifications_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ListingDetailsScreen extends StatefulWidget {
   final String id;
@@ -86,7 +88,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
     bool isSaved = false;
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null) {
-      isSaved = await _listingsRepo.isListingSaved(user.id, listing.id);
+      isSaved = await _listingsRepo.isListingSaved(listing.id);
     }
 
     final Map<String, CommuteResult> commutes = {};
@@ -195,7 +197,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
         future: _pageDataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return _buildLoadingSkeleton(context);
           }
 
           if (snapshot.hasError) {
@@ -287,6 +289,67 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildLoadingSkeleton(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(height: 350, color: Colors.white),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                   Row(
+                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                     children: [
+                       Container(height: 24, width: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+                       Container(height: 32, width: 120, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))),
+                     ],
+                   ),
+                   const SizedBox(height: 16),
+                   Container(height: 28, width: 250, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                   const SizedBox(height: 8),
+                   Container(height: 16, width: 180, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                   const SizedBox(height: 24),
+                   Row(
+                     children: List.generate(3, (index) => Padding(
+                       padding: const EdgeInsets.only(right: 24),
+                       child: Container(height: 20, width: 60, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                     )),
+                   ),
+                   const SizedBox(height: 32),
+                   Container(height: 24, width: 200, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                   const SizedBox(height: 16),
+                   Row(
+                     children: [
+                       Container(height: 100, width: 160, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+                       const SizedBox(width: 12),
+                       Container(height: 100, width: 160, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+                     ],
+                   ),
+                   const SizedBox(height: 32),
+                   Container(height: 24, width: 150, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                   const SizedBox(height: 16),
+                   Column(
+                     children: List.generate(4, (index) => Padding(
+                       padding: const EdgeInsets.only(bottom: 8),
+                       child: Container(height: 14, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2))),
+                     )),
+                   ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
