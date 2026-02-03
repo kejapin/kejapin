@@ -1066,6 +1066,15 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get viewingRequest => 'Ombi la Kutazama';
+
+  @override
+  String get userInfo => 'User Info';
+
+  @override
+  String get reportUser => 'Report User';
+
+  @override
+  String get blockUser => 'Block User';
 }
 
 /// The translations for Swahili, as used in Kenya (`sw_KE`).

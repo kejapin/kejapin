@@ -1063,4 +1063,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewingRequest => 'Viewing Request';
+
+  @override
+  String get userInfo => 'User Info';
+
+  @override
+  String get reportUser => 'Report User';
+
+  @override
+  String get blockUser => 'Block User';
 }

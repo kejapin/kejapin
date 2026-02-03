@@ -2144,6 +2144,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Viewing Request'**
   String get viewingRequest;
+
+  /// No description provided for @userInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'User Info'**
+  String get userInfo;
+
+  /// No description provided for @reportUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Report User'**
+  String get reportUser;
+
+  /// No description provided for @blockUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Block User'**
+  String get blockUser;
 }
 
 class _AppLocalizationsDelegate
