@@ -59,6 +59,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'core/services/notification_service.dart';
+import 'core/globals.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -180,10 +181,8 @@ class _KejapinAppState extends State<KejapinApp> {
   }
 }
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
-
 final GoRouter _router = GoRouter(
-  navigatorKey: _rootNavigatorKey,
+  navigatorKey: rootNavigatorKey,
   initialLocation: '/',
   routes: [
     GoRoute(

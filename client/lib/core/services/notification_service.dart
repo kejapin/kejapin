@@ -7,6 +7,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/messages/data/messages_repository.dart';
+import 'package:go_router/go_router.dart';
+import '../globals.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -37,7 +39,12 @@ class NotificationService {
       await _localNotifications.initialize(
         settings: initSettings,
         onDidReceiveNotificationResponse: (details) {
-          // Handle notification tap
+          if (details.payload != null && details.payload!.isNotEmpty) {
+            final context = rootNavigatorKey.currentContext;
+            if (context != null) {
+              context.push(details.payload!);
+            }
+          }
         },
       );
     } else {
@@ -118,6 +125,8 @@ class NotificationService {
     required String senderName,
     required String message,
     String? avatarUrl,
+    String? route,
+    Map<String, dynamic>? metadata,
   }) async {
     Uint8List? avatarBytes;
     if (avatarUrl != null) {
@@ -153,12 +162,22 @@ class NotificationService {
 
     final notificationDetails = NotificationDetails(android: androidDetails, iOS: const DarwinNotificationDetails());
 
+    // Prepare payload with metadata for deep linking
+    String payload = route ?? '/chat';
+    if (!payload.contains('?') && metadata != null) {
+      final params = <String, String>{};
+      metadata.forEach((k, v) => params[k] = v.toString());
+      if (params.isNotEmpty) {
+        payload += '?${Uri(queryParameters: params).query}';
+      }
+    }
+
     await _localNotifications.show(
       id: senderId.hashCode,
       title: senderName,
       body: message,
       notificationDetails: notificationDetails,
-      payload: 'chat:$senderId',
+      payload: payload,
     );
   }
 
@@ -198,19 +217,26 @@ class NotificationService {
                 final body = event['message'];
 
                 if (type == 'MESSAGE') {
-                    // We need sender info which might be in metadata or we fetch
-                    final senderId = event['metadata']?['sender_id'] ?? '';
-                    final senderName = title.replaceAll('New Message from ', '');
-                    final avatar = _ensureFullUrl(event['metadata']?['sender_avatar']);
+                    // Support both old (sender_id) and new (otherUserId) keys for robustness
+                    final metadata = event['metadata'] ?? {};
+                    final senderId = metadata['otherUserId'] ?? metadata['sender_id'] ?? '';
+                    final senderName = metadata['otherUserName'] ?? title.replaceAll('New Message from ', '');
+                    final avatar = _ensureFullUrl(metadata['avatarUrl'] ?? metadata['sender_avatar']);
                     
                     showChatNotification(
                         senderId: senderId,
                         senderName: senderName,
                         message: body,
                         avatarUrl: avatar,
+                        route: event['route'], // Pass route
+                        metadata: metadata,
                     );
                 } else {
-                    showNotification(title: title, body: body);
+                    showNotification(
+                      title: title, 
+                      body: body,
+                      payload: event['route'],
+                    );
                 }
             }
         });
