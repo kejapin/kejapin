@@ -19,6 +19,7 @@ import 'features/tenant_dashboard/presentation/screens/life_pins_screen.dart';
 import 'features/messages/presentation/screens/messages_screen.dart';
 import 'features/messages/presentation/screens/notifications_screen.dart';
 import 'features/messages/presentation/screens/chat_screen.dart';
+import 'features/messages/presentation/screens/debug_messages_screen.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
 import 'features/profile/presentation/screens/settings_screen.dart';
 import 'features/profile/presentation/screens/edit_profile_screen.dart';
@@ -346,6 +347,10 @@ final GoRouter _router = GoRouter(
           propertyId: extras['propertyId'],
         );
       },
+    ),
+    GoRoute(
+      path: '/debug-chat',
+      builder: (context, state) => const DebugMessagesScreen(),
     ),
     // Search & Details Routes (Outside shell for full-screen feel)
     GoRoute(
