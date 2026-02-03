@@ -105,12 +105,19 @@ class MessagesRepository {
     
     // Fix for Android Emulator accessing localhost Supabase
     if (!kIsWeb && Platform.isAndroid) {
-      if (url.contains('localhost') || url.contains('127.0.0.1')) {
-        url = url.replaceFirst('localhost', '10.0.2.2').replaceFirst('127.0.0.1', '10.0.2.2');
+      if (url.contains('localhost')) {
+         url = url.replaceAll('localhost', '10.0.2.2');
+      }
+      if (url.contains('127.0.0.1')) {
+         url = url.replaceAll('127.0.0.1', '10.0.2.2');
+      }
+      
+      if (url.contains('10.0.2.2') && url.startsWith('https://')) {
+          url = url.replaceFirst('https://', 'http://');
       }
     }
     
-    return url;
+    return Uri.encodeFull(url);
   }
 
   static Map<String, dynamic>? getUserCache(String userId) => _userCache[userId];
