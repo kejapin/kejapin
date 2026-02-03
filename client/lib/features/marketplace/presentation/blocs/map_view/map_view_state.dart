@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import '../../../../domain/listing_entity.dart';
-import '../../../../profile/domain/life_pin_model.dart';
+import 'package:client/features/marketplace/domain/listing_entity.dart';
+import 'package:client/features/profile/domain/life_pin_model.dart';
 import 'package:latlong2/latlong.dart';
 
 class MapViewState extends Equatable {

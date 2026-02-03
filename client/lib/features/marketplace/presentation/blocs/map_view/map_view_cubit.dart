@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../domain/listing_entity.dart';
-import '../../../../profile/domain/life_pin_model.dart';
+import 'package:client/features/marketplace/domain/listing_entity.dart';
+import 'package:client/features/profile/domain/life_pin_model.dart';
 import 'map_view_state.dart';
 
 class MapViewCubit extends Cubit<MapViewState> {
