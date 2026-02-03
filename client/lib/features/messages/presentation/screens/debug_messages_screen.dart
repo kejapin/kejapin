@@ -71,7 +71,7 @@ class _DebugMessagesScreenState extends State<DebugMessagesScreen> {
                             );
                          },
                          imageBuilder: (context, imageProvider) {
-                           debugPrint('✅ DEBUG: IMAGE SUCCESS for URL: $url');
+                           debugPrint('✅ DEBUG: IMAGE SUCCESS for URL: $avatarUrl');
                            return CircleAvatar(backgroundImage: imageProvider);
                          },
                        )
