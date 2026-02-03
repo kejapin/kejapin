@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../marketplace/domain/listing_entity.dart';
 import '../../profile/data/profile_repository.dart';
@@ -94,9 +95,22 @@ class MessagesRepository {
 
   static String? ensureFullUrl(String? path) {
     if (path == null || path.isEmpty) return null;
-    if (path.startsWith('http')) return path;
     
-    return Supabase.instance.client.storage.from('profile-pics').getPublicUrl(path);
+    String url;
+    if (path.startsWith('http')) {
+      url = path;
+    } else {
+      url = Supabase.instance.client.storage.from('profile-pics').getPublicUrl(path);
+    }
+    
+    // Fix for Android Emulator accessing localhost Supabase
+    if (!kIsWeb && Platform.isAndroid) {
+      if (url.contains('localhost') || url.contains('127.0.0.1')) {
+        url = url.replaceFirst('localhost', '10.0.2.2').replaceFirst('127.0.0.1', '10.0.2.2');
+      }
+    }
+    
+    return url;
   }
 
   static Map<String, dynamic>? getUserCache(String userId) => _userCache[userId];
