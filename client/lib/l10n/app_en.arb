@@ -341,5 +341,8 @@
   "rentDue": "Rent Due",
   "utilityBill": "Utility Bill",
   "repairRequest": "Repair Request",
-  "viewingRequest": "Viewing Request"
+  "viewingRequest": "Viewing Request",
+  "userInfo": "User Info",
+  "reportUser": "Report User",
+  "blockUser": "Block User"
 }

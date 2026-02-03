@@ -7,7 +7,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../data/messages_repository.dart';
-import '../../domain/message_entity.dart';
 
 class UserInfoScreen extends StatefulWidget {
   final String userId;

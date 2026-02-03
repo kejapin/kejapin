@@ -121,7 +121,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
                             message: msg.content,
                             avatarUrl: msg.otherUserAvatar,
                             initials: msg.otherUserName.isNotEmpty ? msg.otherUserName[0] : '?',
-                            initials: msg.otherUserName.isNotEmpty ? msg.otherUserName[0] : '?',
                             isUnread: !msg.isRead,
                             onAvatarTap: () => _showProfileModal(
                                 context, 
@@ -246,12 +245,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
               );
   }
 
-  Widget _buildMessageTile({
-    required String name,
-    required String time,
-    required String property,
-    required String message,
-    String? avatarUrl,
   Widget _buildMessageTile({
     required String name,
     required String time,
