@@ -7,8 +7,17 @@ class ScheduleBubble extends StatelessWidget {
   final DateTime date;
   final String title;
   final bool isMe;
+  final VoidCallback? onConfirm;
+  final VoidCallback? onReschedule;
 
-  const ScheduleBubble({super.key, required this.date, required this.title, required this.isMe});
+  const ScheduleBubble({
+    super.key, 
+    required this.date, 
+    required this.title, 
+    required this.isMe,
+    this.onConfirm,
+    this.onReschedule,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +55,7 @@ class ScheduleBubble extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: onReschedule,
                     style: OutlinedButton.styleFrom(
                        padding: EdgeInsets.zero,
                     ),
@@ -56,7 +65,7 @@ class ScheduleBubble extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: onConfirm,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.indigo,
                       foregroundColor: Colors.white,

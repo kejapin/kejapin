@@ -22,10 +22,16 @@ class LocationBubble extends StatelessWidget {
 
   Future<void> _openInMaps() async {
     if (latitude != null && longitude != null) {
-      final url = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
-      final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      final googleMapsUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+      final uri = Uri.parse(googleMapsUrl);
+      
+      try {
+        if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+          // Fallback
+          await launchUrl(uri, mode: LaunchMode.platformDefault);
+        }
+      } catch (e) {
+        debugPrint('Could not launch maps: $e');
       }
     }
   }

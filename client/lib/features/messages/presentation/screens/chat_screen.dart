@@ -157,6 +157,13 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  Future<void> _handleScheduleResponse(String title, DateTime date, String prefix) async {
+    final dateStr = DateFormat('MMM d, h:mm a').format(date);
+    final text = "$prefix: $title ($dateStr)";
+    _messageController.text = text;
+    _sendMessage();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -717,10 +724,14 @@ class _ChatScreenState extends State<ChatScreen> {
           );
           break;
         case 'schedule':
+          final date = DateTime.parse(msg.metadata!['date']);
+          final title = msg.metadata!['title'] ?? 'Event';
           content = ScheduleBubble(
-            date: DateTime.parse(msg.metadata!['date']), 
-            title: msg.metadata!['title'] ?? 'Event', 
-            isMe: isMe
+            date: date, 
+            title: title, 
+            isMe: isMe,
+            onConfirm: () => _handleScheduleResponse(title, date, 'Confirmed'),
+            onReschedule: () => _handleScheduleResponse(title, date, 'Reschedule requested for'),
           );
           break;
         case 'image':
