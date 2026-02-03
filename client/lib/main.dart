@@ -338,8 +338,6 @@ final GoRouter _router = GoRouter(
     // Chat Route (Outside shell for full-screen immersive chat without bottom nav)
     GoRoute(
       path: '/chat',
-    GoRoute(
-      path: '/chat',
       builder: (context, state) {
         final extras = state.extra as Map<String, dynamic>? ?? {};
         final queryParams = state.uri.queryParameters;
