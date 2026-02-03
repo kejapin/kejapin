@@ -49,10 +49,10 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
       
       // 2. Fetch Listings (if any)
       final listingsRes = await supabase
-          .from('listings')
-          .select('id, title, price, listing_images, currency')
-          .eq('landlord_id', widget.userId)
-          .eq('is_active', true)
+          .from('properties')
+          .select('id, title, price_amount, photos, status')
+          .eq('owner_id', widget.userId)
+          .eq('status', 'AVAILABLE')
           .limit(10);
       
       if (mounted) {
@@ -290,11 +290,19 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
   }
 
   Widget _buildListingCard(Map<String, dynamic> item) {
-    final images = item['listing_images'] as List?;
-    final imageUrl = (images != null && images.isNotEmpty) ? images[0] : null;
+    final photos = item['photos'];
+    String? imageUrl;
+    if (photos != null) {
+      if (photos is List && photos.isNotEmpty) {
+        imageUrl = photos[0];
+      } else if (photos is String && photos.isNotEmpty) {
+        imageUrl = photos.contains(',') ? photos.split(',')[0].trim() : photos;
+      }
+    }
+    
     final title = item['title'] ?? 'Listing';
-    final price = item['price']?.toString() ?? '0';
-    final currency = item['currency'] ?? 'KES';
+    final price = item['price_amount']?.toString() ?? '0';
+    final currency = 'KES'; // Default currency as it's not in the properties table yet
 
     return GestureDetector(
       onTap: () {
