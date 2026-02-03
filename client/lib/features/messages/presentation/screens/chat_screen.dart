@@ -57,6 +57,7 @@ class _ChatScreenState extends State<ChatScreen> {
   int _newMessageCount = 0;
   int _totalMessagesCount = 0;
   StreamSubscription? _messageSubscription;
+  MessageEntity? _replyMessage;
 
   @override
   void initState() {
@@ -116,11 +117,26 @@ class _ChatScreenState extends State<ChatScreen> {
     if (content.isEmpty) return;
 
     _messageController.clear();
+
+    // Check for reply context
+    Map<String, dynamic>? metadata;
+    if (_replyMessage != null) {
+      metadata = {
+        'reply_to': {
+          'id': _replyMessage!.id,
+          'content': _replyMessage!.content,
+          'sender': _replyMessage!.isMe ? 'You' : widget.otherUserName,
+        }
+      };
+      setState(() => _replyMessage = null);
+    }
+
     try {
       await _repository.sendMessage(
         recipientId: widget.otherUserId,
         content: content,
         propertyId: widget.propertyId,
+        metadata: metadata,
       );
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -329,89 +345,150 @@ class _ChatScreenState extends State<ChatScreen> {
       decoration: const BoxDecoration(
         color: Colors.transparent,
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          IconButton(
-            onPressed: () => _showAttachmentMenu(context),
-            icon: const Icon(Icons.add_circle, color: AppColors.mutedGold, size: 30),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: GlassContainer(
-              height: 56,
-              opacity: 0.3,
-              blur: 30,
-              color: Colors.black, // Dark base for contrast
-              borderRadius: BorderRadius.circular(28),
-              borderColor: Colors.white.withOpacity(0.1),
-              padding: EdgeInsets.zero,
-              child: Center(
-                child: Theme(
-                  data: Theme.of(context).copyWith(
-                    textSelectionTheme: TextSelectionThemeData(
-                      selectionColor: AppColors.mutedGold.withOpacity(0.3),
-                      selectionHandleColor: AppColors.mutedGold,
+          if (_replyMessage != null)
+             _buildReplyPreview(),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => _showAttachmentMenu(context),
+                icon: const Icon(Icons.add_circle, color: AppColors.mutedGold, size: 30),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: GlassContainer(
+                  height: 56,
+                  opacity: 0.3,
+                  blur: 30,
+                  color: Colors.black, // Dark base for contrast
+                  borderRadius: BorderRadius.circular(28),
+                  borderColor: Colors.white.withOpacity(0.1),
+                  padding: EdgeInsets.zero,
+                  child: Center(
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        textSelectionTheme: TextSelectionThemeData(
+                          selectionColor: AppColors.mutedGold.withOpacity(0.3),
+                          selectionHandleColor: AppColors.mutedGold,
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _messageController,
+                        minLines: 1,
+                        maxLines: 5,
+                        textCapitalization: TextCapitalization.sentences,
+                        cursorColor: AppColors.mutedGold,
+                        style: GoogleFonts.workSans(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.black.withOpacity(0.2), // Explicitly dark
+                          hintText: AppLocalizations.of(context)!.typeYourMessage,
+                          hintStyle: GoogleFonts.workSans(
+                            color: Colors.white.withOpacity(0.4),
+                            fontSize: 15,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(28),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(28),
+                            borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(28),
+                            borderSide: const BorderSide(color: AppColors.mutedGold, width: 1.5),
+                          ),
+                        ),
+                        onSubmitted: (_) => _sendMessage(),
+                      ),
                     ),
-                  ),
-                  child: TextField(
-                    controller: _messageController,
-                    minLines: 1,
-                    maxLines: 5,
-                    textCapitalization: TextCapitalization.sentences,
-                    cursorColor: AppColors.mutedGold,
-                    style: GoogleFonts.workSans(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.black.withOpacity(0.2), // Explicitly dark
-                      hintText: AppLocalizations.of(context)!.typeYourMessage,
-                      hintStyle: GoogleFonts.workSans(
-                        color: Colors.white.withOpacity(0.4),
-                        fontSize: 15,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(28),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(28),
-                        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(28),
-                        borderSide: const BorderSide(color: AppColors.mutedGold, width: 1.5),
-                      ),
-                    ),
-                    onSubmitted: (_) => _sendMessage(),
                   ),
                 ),
               ),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: _sendMessage,
+                child: GlassContainer(
+                  height: 56,
+                  width: 56,
+                  color: AppColors.mutedGold,
+                  opacity: 0.9,
+                  blur: 10,
+                  borderRadius: BorderRadius.circular(28),
+                  borderColor: AppColors.mutedGold.withAlpha(50),
+                  padding: EdgeInsets.zero,
+                  child: const Center(
+                    child: Icon(
+                      Icons.send_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReplyPreview() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.mutedGold,
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(width: 12),
-          GestureDetector(
-            onTap: _sendMessage,
-            child: GlassContainer(
-              height: 56,
-              width: 56,
-              color: AppColors.mutedGold,
-              opacity: 0.9,
-              blur: 10,
-              borderRadius: BorderRadius.circular(28),
-              borderColor: AppColors.mutedGold.withAlpha(50),
-              padding: EdgeInsets.zero,
-              child: const Center(
-                child: Icon(
-                  Icons.send_rounded,
-                  color: Colors.white,
-                  size: 22,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Replying to ${_replyMessage!.isMe ? 'You' : widget.otherUserName}',
+                  style: GoogleFonts.workSans(
+                    color: AppColors.mutedGold,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
+                Text(
+                  _replyMessage!.content,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.workSans(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             ),
+          ),
+          IconButton(
+            onPressed: () => setState(() => _replyMessage = null),
+            icon: const Icon(Icons.close, color: Colors.white54, size: 20),
           ),
         ],
       ),
@@ -432,18 +509,17 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildChatBubble(MessageEntity msg, int index) {
+    Widget bubbleContent;
     final isMe = msg.isMe;
-    
-    // Check for rich content using type field
-    if (msg.type != 'text' && msg.metadata != null) {
-      Widget? bubbleContent;
 
+    if (msg.type != 'text' && msg.metadata != null) {
+      Widget? content;
       switch (msg.type) {
         case 'property':
-          bubbleContent = PropertyBubble(propertyData: msg.metadata!, isMe: isMe);
+          content = PropertyBubble(propertyData: msg.metadata!, isMe: isMe);
           break;
         case 'location':
-          bubbleContent = LocationBubble(
+          content = LocationBubble(
             locationName: msg.metadata!['name'] ?? 'Unknown Location',
             latitude: msg.metadata!['latitude']?.toDouble(),
             longitude: msg.metadata!['longitude']?.toDouble(),
@@ -454,62 +530,55 @@ class _ChatScreenState extends State<ChatScreen> {
           final amount = msg.metadata!['amount'] is int 
               ? (msg.metadata!['amount'] as int).toDouble() 
               : msg.metadata!['amount'] as double;
-          bubbleContent = PaymentBubble(
+          content = PaymentBubble(
             amount: amount, 
             title: msg.metadata!['title'] ?? 'Payment', 
             isMe: isMe
           );
           break;
         case 'schedule':
-          bubbleContent = ScheduleBubble(
+          content = ScheduleBubble(
             date: DateTime.parse(msg.metadata!['date']), 
             title: msg.metadata!['title'] ?? 'Event', 
             isMe: isMe
           );
           break;
         case 'image':
-          bubbleContent = ImageBubble(
+          content = ImageBubble(
             imageUrl: msg.metadata!['url'] ?? '',
             isMe: isMe,
           );
           break;
         case 'document':
-          bubbleContent = DocumentBubble(
+          content = DocumentBubble(
             documentUrl: msg.metadata!['url'] ?? '',
             documentName: msg.metadata!['name'] ?? 'Document',
             isMe: isMe,
           );
           break;
         default:
-          // Unknown type, will fallback to text rendering below
           break;
       }
-
-      // Only return early if we successfully created a bubble
-      if (bubbleContent != null) {
-        return FadeInUp(
-          duration: const Duration(milliseconds: 300),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-              children: [bubbleContent],
-            ),
+      
+      if (content != null) {
+        bubbleContent = Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+            children: [content],
           ),
         );
+      } else {
+        // Fallback
+        bubbleContent = const SizedBox.shrink();
       }
-    }
-    
-    // Both mobile (animated mesh) and web (static gradient) are now dark
-    final bubbleColor = isMe 
-        ? AppColors.mutedGold 
-        : Colors.white.withOpacity(0.15);
-    
-    const textColor = Colors.white;
-
-    return FadeInUp(
-      duration: const Duration(milliseconds: 300),
-      child: Padding(
+    } else {
+      // Text Bubble with Reply Support
+      final bubbleColor = isMe 
+          ? AppColors.mutedGold 
+          : Colors.white.withOpacity(0.15);
+      
+      bubbleContent = Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -533,17 +602,87 @@ class _ChatScreenState extends State<ChatScreen> {
                    )
                 ],
               ),
-              child: Text(
-                msg.content,
-                style: GoogleFonts.workSans(
-                  color: textColor, 
-                  fontSize: 15,
-                  fontWeight: FontWeight.w400,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (msg.metadata?['reply_to'] != null)
+                     _buildReplyQuote(msg.metadata!['reply_to'], isMe),
+                  Text(
+                    msg.content,
+                    style: GoogleFonts.workSans(
+                      color: Colors.white, 
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
+      );
+    }
+
+    return _wrapWithReplyGesture(
+      FadeInUp(
+        duration: const Duration(milliseconds: 300),
+        child: bubbleContent
+      ), 
+      msg
+    );
+  }
+
+  Widget _wrapWithReplyGesture(Widget child, MessageEntity msg) {
+    return Dismissible(
+      key: Key('reply_${msg.id}'),
+      direction: DismissDirection.startToEnd,
+      confirmDismiss: (_) async {
+        setState(() => _replyMessage = msg);
+        // Optional: Trigger vibration here if haptics package available
+        return false;
+      },
+      background: const Align(
+        alignment: Alignment.centerLeft,
+        child: Padding(
+          padding: EdgeInsets.only(left: 20),
+          child: Icon(Icons.reply, color: AppColors.mutedGold),
+        ),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildReplyQuote(Map<String, dynamic> replyData, bool isMe) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(8),
+        border: Border(left: BorderSide(color: isMe ? Colors.white70 : AppColors.mutedGold, width: 3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            replyData['sender'] ?? 'User',
+            style: GoogleFonts.workSans(
+              color: isMe ? Colors.white70 : AppColors.mutedGold,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            replyData['content'] ?? '',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.workSans(
+              color: Colors.white.withOpacity(0.8),
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     );
   }
