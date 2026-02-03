@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:client/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
 import 'package:flutter/foundation.dart';
@@ -320,6 +321,7 @@ class _ChatScreenState extends State<ChatScreen> {
         : url;
         
     final isSvg = effectiveUrl != null && effectiveUrl.toLowerCase().endsWith('.svg');
+    final isLottie = effectiveUrl != null && effectiveUrl.toLowerCase().endsWith('.json');
 
     return ClipOval(
       child: effectiveUrl != null && effectiveUrl.isNotEmpty
@@ -340,10 +342,19 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ),
                 )
-              : CachedNetworkImage(
-                  imageUrl: effectiveUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
+              : isLottie 
+                  ? Lottie.network(
+                      effectiveUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                         color: AppColors.structuralBrown.withOpacity(0.1),
+                         child: const Icon(Icons.error_outline, color: Colors.grey),
+                      ),
+                    )
+                  : CachedNetworkImage(
+                      imageUrl: effectiveUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
                     color: AppColors.structuralBrown.withOpacity(0.1),
                     child: Center(
                       child: Text(
