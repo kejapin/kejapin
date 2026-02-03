@@ -31,8 +31,8 @@ class PricePillMarker extends StatelessWidget {
       textColor = Colors.grey[700]!;
       elevation = 1.0;
     } else {
-      backgroundColor = Colors.white;
-      textColor = Colors.black87;
+      backgroundColor = AppColors.champagne;
+      textColor = AppColors.structuralBrown;
       elevation = 3.0;
     }
 

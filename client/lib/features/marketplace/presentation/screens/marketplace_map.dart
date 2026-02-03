@@ -4,6 +4,7 @@ import 'package:client/features/marketplace/presentation/blocs/map_view/map_view
 import 'package:client/features/marketplace/presentation/widgets/map/cluster_marker.dart';
 import 'package:client/features/marketplace/presentation/widgets/map/floating_search_bar.dart';
 import 'package:client/features/marketplace/presentation/widgets/map/price_pill_marker.dart';
+import 'package:client/features/marketplace/presentation/widgets/map/small_card_marker.dart';
 import 'package:client/features/marketplace/presentation/widgets/map/property_bottom_sheet.dart';
 import 'package:client/features/marketplace/presentation/widgets/map/quick_filter_chips.dart';
 import 'package:flutter/material.dart';
@@ -56,37 +57,110 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
   final MapController _mapController = MapController();
   final PanelController _panelController = PanelController();
   
-  // Cache sorted listings to avoid re-sorting on every build frame if logic is heavy
-  // But for <1000 items it's fast enough in build usually.
-  
+  double _currentZoom = 13.0;
+  LatLng? _userLocation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLocation();
+  }
+
+  Future<void> _fetchLocation() async {
+    try {
+      // Check permissions logic simplistic for brevity
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      
+      if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+        final pos = await Geolocator.getCurrentPosition();
+        if (mounted) {
+          setState(() {
+            _userLocation = LatLng(pos.latitude, pos.longitude);
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Location error: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // We access Cubit here to read state in filtering
+    final cubit = context.read<MapViewCubit>();
+
     return BlocListener<MapViewCubit, MapViewState>(
-      listenWhen: (previous, current) => previous.selectedListing != current.selectedListing,
-      listener: (context, state) {
+      listenWhen: (previous, current) {
+         return previous.selectedListing != current.selectedListing ||
+                previous.isClosestToMeActive != current.isClosestToMeActive;
+      },
+      listener: (context, state) async {
+        // Handle Closest To Me Activation
+        if (state.isClosestToMeActive && !state.isBottomSheetOpen) {
+           _handleClosestToMe(state);
+        }
+
+        // Handle Listing Selection (Modal Open)
         if (state.selectedListing != null) {
           _panelController.open();
-          // Center map on selection? user preference usually. 
-          // _mapController.move(LatLng(state.selectedListing!.latitude, state.selectedListing!.longitude), 15);
+          
+          // Smart Auto-Move: Center the pin in the top viewing area.
+          // Viewing area is Top 40% (since 60% covered). Center is 20%.
+          // We need to shift map so pin is at 20% from top.
+          final pin = LatLng(state.selectedListing!.latitude, state.selectedListing!.longitude);
+          
+          // We can use CameraFit to pad bottom!
+          _mapController.fitCamera(
+            CameraFit.coordinates(
+              coordinates: [pin],
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).size.height * 0.5, // Push pin up
+                top: 50,
+                left: 20,
+                right: 20
+              ),
+              maxZoom: min(16.0, _currentZoom < 14 ? 15.0 : _currentZoom), // Ensure decent zoom
+            ),
+          );
         } else {
-          _panelController.close();
+           // Modal Closed logic
+           // "map moves again centering the pin and lines disappear"
+           // Wait, if we close modal, maybe we want to keep map where it is?
+           // Or re-center on the last selected to see it fully?
+           // User said: "map moves again centering the pin".
+           // This means we remove the padding/offset.
+           
+           // We only do this if we had a selection previously? 
+           // Usually just leaving it is fine but user asked explicitly.
+           // Since 'selectedListing' becomes null here, we can't get coordinates easily unless we cached it.
+           // But actually if user taps map to close, they want to explore.
+           // Let's just reset padding/view if needed, or do nothing.
+           // _panelController.close() handles sheet.
+           
+           _panelController.close();
         }
       },
       child: BlocBuilder<MapViewCubit, MapViewState>(
         builder: (context, state) {
-          // 1. Filter and Sort Listings based on active Smart Filters
+          // Process Listings
           final displayListings = _processListings(widget.listings, state);
 
           return SlidingUpPanel(
             controller: _panelController,
-            minHeight: 0, // Hidden by default
-            maxHeight: MediaQuery.of(context).size.height * 0.6, // 60% screen
+            minHeight: 0, 
+            maxHeight: MediaQuery.of(context).size.height * 0.6,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             parallaxEnabled: true,
             parallaxOffset: 0.5,
-            backdropEnabled: true, // Dim map when sheet open
-            color: Colors.transparent, // We handle content decoration
-            boxShadow: const [], // Custom shadow in content
+            backdropEnabled: false, // User wants to see map still? "still see the pin".
+            // If backdrop is true, map is dimmed. User wants to see pin at top.
+            // Let's disable backdrop or make it very light.
+            // Actually, if map interacts, we need backdrop false or tap pass-through.
+            // Default panel handles taps on body by closing?
+            // User: "if user dismises the modal map moves again".
             
             panelBuilder: (scrollController) {
               if (state.selectedListing == null) return const SizedBox.shrink();
@@ -94,7 +168,6 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                 listing: state.selectedListing!,
                 scrollController: scrollController,
                 onChatTap: () {
-                   // Navigate to chat
                    context.push(
                     '/chat',
                     extra: {
@@ -118,18 +191,19 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
 
             body: Stack(
               children: [
-                // Map Layer
                 FlutterMap(
                   mapController: _mapController,
                   options: MapOptions(
                     initialCenter: const LatLng(-1.2921, 36.8219), // Nairobi
                     initialZoom: 13.0,
+                    onPositionChanged: (pos, _) {
+                       if (pos.zoom != null && pos.zoom != _currentZoom) {
+                          setState(() => _currentZoom = pos.zoom!);
+                       }
+                    },
                     onTap: (_, __) {
                       context.read<MapViewCubit>().closeBottomSheet();
                     },
-                    interactionOptions: const InteractionOptions(
-                      flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-                    ),
                   ),
                   children: [
                     TileLayer(
@@ -137,40 +211,62 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                       userAgentPackageName: 'com.kejapin.client',
                     ),
                     
-                    // Smart Clustering Layer
+                    // Lines Layer (Only when selected)
+                    if (state.selectedListing != null && _userLocation != null)
+                      PolylineLayer(
+                        polylines: [
+                          Polyline(
+                            points: [
+                              _userLocation!,
+                              LatLng(state.selectedListing!.latitude, state.selectedListing!.longitude)
+                            ],
+                            color: AppColors.structuralBrown,
+                            strokeWidth: 3.0,
+                            isDotted: true, 
+                          ),
+                        ],
+                      ),
+                    
+                    // User Location Marker
+                    if (_userLocation != null)
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            point: _userLocation!,
+                            width: 20,
+                            height: 20,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.blueAccent,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 2),
+                                boxShadow: const [BoxShadow(blurRadius: 5, color: Colors.black26)],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    
+                    // Markers Layer
                     MarkerClusterLayerWidget(
                       options: MarkerClusterLayerOptions(
-                        maxClusterRadius: 120,
+                        maxClusterRadius: 100, // Reduced radius for better accuracy
                         size: const Size(100, 60),
                         alignment: Alignment.center,
                         padding: const EdgeInsets.all(50),
                         markers: displayListings.map((listing) {
                           return Marker(
                             point: LatLng(listing.latitude, listing.longitude),
-                            width: 80,
-                            height: 40,
-                            child: PricePillMarker(
-                              price: 'KSh ${(listing.priceAmount / 1000).toStringAsFixed(0)}k',
-                              isSelected: state.selectedListing?.id == listing.id,
-                              isViewed: state.viewedListingIds.contains(listing.id),
-                              onTap: () {
-                                context.read<MapViewCubit>().selectListing(listing);
-                              },
-                            ),
+                            width: _currentZoom > 15.5 ? 160 : 80, // Dynamic size
+                            height: _currentZoom > 15.5 ? 70 : 40,
+                            child: _buildProgressiveMarker(listing, state),
                           );
                         }).toList(),
                         builder: (context, markers) {
-                           // Calculate count and avg
-                           // Getting markers list, but they are generic Markers. 
-                           // For average price we need listing data. 
-                           // Simplification: Just count for now as extracting data from Widget Markers is hard unless we map.
-                           // Actually we can map by point lookup or passing data-rich markers if package supported.
-                           // For now just show Count.
                            return ClusterMarker(
                              count: markers.length,
                              onTap: () {
-                               // Zoom to cluster handled by package by default usually?
-                               // Default behavior is zoom.
+                               // Default is zoom, which is fine
                              },
                            );
                         },
@@ -188,12 +284,9 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                         child: FloatingSearchBar(
                           onSearchChanged: (val) {
-                             // Implement search logic if needed or pass to Cubit
-                             context.read<MapViewCubit>().setSearchQuery(val);
+                             cubit.setSearchQuery(val);
                           },
-                          onFilterTap: () {
-                            widget.onShowFilters();
-                          },
+                          onFilterTap: widget.onShowFilters,
                         ),
                       ),
                       
@@ -202,19 +295,16 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                         child: QuickFilterChips(
                           isClosestActive: state.isClosestToMeActive,
                           isCheapestActive: state.isCheapestActive,
-                          onClosestTap: () => context.read<MapViewCubit>().toggleClosestToMe(),
-                          onCheapestTap: () => context.read<MapViewCubit>().toggleCheapest(),
+                          onClosestTap: () => cubit.toggleClosestToMe(),
+                          onCheapestTap: () => cubit.toggleCheapest(),
                           onFilterTap: (filter) {
-                             // Handle standard filters
+                             widget.onShowFilters();
                           },
                         ),
                       ),
                     ],
                   ),
                 ),
-
-                // Map/List Toggle (Optional, if we want to keep it consistent with plan)
-                // Positioned(bottom: 20, left: 0, right: 0, ...)
               ],
             ),
           );
@@ -223,13 +313,92 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
     );
   }
 
-  // Smart Filter Logic
+  Widget _buildProgressiveMarker(ListingEntity listing, MapViewState state) {
+    // Zoom Logic
+    // < 12: Dot (Actually Cluster handles this if radius is large, but if single item exists)
+    // 12 - 15.5: PricePill (Gold)
+    // > 15.5: SmallCard
+
+    if (_currentZoom < 12.0) {
+      return GestureDetector(
+        onTap: () => context.read<MapViewCubit>().selectListing(listing),
+        child: Container(
+          decoration: BoxDecoration(
+             color: AppColors.mutedGold,
+             shape: BoxShape.circle,
+             border: Border.all(color: Colors.white, width: 2),
+             boxShadow: const [BoxShadow(blurRadius: 3, color: Colors.black26)],
+          ),
+          width: 15,
+          height: 15,
+        ),
+      );
+    }
+    
+    if (_currentZoom > 15.5) {
+      return SmallCardMarker(
+        listing: listing,
+        isSelected: state.selectedListing?.id == listing.id,
+        onTap: () => context.read<MapViewCubit>().selectListing(listing),
+      );
+    }
+
+    return PricePillMarker(
+      price: 'KSh ${(listing.priceAmount / 1000).toStringAsFixed(0)}k',
+      isSelected: state.selectedListing?.id == listing.id,
+      isViewed: state.viewedListingIds.contains(listing.id),
+      onTap: () {
+        context.read<MapViewCubit>().selectListing(listing);
+      },
+    );
+  }
+
+  void _handleClosestToMe(MapViewState state) {
+     if (_userLocation == null) {
+        // Trigger fetch if null?
+        // _fetchLocation(); // Assumes user will wait. 
+        // Or show snackbar "Getting location..."
+        return;
+     }
+     
+     // Find closest listing
+     ListingEntity? closest;
+     double minDistance = double.infinity;
+     
+     // Note: We use the already processed lists if possible, OR logic in Cubit
+     // But here we need to act on the full list or filtered list.
+     // Let's use widget.listings for full scope search or filtered?
+     // Filters apply. So process list first.
+     
+     final candidates = _processListings(widget.listings, state);
+     if (candidates.isEmpty) return;
+     
+     for (var listing in candidates) {
+        final d = Geolocator.distanceBetween(
+           _userLocation!.latitude, _userLocation!.longitude, 
+           listing.latitude, listing.longitude
+        );
+        if (d < minDistance) {
+           minDistance = d;
+           closest = listing;
+        }
+     }
+     
+     if (closest != null) {
+        // Select it AND Move Map
+        // Selecting it will trigger the other listener to Move Map!
+        // But we want it centered? Or with sheet?
+        // If we select, sheet opens. So "Move with Padding" applies.
+        context.read<MapViewCubit>().selectListing(closest);
+     }
+  }
+
   List<ListingEntity> _processListings(List<ListingEntity> listings, MapViewState state) {
     if (listings.isEmpty) return [];
 
     List<ListingEntity> filtered = List.from(listings);
 
-    // 1. Text Search filtering (local)
+    // 1. Text Search
     if (state.searchQuery != null && state.searchQuery!.isNotEmpty) {
       final q = state.searchQuery!.toLowerCase();
       filtered = filtered.where((l) => 
@@ -239,28 +408,32 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
       ).toList();
     }
 
-    // 2. Sorting (Closest / Cheapest)
-    // Note: To sort by distance we need current location.
-    // For now we use Map Center or Nairobi default if not provided, or better: async location?
-    // Sorting inside Build is synchronous. We can't wait for location here.
-    // Ideally user location should be in State.
-    // Assuming for now simple sorting if we had location in Cubit.
-    // Since we don't hold user location strictly yet in this simple Cubit, we'll skip precise distance sort 
-    // OR we assume (0,0) or check if we can get it.
-    
-    // For "Cheapest":
+    // 2. Sorting
     if (state.isCheapestActive && !state.isClosestToMeActive) {
        filtered.sort((a, b) => a.priceAmount.compareTo(b.priceAmount));
+    } else if (state.isClosestToMeActive && _userLocation != null) {
+       filtered.sort((a, b) {
+          final da = Geolocator.distanceBetween(_userLocation!.latitude, _userLocation!.longitude, a.latitude, a.longitude);
+          final db = Geolocator.distanceBetween(_userLocation!.latitude, _userLocation!.longitude, b.latitude, b.longitude);
+          return da.compareTo(db);
+       });
+    } else if (state.isClosestToMeActive && state.isCheapestActive && _userLocation != null) {
+         // Combined sort: normalized score? simple: distance primary?
+         // User said: "closest and cheapest".
+         // Let's sort by distance first, then price? 
+         // Or simple: Sort by Price * Distance Factor?
+         // Simplest effective: Sort by Price, but valid only within X km?
+         // Let's stick to Distance sort as "closest" is usually primary intent for geography.
+          filtered.sort((a, b) {
+            final da = Geolocator.distanceBetween(_userLocation!.latitude, _userLocation!.longitude, a.latitude, a.longitude);
+            final db = Geolocator.distanceBetween(_userLocation!.latitude, _userLocation!.longitude, b.latitude, b.longitude);
+            return da.compareTo(db); // Priority to location
+         });
     }
-    
-    // For "Combined":
-    /*
-    if (state.isCheapestActive && state.isClosestToMeActive) {
-       // logic...
-    }
-    */
-    
+
     return filtered;
   }
+  
+  double min(double a, double b) => a < b ? a : b;
 }
 

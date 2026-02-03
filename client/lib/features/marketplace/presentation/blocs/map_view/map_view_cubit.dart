@@ -39,7 +39,7 @@ class MapViewCubit extends Cubit<MapViewState> {
   void closeBottomSheet() {
     emit(state.copyWith(
       isBottomSheetOpen: false,
-      selectedListing: null, // Optional: keep selected but close sheet? Better to clear for map clarity
+      selectedListing: null,
     ));
   }
 
