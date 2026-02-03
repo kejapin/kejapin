@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
+import 'dart:async';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -51,12 +52,63 @@ class _ChatScreenState extends State<ChatScreen> {
   final _repository = MessagesRepository();
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
+  
+  bool _showScrollButton = false;
+  int _newMessageCount = 0;
+  int _totalMessagesCount = 0;
+  StreamSubscription? _messageSubscription;
 
   @override
   void initState() {
     super.initState();
     _repository.warmupCache();
     _repository.markConversationAsRead(widget.otherUserId);
+    
+    _scrollController.addListener(_scrollListener);
+    // Listen for new messages only to update the count when scrolled up
+    _messageSubscription = _repository.getConversationStream(widget.otherUserId).listen((messages) {
+      if (mounted) {
+        if (_showScrollButton) {
+           final diff = messages.length - _totalMessagesCount;
+           if (diff > 0) {
+             setState(() => _newMessageCount += diff);
+           }
+        }
+        _totalMessagesCount = messages.length;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _messageSubscription?.cancel();
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.hasClients) {
+      final isScrolledUp = _scrollController.offset > 200;
+      if (isScrolledUp != _showScrollButton) {
+        setState(() {
+          _showScrollButton = isScrolledUp;
+          if (!isScrolledUp) {
+            _newMessageCount = 0;
+          }
+        });
+      }
+    }
+  }
+
+  void _scrollToBottom() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+     setState(() => _newMessageCount = 0);
   }
 
   Future<void> _sendMessage() async {
@@ -172,6 +224,12 @@ class _ChatScreenState extends State<ChatScreen> {
               ],
             ),
           ),
+          if (_showScrollButton)
+            Positioned(
+              bottom: 100,
+              right: 16,
+              child: _buildScrollToBottomButton(),
+            ),
         ],
       ),
     );
@@ -297,6 +355,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   child: TextField(
                     controller: _messageController,
+                    minLines: 1,
+                    maxLines: 5,
+                    textCapitalization: TextCapitalization.sentences,
                     cursorColor: AppColors.mutedGold,
                     style: GoogleFonts.workSans(
                       color: Colors.white,
@@ -796,6 +857,51 @@ class _ChatScreenState extends State<ChatScreen> {
     
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Repair request sent')),
+    );
+  }
+  Widget _buildScrollToBottomButton() {
+    return GestureDetector(
+      onTap: _scrollToBottom,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.mutedGold,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 28),
+            if (_newMessageCount > 0)
+              Positioned(
+                top: -8,
+                right: -8,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    _newMessageCount.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
