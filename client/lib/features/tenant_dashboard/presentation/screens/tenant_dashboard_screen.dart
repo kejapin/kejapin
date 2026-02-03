@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +21,7 @@ class _TenantDashboardScreenState extends State<TenantDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
-      appBar: const CustomAppBar(title: 'MY LIFE-HUB', showSearch: false),
+      appBar: CustomAppBar(title: AppLocalizations.of(context)!.myLifeHub, showSearch: false),
       body: Stack(
         children: [
           SafeArea(
@@ -32,8 +33,8 @@ class _TenantDashboardScreenState extends State<TenantDashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   FadeInDown(
-                    child: const Text(
-                      'Spatial Activity',
+                    child: Text(
+                      AppLocalizations.of(context)!.spatialActivity,
                       style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.structuralBrown),
                     ),
                   ),
@@ -68,11 +69,11 @@ class _TenantDashboardScreenState extends State<TenantDashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Avg. Life-Pulse', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              Text(AppLocalizations.of(context)!.avgLifePulse, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(color: AppColors.sageGreen, borderRadius: BorderRadius.circular(20)),
-                child: const Text('Top 10%', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                child: Text(AppLocalizations.of(context)!.top10Percent, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -117,7 +118,7 @@ class _TenantDashboardScreenState extends State<TenantDashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Life-Path Journey', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Text(AppLocalizations.of(context)!.lifePathJourney, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
         _TimelineItem(
           title: 'Viewing: Skyline Terrace',
@@ -163,7 +164,7 @@ class _TenantDashboardScreenState extends State<TenantDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Spatial Savings', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Text(AppLocalizations.of(context)!.spatialSavings, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             const SizedBox(height: 10),
             Expanded(
               child: BarChart(
@@ -244,7 +245,7 @@ class _TimelineItem extends StatelessWidget {
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: const Text('Rate Performance', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      child: Text(AppLocalizations.of(context)!.ratePerformance, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                     ),
                   ],
                 ],

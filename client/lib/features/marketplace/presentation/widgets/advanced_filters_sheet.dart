@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:client/l10n/app_localizations.dart';
 
 class AdvancedFiltersSheet extends StatefulWidget {
   final Map<String, dynamic> currentFilters;
@@ -136,7 +137,7 @@ class _AdvancedFiltersSheetState extends State<AdvancedFiltersSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Advanced Filters',
+                          AppLocalizations.of(context)!.advancedFilters,
                           style: GoogleFonts.montserrat(
                             fontSize: isWeb ? 24 : 20,
                             fontWeight: FontWeight.w800,
@@ -144,7 +145,7 @@ class _AdvancedFiltersSheetState extends State<AdvancedFiltersSheet> {
                           ),
                         ),
                         Text(
-                          'Refine your search',
+                          AppLocalizations.of(context)!.refineSearch,
                           style: TextStyle(
                             fontSize: 14,
                             color: AppColors.structuralBrown.withOpacity(0.6),
@@ -168,19 +169,19 @@ class _AdvancedFiltersSheetState extends State<AdvancedFiltersSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle('Price Range'),
+                    _buildSectionTitle(AppLocalizations.of(context)!.priceRange),
                     _buildPriceRangeSlider(),
                     const SizedBox(height: 24),
                     
-                    _buildSectionTitle('Property Type'),
+                    _buildSectionTitle(AppLocalizations.of(context)!.propertyType),
                     _buildPropertyTypeChips(),
                     const SizedBox(height: 24),
                     
-                    _buildSectionTitle('Amenities'),
+                    _buildSectionTitle(AppLocalizations.of(context)!.amenities),
                     _buildAmenitiesGrid(),
                     const SizedBox(height: 24),
                     
-                    _buildSectionTitle('Furnishing'),
+                    _buildSectionTitle(AppLocalizations.of(context)!.furnishing),
                     _buildFurnishingOptions(),
                     const SizedBox(height: 24),
                     
@@ -217,7 +218,7 @@ class _AdvancedFiltersSheetState extends State<AdvancedFiltersSheet> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: Center(
                           child: Text(
-                            'Reset',
+                            AppLocalizations.of(context)!.reset,
                             style: GoogleFonts.montserrat(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -253,7 +254,7 @@ class _AdvancedFiltersSheetState extends State<AdvancedFiltersSheet> {
                         ),
                         child: Center(
                           child: Text(
-                            'Apply Filters',
+                            AppLocalizations.of(context)!.applyFilters,
                             style: GoogleFonts.montserrat(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -360,7 +361,7 @@ class _AdvancedFiltersSheetState extends State<AdvancedFiltersSheet> {
                 : Colors.transparent,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Text(
-              type,
+              _localizePropertyType(context, type),
               style: GoogleFonts.montserrat(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -405,7 +406,7 @@ class _AdvancedFiltersSheetState extends State<AdvancedFiltersSheet> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  amenity,
+                  _localizeAmenity(context, amenity),
                   style: GoogleFonts.montserrat(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -441,7 +442,7 @@ class _AdvancedFiltersSheetState extends State<AdvancedFiltersSheet> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Center(
                   child: Text(
-                    option,
+                    _localizeFurnishing(context, option),
                     style: GoogleFonts.montserrat(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -476,7 +477,7 @@ class _AdvancedFiltersSheetState extends State<AdvancedFiltersSheet> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Available Now',
+                  AppLocalizations.of(context)!.availableNow,
                   style: GoogleFonts.montserrat(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -484,7 +485,7 @@ class _AdvancedFiltersSheetState extends State<AdvancedFiltersSheet> {
                   ),
                 ),
                 Text(
-                  'Show only immediately available properties',
+                  AppLocalizations.of(context)!.availableNowDesc,
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.structuralBrown.withOpacity(0.6),
@@ -506,5 +507,42 @@ class _AdvancedFiltersSheetState extends State<AdvancedFiltersSheet> {
         ],
       ),
     );
+  }
+
+  String _localizePropertyType(BuildContext context, String type) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (type) {
+      case 'BEDSITTER': return l10n.bedsitter;
+      case '1BHK': return l10n.oneBhk;
+      case '2BHK': return l10n.twoBhk;
+      case 'SQ': return l10n.sq;
+      case 'BUNGALOW': return l10n.bungalow;
+      default: return type;
+    }
+  }
+
+  String _localizeAmenity(BuildContext context, String amenity) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (amenity) {
+      case 'WiFi': return l10n.wifi;
+      case 'Parking': return l10n.parking;
+      case 'Security': return l10n.security;
+      case 'Water 24/7': return l10n.water247;
+      case 'Generator': return l10n.generator;
+      case 'Gym': return l10n.gym;
+      case 'Swimming Pool': return l10n.swimmingPool;
+      case 'Garden': return l10n.garden;
+      default: return amenity;
+    }
+  }
+
+  String _localizeFurnishing(BuildContext context, String furnishing) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (furnishing) {
+      case 'Furnished': return l10n.furnished;
+      case 'Semi-Furnished': return l10n.semiFurnished;
+      case 'Unfurnished': return l10n.unfurnished;
+      default: return furnishing;
+    }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
@@ -87,7 +88,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           const SizedBox(width: 20),
           FadeInDown(
             child: Text(
-              "Notifications",
+              AppLocalizations.of(context)!.notifications,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -98,9 +99,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           if (notifications.isNotEmpty)
             TextButton(
               onPressed: _markAllRead,
-              child: const Text(
-                "MARK ALL READ",
-                style: TextStyle(
+              child: Text(
+                AppLocalizations.of(context)!.markAllRead,
+                style: const TextStyle(
                   color: AppColors.mutedGold,
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
@@ -129,18 +130,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            const Text(
-              "All caught up!",
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context)!.allCaughtUp,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              "You don't have any new notifications.",
-              style: TextStyle(color: Colors.white70, fontSize: 14),
+            Text(
+              AppLocalizations.of(context)!.noNewNotifications,
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
             ),
           ],
         ),

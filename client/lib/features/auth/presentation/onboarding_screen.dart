@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
+import 'package:client/l10n/app_localizations.dart';
 
 import '../../../core/constants/app_colors.dart';
 
@@ -16,35 +17,32 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<OnboardingPage> _pages = [
+  List<OnboardingPage> _getPages(BuildContext context) => [
     OnboardingPage(
-      title: "Find Your Perfect Fit",
-      description:
-          "Discover homes curated by data and design. We analyze what matters to match you with properties that truly fit your lifestyle.",
+      title: AppLocalizations.of(context)!.onboarding1Title,
+      description: AppLocalizations.of(context)!.onboarding1Desc,
       image: 'assets/images/onboarding/discovery.png',
     ),
     OnboardingPage(
-      title: "Plan Your Route. Find Your Life Pins.",
-      description:
-          "Visualize your commute and calculate real travel times to work, gym, and all the places that matter in your life.",
+      title: AppLocalizations.of(context)!.onboarding2Title,
+      description: AppLocalizations.of(context)!.onboarding2Desc,
       image: 'assets/images/onboarding/life_pins.png',
     ),
     OnboardingPage(
-      title: "Complete Cost Transparency",
-      description:
-          "See the total monthly cost including rent, commute, and utilities. No hidden fees, just honest numbers.",
+      title: AppLocalizations.of(context)!.onboarding3Title,
+      description: AppLocalizations.of(context)!.onboarding3Desc,
       image: 'assets/images/onboarding/transparency.png',
     ),
     OnboardingPage(
-      title: "Trust Built In",
-      description:
-          "Verified landlords, secure payments, and a community-focused platform. Find your home with confidence.",
+      title: AppLocalizations.of(context)!.onboarding4Title,
+      description: AppLocalizations.of(context)!.onboarding4Desc,
       image: 'assets/images/onboarding/trust.png',
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final pages = _getPages(context);
     // Responsive constraint for web
     final maxWidth = MediaQuery.of(context).size.width > 600 ? 600.0 : double.infinity;
     
@@ -102,8 +100,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             ),
                           ),
                           child: Text(
-                            'Skip',
-                            style: TextStyle(
+                            AppLocalizations.of(context)!.skip,
+                            style: const TextStyle(
                               color: AppColors.structuralBrown,
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
@@ -116,11 +114,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       child: PageView.builder(
                         controller: _pageController,
                         onPageChanged: (value) => setState(() => _currentPage = value),
-                        itemCount: _pages.length,
-                        itemBuilder: (context, index) => _buildPage(_pages[index], index),
+                        itemCount: pages.length,
+                        itemBuilder: (context, index) => _buildPage(pages[index], index),
                       ),
                     ),
-                    _buildBottomControls(),
+                    _buildBottomControls(pages),
                     const SizedBox(height: 20),
                   ],
                 ),
@@ -229,7 +227,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildBottomControls() {
+  Widget _buildBottomControls(List<OnboardingPage> pages) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32.0),
       child: Row(
@@ -238,7 +236,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           // Page indicators
           Row(
             children: List.generate(
-              _pages.length,
+              pages.length,
               (index) => AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 margin: const EdgeInsets.only(right: 8),
@@ -256,7 +254,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           // Next/Get Started button
           ElevatedButton(
             onPressed: () {
-              if (_currentPage < _pages.length - 1) {
+              if (_currentPage < pages.length - 1) {
                 _pageController.animateToPage(
                   _currentPage + 1,
                   duration: const Duration(milliseconds: 400),
@@ -279,14 +277,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  _currentPage == _pages.length - 1 ? "Get Started" : "Next",
+                  _currentPage == pages.length - 1 ? AppLocalizations.of(context)!.getStarted : AppLocalizations.of(context)!.next,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1,
                   ),
                 ),
-                if (_currentPage < _pages.length - 1) ...[
+                if (_currentPage < pages.length - 1) ...[
                   const SizedBox(width: 8),
                   const Icon(Icons.arrow_forward, size: 18),
                 ],

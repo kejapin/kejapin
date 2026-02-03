@@ -1,7 +1,6 @@
-import 'dart:math' as math;
 import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,7 +10,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../../core/widgets/animated_indicators.dart';
-import '../../../../core/widgets/keja_state_view.dart';
 import '../../data/profile_repository.dart';
 import '../../../../core/services/supabase_storage_service.dart';
 
@@ -51,6 +49,15 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
   bool _isSubmitting = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Auto-check status when entering the screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkExistingPartnerStatus();
+    });
+  }
+
+  @override
   void dispose() {
     _fullNameController.dispose();
     _idNumberController.dispose();
@@ -79,18 +86,18 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
 
   bool _validateStep() {
     if (_currentStep == 0) {
-      if (_fullNameController.text.isEmpty) return _error("Legal name is required");
-      if (_idNumberController.text.isEmpty) return _error("ID Number is required");
-      if (_phoneController.text.isEmpty) return _error("Phone number is required");
+      if (_fullNameController.text.isEmpty) return _error(AppLocalizations.of(context)!.legalNameRequired);
+      if (_idNumberController.text.isEmpty) return _error(AppLocalizations.of(context)!.idRequired);
+      if (_phoneController.text.isEmpty) return _error(AppLocalizations.of(context)!.phoneRequired);
     } else if (_currentStep == 1) {
-      if (_kraPinController.text.isEmpty) return _error("KRA PIN is required for verification");
+      if (_kraPinController.text.isEmpty) return _error(AppLocalizations.of(context)!.kraPinRequired);
     } else if (_currentStep == 2) {
-      if (_idFront == null) return _error("ID Front is required");
-      if (_idBack == null) return _error("ID Back is required");
-      if (_selfie == null) return _error("Live selfie image is required");
-      if (_proofDocument == null) return _error("Proof of association is required");
+      if (_idFront == null) return _error(AppLocalizations.of(context)!.idFrontRequired);
+      if (_idBack == null) return _error(AppLocalizations.of(context)!.idBackRequired);
+      if (_selfie == null) return _error(AppLocalizations.of(context)!.selfieRequired);
+      if (_proofDocument == null) return _error(AppLocalizations.of(context)!.proofRequired);
     } else if (_currentStep == 3) {
-      if (_payoutDetailsController.text.isEmpty) return _error("Payout details are required");
+      if (_payoutDetailsController.text.isEmpty) return _error(AppLocalizations.of(context)!.payoutRequired);
     }
     return true;
   }
@@ -105,29 +112,40 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
     try {
       // Direct fetch from Supabase (source of truth)
       final profile = await _profileRepo.getProfile();
+      debugPrint("DEBUG: Profile Role: ${profile.role}, vStatus: ${profile.vStatus}");
       
       if (mounted) {
         if (profile.role == 'LANDLORD' || profile.role == 'AGENT' || profile.role == 'ADMIN') {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Partner status confirmed! Redirecting to dashboard..."),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.partnerStatusConfirmed),
               backgroundColor: Colors.green,
             ),
           );
           Future.delayed(const Duration(seconds: 1), () {
             if (mounted) context.go('/landlord-dashboard');
           });
+        } else if (profile.vStatus == 'VERIFIED') {
+           ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.accountVerified),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) context.go('/profile'); 
+          });
         } else if (profile.vStatus == 'PENDING') {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Your application is still PENDING verification. Please wait for approval."),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.applicationPending),
               backgroundColor: AppColors.mutedGold,
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("No partner record found. Please proceed with the application."),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.noPartnerRecord),
               backgroundColor: Colors.orange,
             ),
           );
@@ -136,7 +154,7 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Verification failed: $e"), backgroundColor: Colors.redAccent),
+          SnackBar(content: Text("${AppLocalizations.of(context)!.verificationFailed}: $e"), backgroundColor: Colors.redAccent),
         );
       }
     } finally {
@@ -176,6 +194,12 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
         path: '$userId/proof_${DateTime.now().millisecondsSinceEpoch}.jpg',
       );
 
+      debugPrint('SUBMITTING APPLICATION WITH DATA:');
+      debugPrint('Name: ${_fullNameController.text}');
+      debugPrint('ID: ${_idNumberController.text}');
+      debugPrint('Phone: ${_phoneController.text}');
+      debugPrint('Company: ${_companyNameController.text}');
+
       // 2. Submit Data to Backend
       await _profileRepo.submitLandlordApplication(
         documents: {
@@ -186,6 +210,7 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
           'proof_type': _proofType,
           'submitted_at': DateTime.now().toIso8601String(),
         },
+        fullName: _fullNameController.text,
         companyName: _companyNameController.text,
         companyBio: _companyBioController.text,
         nationalId: _idNumberController.text,
@@ -209,7 +234,7 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(content: Text('Upload failed: $e\nMake sure your Supabase Bucket "verification-documents" is created and public.'), backgroundColor: Colors.redAccent)
+           SnackBar(content: Text('${AppLocalizations.of(context)!.uploadFailed}: $e\nMake sure your Supabase Bucket "verification-documents" is created and public.'), backgroundColor: Colors.redAccent)
         );
       }
     } finally {
@@ -221,7 +246,7 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
-      appBar: const CustomAppBar(title: 'PARTNER PROGRAM', showSearch: false),
+      appBar: CustomAppBar(title: AppLocalizations.of(context)!.applyLandlordTitle, showSearch: false),
       body: Theme(
         data: Theme.of(context).copyWith(colorScheme: const ColorScheme.light(primary: AppColors.structuralBrown)),
         child: Stepper(
@@ -256,9 +281,9 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
       content: FadeInUp(
         child: Column(
           children: [
-            _buildField(_fullNameController, 'Full Legal Name', 'Must match ID/M-Pesa', Icons.person),
-            _buildField(_idNumberController, 'National ID Number', '00000000', Icons.badge, keyboard: TextInputType.number),
-            _buildField(_phoneController, 'Contact Phone', '0700 000 000', Icons.phone, keyboard: TextInputType.phone),
+            _buildField(_fullNameController, AppLocalizations.of(context)!.legalName, AppLocalizations.of(context)!.legalNameHint, Icons.person),
+            _buildField(_idNumberController, AppLocalizations.of(context)!.idNumber, '00000000', Icons.badge, keyboard: TextInputType.number),
+            _buildField(_phoneController, AppLocalizations.of(context)!.phoneNumber, '0700 000 000', Icons.phone, keyboard: TextInputType.phone),
             const SizedBox(height: 16),
             _buildRoleSelector(),
           ],
@@ -275,9 +300,9 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
       content: FadeInUp(
         child: Column(
           children: [
-            _buildField(_kraPinController, 'KRA PIN', 'A000000000X', Icons.description),
+            _buildField(_kraPinController, AppLocalizations.of(context)!.kraPin, 'A000000000X', Icons.description),
             const SizedBox(height: 16),
-            _buildField(_companyNameController, 'Agency/Brand Name (Optional)', 'Kejapin Realty', Icons.business),
+            _buildField(_companyNameController, AppLocalizations.of(context)!.agencyName, 'Kejapin Realty', Icons.business),
             const SizedBox(height: 16),
             _buildProofSelector(),
           ],
@@ -304,7 +329,7 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
             const SizedBox(height: 16),
             _buildUploadRow('LIVE SELFIE', _selfie, () => _pickImage('SELFIE'), Icons.camera_front_outlined),
             const SizedBox(height: 16),
-            _buildUploadRow('ASSOCIATION PROOF (${_proofType.replaceAll('_', ' ')})', _proofDocument, () => _pickImage('PROOF'), Icons.assignment_outlined),
+            _buildUploadRow('${AppLocalizations.of(context)!.proofOfAssociation} (${_proofType.replaceAll('_', ' ')})', _proofDocument, () => _pickImage('PROOF'), Icons.assignment_outlined),
           ],
         ),
       ),
@@ -322,7 +347,7 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
             const SizedBox(height: 24),
             _buildField(
               _payoutDetailsController, 
-              _payoutMethod == 'MPESA' ? 'Paybill / Till / Phone' : 'Account Details',
+              _payoutMethod == 'MPESA' ? AppLocalizations.of(context)!.paybillTill : AppLocalizations.of(context)!.accountDetails,
               _payoutMethod == 'MPESA' ? 'e.g. Paybill: 123456' : 'e.g. Bank: KCB, Acc: 9876...',
               Icons.account_balance_wallet,
               maxLines: 3
@@ -356,20 +381,25 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('YOUR ROLE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 1.5)),
+        Text(AppLocalizations.of(context)!.yourRole, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 1.5)),
         const SizedBox(height: 12),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             children: ['OWNER', 'AGENT', 'CARETAKER'].map((r) {
               final sel = _businessRole == r;
+              String displayRole = r;
+              if (r == 'OWNER') displayRole = AppLocalizations.of(context)!.owner;
+              if (r == 'AGENT') displayRole = AppLocalizations.of(context)!.agent;
+              if (r == 'CARETAKER') displayRole = AppLocalizations.of(context)!.caretaker;
+
               return GestureDetector(
                 onTap: () => setState(() => _businessRole = r),
                 child: Container(
                   margin: const EdgeInsets.only(right: 8),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(color: sel ? AppColors.structuralBrown : Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: sel ? Colors.transparent : Colors.grey.shade200)),
-                  child: Text(r, style: TextStyle(color: sel ? Colors.white : Colors.black, fontWeight: FontWeight.bold, fontSize: 11)),
+                  child: Text(displayRole, style: TextStyle(color: sel ? Colors.white : Colors.black, fontWeight: FontWeight.bold, fontSize: 11)),
                 ),
               );
             }).toList(),
@@ -383,13 +413,13 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('PROOF OF ASSOCIATION', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 1.5)),
+        Text(AppLocalizations.of(context)!.proofOfAssociation, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 1.5)),
         const SizedBox(height: 12),
         Column(
           children: [
-            {'val': 'UTILITY_BILL', 'label': 'Recent Utility Bill (KPLC/Water)'},
-            {'val': 'REG_CERT', 'label': 'Agency Registration Cert'},
-            {'val': 'AUTHORITY_LETTER', 'label': 'Letter of Authority (Caretaker)'},
+            {'val': 'UTILITY_BILL', 'label': AppLocalizations.of(context)!.utilityBill},
+            {'val': 'REG_CERT', 'label': AppLocalizations.of(context)!.regCert},
+            {'val': 'AUTHORITY_LETTER', 'label': AppLocalizations.of(context)!.authorityLetter},
           ].map((item) {
             final sel = _proofType == item['val'];
             return GestureDetector(
@@ -417,9 +447,9 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
   Widget _buildPayoutSelector() {
     return Row(
       children: [
-        Expanded(child: _buildSelectBtn('MPESA', Icons.phone_iphone, _payoutMethod == 'MPESA')),
+        Expanded(child: _buildSelectBtn(AppLocalizations.of(context)!.mpesa, Icons.phone_iphone, _payoutMethod == 'MPESA')),
         const SizedBox(width: 12),
-        Expanded(child: _buildSelectBtn('BANK', Icons.account_balance, _payoutMethod == 'BANK')),
+        Expanded(child: _buildSelectBtn(AppLocalizations.of(context)!.bank, Icons.account_balance, _payoutMethod == 'BANK')),
       ],
     );
   }
@@ -456,7 +486,7 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
               children: [
                 Icon(icon, color: file != null ? AppColors.mutedGold : Colors.grey),
                 const SizedBox(width: 16),
-                Expanded(child: Text(file != null ? file.name : 'Tap to upload', style: TextStyle(color: file != null ? Colors.black : Colors.grey, fontWeight: file != null ? FontWeight.bold : FontWeight.normal, fontSize: 13))),
+                Expanded(child: Text(file != null ? file.name : AppLocalizations.of(context)!.tapToUpload, style: TextStyle(color: file != null ? Colors.black : Colors.grey, fontWeight: file != null ? FontWeight.bold : FontWeight.normal, fontSize: 13))),
                 if (file != null) const Icon(Icons.check_circle, color: AppColors.mutedGold),
               ],
             ),
@@ -481,7 +511,7 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: _isSubmitting ? const UploadingIndicator() : Text(_currentStep == 3 ? 'BECOME PARTNER' : 'CONTINUE', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  child: _isSubmitting ? const UploadingIndicator() : Text(_currentStep == 3 ? AppLocalizations.of(context)!.becomePartner : AppLocalizations.of(context)!.continueText, style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
               if (_currentStep > 0) ...[
@@ -499,7 +529,7 @@ class _ApplyLandlordScreenState extends State<ApplyLandlordScreen> {
              TextButton(
                onPressed: _isSubmitting ? null : _checkExistingPartnerStatus,
                child: Text(
-                 "Already a Partner? Tap to Verify",
+                 AppLocalizations.of(context)!.alreadyPartner,
                  style: GoogleFonts.workSans(
                    color: AppColors.structuralBrown,
                    fontWeight: FontWeight.bold,
@@ -534,18 +564,18 @@ class PartnerCongratulationsCard extends StatelessWidget {
             children: [
               const Icon(Icons.verified, color: AppColors.mutedGold, size: 80),
               const SizedBox(height: 24),
-              const Text('AUTO-VERIFIED', style: TextStyle(color: AppColors.mutedGold, letterSpacing: 4, fontWeight: FontWeight.w900, fontSize: 14)),
+              Text(AppLocalizations.of(context)!.autoVerified, style: const TextStyle(color: AppColors.mutedGold, letterSpacing: 4, fontWeight: FontWeight.w900, fontSize: 14)),
               const SizedBox(height: 16),
-              const Text('WELCOME PARTNER', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+              Text(AppLocalizations.of(context)!.welcomePartner, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
-              const Text('Your documents have been submitted and auto-approved for testing. You can now access the Landlord Dashboard.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.champagne, fontSize: 13, height: 1.5)),
+              Text(AppLocalizations.of(context)!.welcomePartnerDesc, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.champagne, fontSize: 13, height: 1.5)),
               const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () { Navigator.pop(context); context.go('/landlord-dashboard'); },
                   style: ElevatedButton.styleFrom(backgroundColor: AppColors.mutedGold, foregroundColor: AppColors.structuralBrown, padding: const EdgeInsets.symmetric(vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
-                  child: const Text('GO TO DASHBOARD', style: TextStyle(fontWeight: FontWeight.w900)),
+                  child: Text(AppLocalizations.of(context)!.goToDashboard, style: const TextStyle(fontWeight: FontWeight.w900)),
                 ),
               ),
             ],

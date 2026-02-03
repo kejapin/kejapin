@@ -6,6 +6,9 @@ import '../constants/app_colors.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/profile/data/profile_repository.dart';
 import 'glass_container.dart';
+import 'package:provider/provider.dart';
+import '../providers/locale_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -75,8 +78,8 @@ class AppDrawer extends StatelessWidget {
                   // Menu Items
                   // Menu Items
                   Expanded(
-                    child: FutureBuilder(
-                      future: ProfileRepository().getProfile(),
+                    child: StreamBuilder<UserProfile>(
+                      stream: ProfileRepository().getProfileStream(),
                       builder: (context, snapshot) {
                         final profile = snapshot.data;
                         final String role = profile?.role ?? 'TENANT';
@@ -88,7 +91,7 @@ class AppDrawer extends StatelessWidget {
                           children: [
                             _DrawerItem(
                               icon: Icons.explore_outlined,
-                              title: 'Marketplace',
+                              title: AppLocalizations.of(context)!.marketplace,
                               onTap: () {
                                 Navigator.pop(context);
                                 context.go('/marketplace');
@@ -127,7 +130,7 @@ class AppDrawer extends StatelessWidget {
                             if (role == 'TENANT' && !isAdmin)
                               _DrawerItem(
                                 icon: Icons.verified_user_outlined,
-                                title: 'Become a Partner',
+                                title: AppLocalizations.of(context)!.becomePartner,
                                 onTap: () {
                                   Navigator.pop(context);
                                   context.go('/apply-landlord');
@@ -152,7 +155,7 @@ class AppDrawer extends StatelessWidget {
                             ),
                             _DrawerItem(
                               icon: Icons.message_outlined,
-                              title: 'Messages',
+                              title: AppLocalizations.of(context)!.messages,
                               onTap: () {
                                 Navigator.pop(context);
                                 context.go('/messages');
@@ -160,10 +163,19 @@ class AppDrawer extends StatelessWidget {
                             ),
                             _DrawerItem(
                               icon: Icons.person_outline,
-                              title: 'Profile',
+                              title: AppLocalizations.of(context)!.profile,
                               onTap: () {
                                 Navigator.pop(context);
                                 context.go('/profile');
+                              },
+                            ),
+                            const Divider(color: Colors.white10),
+                            _DrawerItem(
+                              icon: Icons.language_outlined,
+                              title: AppLocalizations.of(context)!.settings,
+                              onTap: () {
+                                Navigator.pop(context);
+                                _showLanguageSelector(context);
                               },
                             ),
                           ],
@@ -211,7 +223,63 @@ class AppDrawer extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showLanguageSelector(BuildContext context) {
+    final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => GlassContainer(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        color: AppColors.structuralBrown,
+        opacity: 0.95,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: 24),
+            Text(
+              "Select Language",
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 24),
+            _buildLanguageOption(context, "English", const Locale('en'), localeProvider),
+            _buildLanguageOption(context, "Kiswahili Sanifu", const Locale('sw'), localeProvider),
+            _buildLanguageOption(context, "Kiswahili Kenyan", const Locale('sw', 'KE'), localeProvider),
+            const SizedBox(height: 48),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption(BuildContext context, String name, Locale locale, LocaleProvider provider) {
+    final isSelected = provider.locale == locale;
+    return ListTile(
+      onTap: () {
+        provider.setLocale(locale);
+        Navigator.pop(context);
+      },
+      leading: Icon(
+        Icons.check_circle,
+        color: isSelected ? AppColors.mutedGold : Colors.transparent,
+      ),
+      title: Text(
+        name,
+        style: TextStyle(
+          color: isSelected ? AppColors.mutedGold : Colors.white,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      trailing: isSelected ? null : const Icon(Icons.language, color: Colors.white24, size: 16),
     );
   }
 }

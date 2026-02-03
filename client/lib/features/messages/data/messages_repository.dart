@@ -7,6 +7,8 @@ import 'notifications_repository.dart';
 class MessageEntity {
   final String id;
   final String content;
+  final String type;
+  final Map<String, dynamic>? metadata;
   final bool isRead;
   final DateTime createdAt;
   final String otherUserId;
@@ -18,6 +20,8 @@ class MessageEntity {
   MessageEntity({
     required this.id,
     required this.content,
+    this.type = 'text',
+    this.metadata,
     required this.isRead,
     required this.createdAt,
     required this.otherUserId,
@@ -51,9 +55,21 @@ class MessageEntity {
     }
     final name = displayName;
     
+    // Parse metadata safely - it could be a Map or null
+    Map<String, dynamic>? parsedMetadata;
+    if (record['metadata'] != null) {
+      if (record['metadata'] is Map<String, dynamic>) {
+        parsedMetadata = record['metadata'] as Map<String, dynamic>;
+      } else if (record['metadata'] is Map) {
+        parsedMetadata = Map<String, dynamic>.from(record['metadata'] as Map);
+      }
+    }
+    
     return MessageEntity(
       id: record['id'] ?? '',
       content: record['content'] ?? '',
+      type: record['type'] ?? 'text',
+      metadata: parsedMetadata,
       isRead: record['is_read'] ?? false,
       createdAt: record['created_at'] != null ? DateTime.parse(record['created_at']) : DateTime.now(),
       otherUserId: isMe ? record['recipient_id'] : record['sender_id'],
@@ -221,16 +237,20 @@ class MessagesRepository {
     required String recipientId,
     required String content,
     String? propertyId,
+    String? type,
+    Map<String, dynamic>? metadata,
   }) async {
     final user = _supabase.auth.currentUser;
     if (user == null) return;
 
-    // Send original message
+    // Send original message with rich content support
     await _supabase.from('messages').insert({
       'sender_id': user.id,
       'recipient_id': recipientId,
       'content': content,
       'property_id': propertyId,
+      'type': type ?? 'text',
+      'metadata': metadata ?? {},
     });
 
     // Cross-user Notification: Create notification record for recipient

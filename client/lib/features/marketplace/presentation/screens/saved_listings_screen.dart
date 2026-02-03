@@ -11,6 +11,7 @@ import '../../domain/listing_entity.dart';
 import '../widgets/listing_card.dart';
 import '../../../../core/globals.dart';
 import '../../../../core/widgets/smart_dashboard_panel.dart';
+import 'package:client/l10n/app_localizations.dart';
 
 class SavedListingsScreen extends StatefulWidget {
   const SavedListingsScreen({super.key});
@@ -42,7 +43,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading saved listings: $e')),
+          SnackBar(content: Text('${AppLocalizations.of(context)!.errorLoadingSavedListings}: $e')),
         );
       }
     }
@@ -104,7 +105,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
           const SizedBox(width: 20),
           FadeInDown(
             child: Text(
-              "Saved Listings",
+              AppLocalizations.of(context)!.savedListings,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -147,18 +148,18 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            const Text(
-              "No saved listings yet",
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context)!.noSavedListings,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              "Pin your favorite properties to see them here.",
-              style: TextStyle(color: Colors.white70, fontSize: 14),
+            Text(
+              AppLocalizations.of(context)!.noSavedListingsMessage,
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
             ),
             const SizedBox(height: 48),
             ElevatedButton(
@@ -169,7 +170,7 @@ class _SavedListingsScreenState extends State<SavedListingsScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text("Explore Marketplace", style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(AppLocalizations.of(context)!.exploreMarketplace, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),

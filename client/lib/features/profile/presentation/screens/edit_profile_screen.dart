@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -59,7 +60,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully!')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.profileUpdated)),
         );
         context.pop(true); // Return true to indicate success
       }
@@ -86,7 +87,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'COMPLETE PROFILE',
+          AppLocalizations.of(context)!.completeProfile,
           style: GoogleFonts.workSans(
             fontSize: 14,
             fontWeight: FontWeight.bold,
@@ -104,7 +105,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Let's get to know you",
+                AppLocalizations.of(context)!.letsGetToKnowYou,
                 style: GoogleFonts.workSans(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -113,7 +114,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                "Updating your profile helps people recognize you in chats and marketplace interactions.",
+                AppLocalizations.of(context)!.updatingProfileRecognize,
                 style: GoogleFonts.workSans(
                   fontSize: 14,
                   color: Colors.grey[600],
@@ -122,11 +123,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 32),
               
               _buildTextField(
-                label: 'Username',
+                label: AppLocalizations.of(context)!.username,
                 controller: _usernameController,
-                hint: 'e.g. john_doe',
+                hint: AppLocalizations.of(context)!.usernameHint,
                 icon: Icons.alternate_email,
-                validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                validator: (val) => val == null || val.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
               const SizedBox(height: 16),
               
@@ -134,19 +135,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 children: [
                   Expanded(
                     child: _buildTextField(
-                      label: 'First Name',
+                      label: AppLocalizations.of(context)!.firstName,
                       controller: _firstNameController,
-                      hint: 'John',
-                      validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                      hint: AppLocalizations.of(context)!.firstNameHint,
+                      validator: (val) => val == null || val.isEmpty ? AppLocalizations.of(context)!.required : null,
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildTextField(
-                      label: 'Last Name',
+                      label: AppLocalizations.of(context)!.lastName,
                       controller: _lastNameController,
-                      hint: 'Doe',
-                      validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                      hint: AppLocalizations.of(context)!.lastNameHint,
+                      validator: (val) => val == null || val.isEmpty ? AppLocalizations.of(context)!.required : null,
                     ),
                   ),
                 ],
@@ -154,9 +155,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 16),
               
               _buildTextField(
-                label: 'Bio',
+                label: AppLocalizations.of(context)!.bio,
                 controller: _bioController,
-                hint: 'Tell us a bit about yourself...',
+                hint: AppLocalizations.of(context)!.bioHint,
                 maxLines: 3,
               ),
               const SizedBox(height: 48),
@@ -175,7 +176,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: _isLoading 
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        'SAVE PROFILE',
+                        AppLocalizations.of(context)!.saveProfile,
                         style: GoogleFonts.workSans(
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,

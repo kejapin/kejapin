@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -47,16 +47,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Change Profile Photo', style: GoogleFonts.workSans(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.structuralBrown)),
+            Text(AppLocalizations.of(context)!.changeProfilePhoto, style: GoogleFonts.workSans(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.structuralBrown)),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildOption(Icons.upload, 'Upload Photo', _pickAndUploadImage, modalContext),
-                _buildOption(Icons.face, 'Choose Animated', _showAvatarPicker, modalContext),
-                _buildOption(Icons.shuffle, 'Generate Random', () {
-                    _showRandomAvatarGenerator();
-                }, modalContext),
+                 _buildOption(Icons.upload, AppLocalizations.of(context)!.uploadPhoto, _pickAndUploadImage, modalContext),
+                 _buildOption(Icons.face, AppLocalizations.of(context)!.chooseAnimated, _showAvatarPicker, modalContext),
+                 _buildOption(Icons.shuffle, AppLocalizations.of(context)!.generateRandom, () {
+                     _showRandomAvatarGenerator();
+                 }, modalContext),
               ],
             ),
             const SizedBox(height: 24),
@@ -89,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                                Text('Random Generator', style: GoogleFonts.workSans(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.structuralBrown)),
+                                 Text(AppLocalizations.of(context)!.randomGenerator, style: GoogleFonts.workSans(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.structuralBrown)),
                                 const SizedBox(height: 24),
                                 Container(
                                     height: 150,
@@ -108,14 +108,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                        TextButton.icon(
+                                         TextButton.icon(
                                             onPressed: () {
                                                 setState(() {
                                                     seed = DateTime.now().toIso8601String() + 'new';
                                                 });
                                             }, 
                                             icon: const Icon(Icons.refresh, color: AppColors.mutedGold),
-                                            label: Text('Regenerate', style: TextStyle(color: AppColors.structuralBrown)),
+                                            label: Text(AppLocalizations.of(context)!.regenerate, style: TextStyle(color: AppColors.structuralBrown)),
                                         ),
                                         ElevatedButton(
                                             onPressed: () {
@@ -126,7 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 backgroundColor: AppColors.structuralBrown,
                                                 foregroundColor: Colors.white,
                                             ),
-                                            child: const Text('Save This Avatar'),
+                                            child: Text(AppLocalizations.of(context)!.saveThisAvatar),
                                         ),
                                     ],
                                 ),
@@ -144,7 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // Show loading
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Saving avatar...')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.savingAvatar)),
       );
     }
 
@@ -167,7 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('New avatar generated!')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.newAvatarGenerated)),
         );
       }
     } catch (e) {
@@ -212,7 +212,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // Show loading indicator
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Uploading image...')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.uploadingImage)),
       );
     }
 
@@ -223,7 +223,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile picture updated!')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.profilePictureUpdated)),
         );
       }
     } catch (e) {
@@ -268,7 +268,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         child: Column(
           children: [
-            Text('Choose an Avatar', style: GoogleFonts.workSans(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.structuralBrown)),
+            Text(AppLocalizations.of(context)!.chooseAnAvatar, style: GoogleFonts.workSans(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.structuralBrown)),
             const SizedBox(height: 24),
             Expanded(
               child: GridView.builder(
@@ -314,7 +314,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Avatar updated!')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.avatarUpdated)),
         );
       }
     } catch (e) {
@@ -351,7 +351,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onPressed: () => rootScaffoldKey.currentState?.openDrawer(),
                     ),
                     title: Text(
-                      'PROFILE & SETTINGS',
+                      AppLocalizations.of(context)!.profileAndSettings,
                       style: GoogleFonts.workSans(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -501,7 +501,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 }
                               },
                               icon: const Icon(Icons.edit_note, size: 20),
-                              label: const Text('EDIT PROFILE'),
+                              label: Text(AppLocalizations.of(context)!.editProfile),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppColors.structuralBrown,
                                 side: BorderSide(color: AppColors.structuralBrown.withOpacity(0.2)),
@@ -522,25 +522,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               _buildSettingsGroup([
                                 _buildSettingsTile(
                                   icon: Icons.pin_drop,
-                                  title: 'Life Pins',
+                                  title: AppLocalizations.of(context)!.lifePins,
                                   onTap: () => context.push('/life-pins'),
                                 ),
                                 _buildDivider(),
                                 _buildSettingsTile(
                                   icon: Icons.lock,
-                                  title: 'Account Security',
+                                  title: AppLocalizations.of(context)!.accountSecurity,
                                   onTap: () => context.push('/settings/security'),
                                 ),
                                 _buildDivider(),
                                 _buildSettingsTile(
                                   icon: Icons.notifications_active,
-                                  title: 'Notification Preferences',
+                                  title: AppLocalizations.of(context)!.notificationPreferences,
                                   onTap: () => context.push('/settings/notifications'),
                                 ),
                                 _buildDivider(),
                                 _buildSettingsTile(
                                   icon: Icons.credit_card,
-                                  title: 'Payment Methods',
+                                  title: AppLocalizations.of(context)!.paymentMethods,
                                   onTap: () => context.push('/settings/payment'),
                                 ),
                               ]),
@@ -548,7 +548,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               _buildSettingsGroup([
                                 _buildSettingsTile(
                                   icon: Icons.support_agent,
-                                  title: 'Help & Support',
+                                  title: AppLocalizations.of(context)!.helpAndSupport,
                                   onTap: () => context.push('/settings/help'),
                                 ),
                               ]),
@@ -564,14 +564,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   }
                                 },
                                 icon: Icon(Icons.logout, color: Colors.grey[400], size: 20),
-                                label: Text(
-                                  'Log Out',
-                                  style: GoogleFonts.workSans(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey[400],
+                                  label: Text(
+                                    AppLocalizations.of(context)!.logOut,
+                                    style: GoogleFonts.workSans(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey[400],
+                                    ),
                                   ),
-                                ),
                                 style: TextButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                                 ),

@@ -3,21 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart' as gf;
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_map/flutter_map.dart'; // Ensure flutter_map is used for detailed view
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/services/commute_service.dart';
-import '../../../../core/services/navigation_service.dart';
+import 'package:flutter_map/flutter_map.dart'; 
 import 'package:geolocator/geolocator.dart';
-import '../../../../core/widgets/custom_app_bar.dart';
-import '../../../../core/widgets/glass_container.dart';
-import '../../../profile/data/life_pin_repository.dart';
-import '../../../profile/domain/life_pin_model.dart';
-import '../../data/listings_repository.dart';
-import '../../domain/listing_entity.dart';
-import '../../../search/data/models/search_result.dart';
-import '../../../../core/services/efficiency_service.dart';
+import 'package:animate_do/animate_do.dart';
+
+import 'package:client/l10n/app_localizations.dart';
+import 'package:client/core/constants/app_colors.dart';
+import 'package:client/core/services/commute_service.dart';
+import 'package:client/core/services/navigation_service.dart';
+import 'package:client/core/services/notification_service.dart';
+import 'package:client/core/services/efficiency_service.dart';
+import 'package:client/core/widgets/custom_app_bar.dart';
+import 'package:client/core/widgets/glass_container.dart';
+import 'package:client/features/search/data/models/search_result.dart';
+import 'package:client/features/marketplace/data/listings_repository.dart';
+import 'package:client/features/marketplace/domain/listing_entity.dart';
+import 'package:client/features/profile/data/life_pin_repository.dart';
+import 'package:client/features/profile/domain/life_pin_model.dart';
 import 'package:client/features/messages/data/notifications_repository.dart';
-import '../../../../core/services/notification_service.dart';
 
 class ListingDetailsScreen extends StatefulWidget {
   final String id;
@@ -91,23 +94,23 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
         });
         if (_isSaved) {
            _notificationsRepo.createNotification(
-             title: 'Property Pinned! 📍',
-             message: 'Selected property added to your life-path.',
+             title: AppLocalizations.of(context)!.propertyPinned,
+             message: AppLocalizations.of(context)!.pinnedToLifePath,
              type: 'FAVORITE',
              route: '/saved',
            );
            NotificationService().showNotification(
-             title: 'Property Pinned! 📍',
-             body: 'Listing added to your life-path.',
+             title: AppLocalizations.of(context)!.propertyPinned,
+             body: AppLocalizations.of(context)!.pinnedToLifePath,
            );
         } else {
            NotificationService().showNotification(
-             title: 'Property Removed 🗑️',
-             body: 'Listing removed from your life-path.',
+             title: AppLocalizations.of(context)!.propertyRemoved,
+             body: AppLocalizations.of(context)!.removedFromLifePath,
            );
            _notificationsRepo.createNotification(
-             title: 'Property Removed 🗑️',
-             message: 'Selected property removed from your life-path.',
+             title: AppLocalizations.of(context)!.propertyRemoved,
+             message: AppLocalizations.of(context)!.removedFromLifePath,
              type: 'SYSTEM',
            );
         }
@@ -154,7 +157,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
-      appBar: const CustomAppBar(title: 'Property Details', showSearch: false),
+      appBar: CustomAppBar(title: AppLocalizations.of(context)!.propertyDetails, showSearch: false),
       body: FutureBuilder(
         future: Future.wait([_listingFuture, _lifePinsFuture]),
         builder: (context, snapshot) {
@@ -232,7 +235,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                            Icon(_showMap ? Icons.image : Icons.map_outlined, color: AppColors.champagne, size: 18),
                            const SizedBox(width: 8),
                            Text(
-                             _showMap ? "Show Photos" : "Show Map",
+                             _showMap ? AppLocalizations.of(context)!.showPhotos : AppLocalizations.of(context)!.showMap,
                              style: const TextStyle(
                                color: AppColors.champagne,
                                fontWeight: FontWeight.bold,
@@ -353,19 +356,17 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
               ],
             ),
             PolylineLayer(
-              polylines: [
-                ...EfficiencyService().calculateScore(listing).categories.entries.map((entry) {
-                  final offset = _getCategoryOffset(entry.key);
-                  return Polyline(
-                    points: [
-                      LatLng(listing.latitude, listing.longitude),
-                      LatLng(listing.latitude + offset.latitude, listing.longitude + offset.longitude),
-                    ],
-                    strokeWidth: 2,
-                    color: _getCategoryColor(entry.key, entry.value).withOpacity(0.4),
-                  );
-                }),
-              ],
+              polylines: EfficiencyService().calculateScore(listing).categories.entries.map<Polyline>((entry) {
+                final offset = _getCategoryOffset(entry.key);
+                return Polyline(
+                  points: [
+                    LatLng(listing.latitude, listing.longitude),
+                    LatLng(listing.latitude + offset.latitude, listing.longitude + offset.longitude),
+                  ],
+                  strokeWidth: 2,
+                  color: _getCategoryColor(entry.key, entry.value).withOpacity(0.4),
+                );
+              }).toList(),
             ),
           ],
         ),
@@ -447,14 +448,14 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
         const SizedBox(height: 16),
         Row(
           children: [
-            _buildIconInfo(Icons.star, '${listing.rating} (${listing.reviewCount} reviews)', color: AppColors.mutedGold),
+            _buildIconInfo(Icons.star, '${listing.rating} (${listing.reviewCount} ${AppLocalizations.of(context)!.reviews})', color: AppColors.mutedGold),
             const SizedBox(width: 20),
-            _buildIconInfo(Icons.king_bed, '${listing.bedrooms} Beds'),
+            _buildIconInfo(Icons.king_bed, '${listing.bedrooms} ${AppLocalizations.of(context)!.beds}'),
             const SizedBox(width: 20),
-            _buildIconInfo(Icons.bathtub, '${listing.bathrooms} Baths'),
+            _buildIconInfo(Icons.bathtub, '${listing.bathrooms} ${AppLocalizations.of(context)!.baths}'),
             const SizedBox(width: 20),
             if (listing.sqft != null)
-              _buildIconInfo(Icons.square_foot, '${listing.sqft} sqft'),
+              _buildIconInfo(Icons.square_foot, '${listing.sqft} ${AppLocalizations.of(context)!.sqft}'),
           ],
         ),
       ],
@@ -477,9 +478,9 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Your Life Path Commutes',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Text(
+          AppLocalizations.of(context)!.yourLifePathCommutes,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -555,9 +556,9 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Living Efficiency',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context)!.livingEfficiency,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   efficiency.efficiencyLabel.toUpperCase(),
@@ -577,7 +578,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'Prop Score: ${efficiency.totalScore.toInt()}/100',
+                '${AppLocalizations.of(context)!.propScore}: ${efficiency.totalScore.toInt()}/100',
                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
               ),
             ),
@@ -611,7 +612,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              entry.key,
+                              _localizeCategory(context, entry.key),
                               style: gf.GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 13),
                             ),
                           ),
@@ -648,9 +649,9 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Description',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Text(
+          AppLocalizations.of(context)!.description,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -665,9 +666,9 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Amenities',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Text(
+          AppLocalizations.of(context)!.amenities,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         Wrap(
@@ -717,7 +718,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                 side: const BorderSide(color: AppColors.structuralBrown),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text('Connect with Landlord', style: TextStyle(color: AppColors.structuralBrown)),
+              child: Text(AppLocalizations.of(context)!.connectWithLandlord, style: const TextStyle(color: AppColors.structuralBrown)),
             ),
           ),
           const SizedBox(width: 12),
@@ -738,7 +739,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text('Book Viewing', style: TextStyle(color: Colors.white)),
+              child: Text(AppLocalizations.of(context)!.bookViewing, style: const TextStyle(color: Colors.white)),
             ),
           ),
         ],
@@ -792,6 +793,23 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
       case 'Wellness': return Icons.spa;
       case 'Vibe Match': return Icons.celebration;
       default: return Icons.star;
+    }
+  }
+
+  String _localizeCategory(BuildContext context, String category) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (category) {
+      case 'Life-Path Fit': return l10n.lifePathFit;
+      case 'Stage Radar': return l10n.stageRadar;
+      case 'Network Strength': return l10n.networkStrength;
+      case 'Water Reliability': return l10n.waterReliability;
+      case 'Power Stability': return l10n.powerStability;
+      case 'Security': return l10n.security;
+      case 'Retail Density': return l10n.retailDensity;
+      case 'Healthcare': return l10n.healthcare;
+      case 'Wellness': return l10n.wellness;
+      case 'Vibe Match': return l10n.vibeMatch;
+      default: return category;
     }
   }
 }

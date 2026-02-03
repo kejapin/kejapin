@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
@@ -8,7 +9,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/glass_container.dart';
 import '../../data/messages_repository.dart';
+import '../widgets/attachment_menu.dart';
+import '../widgets/bubbles/property_bubble.dart';
+import '../widgets/bubbles/location_bubble.dart';
+import '../widgets/bubbles/payment_bubble.dart';
+import '../widgets/bubbles/schedule_bubble.dart';
+import 'dart:convert';
 
 class ChatScreen extends StatefulWidget {
   final String otherUserId;
@@ -63,7 +72,7 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error sending message: $e')),
+          SnackBar(content: Text('${AppLocalizations.of(context)!.errorSendingMessage}: $e')),
         );
       }
     }
@@ -239,6 +248,11 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       child: Row(
         children: [
+          IconButton(
+            onPressed: () => _showAttachmentMenu(context),
+            icon: const Icon(Icons.add_circle, color: AppColors.mutedGold, size: 30),
+          ),
+          const SizedBox(width: 8),
           Expanded(
             child: GlassContainer(
               height: 56,
@@ -267,7 +281,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.black.withOpacity(0.2), // Explicitly dark
-                      hintText: 'Type your message...',
+                      hintText: AppLocalizations.of(context)!.typeYourMessage,
                       hintStyle: GoogleFonts.workSans(
                         color: Colors.white.withOpacity(0.4),
                         fontSize: 15,
@@ -325,7 +339,7 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Icon(Icons.chat_bubble_outline, size: 64, color: Colors.white.withOpacity(0.15)),
           const SizedBox(height: 16),
-          Text("No messages here yet", style: GoogleFonts.workSans(color: Colors.white54, fontSize: 14)),
+          Text(AppLocalizations.of(context)!.noMessagesHereYet, style: GoogleFonts.workSans(color: Colors.white54, fontSize: 14)),
         ],
       ),
     );
@@ -333,6 +347,54 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildChatBubble(MessageEntity msg, int index) {
     final isMe = msg.isMe;
+    
+    // Check for rich content using type field
+    if (msg.type != 'text' && msg.metadata != null) {
+      Widget bubbleContent;
+
+      switch (msg.type) {
+        case 'property':
+          bubbleContent = PropertyBubble(propertyData: msg.metadata!, isMe: isMe);
+          break;
+        case 'location':
+          bubbleContent = LocationBubble(locationName: msg.metadata!['name'] ?? 'Unknown Location', isMe: isMe);
+          break;
+        case 'payment':
+          final amount = msg.metadata!['amount'] is int 
+              ? (msg.metadata!['amount'] as int).toDouble() 
+              : msg.metadata!['amount'] as double;
+          bubbleContent = PaymentBubble(
+            amount: amount, 
+            title: msg.metadata!['title'] ?? 'Payment', 
+            isMe: isMe
+          );
+          break;
+        case 'schedule':
+          bubbleContent = ScheduleBubble(
+            date: DateTime.parse(msg.metadata!['date']), 
+            title: msg.metadata!['title'] ?? 'Event', 
+            isMe: isMe
+          );
+          break;
+        default:
+          // Unknown type, fallback to text rendering below
+          break;
+      }
+
+      // Only return early if we successfully created a bubble
+      if (msg.type == 'property' || msg.type == 'location' || msg.type == 'payment' || msg.type == 'schedule') {
+        return FadeInUp(
+          duration: const Duration(milliseconds: 300),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+              children: [bubbleContent],
+            ),
+          ),
+        );
+      }
+    }
     
     // Both mobile (animated mesh) and web (static gradient) are now dark
     final bubbleColor = isMe 
@@ -380,5 +442,88 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
     );
+  }
+  void _showAttachmentMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AttachmentMenu(
+        onAttachmentSelected: (id) {
+          Navigator.pop(context);
+          _handleAttachmentAction(id);
+        },
+      ),
+    );
+  }
+
+  void _handleAttachmentAction(String id) {
+    // Build structured message with type and metadata
+    Map<String, dynamic> metadata = {};
+    String type = id;
+
+    switch (id) {
+      case 'property':
+        type = 'property';
+        metadata = {
+          'title': widget.propertyTitle ?? 'Luxurious Apartment',
+          'price': 'KES 45,000/mo',
+          'image': 'https://qph.cf2.quoracdn.net/main-qimg-14138122606822216127117600746978.webp'
+        };
+        break;
+      case 'location':
+        type = 'location';
+        metadata = {'name': 'Westlands Stage, Nairobi'};
+        break;
+      case 'payment':
+        type = 'payment';
+        metadata = {'amount': 45000, 'title': 'Rent: October 2024'};
+        break;
+      case 'schedule':
+        type = 'schedule';
+        metadata = {
+          'date': DateTime.now().add(const Duration(days: 1)).toIso8601String(), 
+          'title': 'Viewing Appointment'
+        };
+        break;
+      default:
+        // For others, just show a message for now
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("$id attachment not yet implemented")),
+        );
+        return;
+    }
+
+    // Generate a user-friendly preview text for the content field
+    String contentPreview;
+    switch (type) {
+      case 'property':
+        contentPreview = '🏠 Shared property: ${metadata['title']}';
+        break;
+      case 'location':
+        contentPreview = '📍 Shared location: ${metadata['name']}';
+        break;
+      case 'payment':
+        contentPreview = '💰 Payment request: ${metadata['title']}';
+        break;
+      case 'schedule':
+        contentPreview = '📅 Scheduled: ${metadata['title']}';
+        break;
+      default:
+        contentPreview = 'Shared $type';
+    }
+
+    try {
+      _repository.sendMessage(
+        recipientId: widget.otherUserId,
+        content: contentPreview,
+        propertyId: widget.propertyId,
+        type: type,
+        metadata: metadata,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error sending attachment: $e")),
+      );
+    }
   }
 }

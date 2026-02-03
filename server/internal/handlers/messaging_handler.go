@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/kejapin/server/internal/core/domain"
 	"github.com/kejapin/server/internal/repositories"
 
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/datatypes"
 )
 
 type MessagingHandler struct {
@@ -33,13 +35,30 @@ func (h *MessagingHandler) GetMessages(c *fiber.Ctx) error {
 func (h *MessagingHandler) SendMessage(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(string)
 	var req struct {
-		RecipientID string  `json:"recipient_id"`
-		Content     string  `json:"content"`
-		PropertyID  *string `json:"property_id"`
+		RecipientID string                 `json:"recipient_id"`
+		Content     string                 `json:"content"`
+		PropertyID  *string                `json:"property_id"`
+		Type        string                 `json:"type"`
+		Metadata    map[string]interface{} `json:"metadata"`
 	}
 
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
+	}
+
+	// Default to text if not provided
+	msgType := req.Type
+	if msgType == "" {
+		msgType = "text"
+	}
+
+	// Serialize metadata
+	var metaJSON datatypes.JSON
+	if req.Metadata != nil {
+		b, _ := json.Marshal(req.Metadata)
+		metaJSON = datatypes.JSON(b)
+	} else {
+		metaJSON = datatypes.JSON([]byte("{}"))
 	}
 
 	msg := &domain.Message{
@@ -47,6 +66,8 @@ func (h *MessagingHandler) SendMessage(c *fiber.Ctx) error {
 		RecipientID: req.RecipientID,
 		Content:     req.Content,
 		PropertyID:  req.PropertyID,
+		Type:        msgType,
+		Metadata:    metaJSON,
 		CreatedAt:   time.Now(),
 	}
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:client/features/profile/data/profile_repository.dart';
 import 'package:client/core/constants/app_colors.dart';
@@ -74,22 +75,22 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
 
     return Scaffold(
       backgroundColor: AppColors.alabaster,
-      appBar: CustomAppBar(title: 'NOTIFICATIONS', showSearch: false),
+      appBar: CustomAppBar(title: AppLocalizations.of(context)!.notifications, showSearch: false),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          _buildSectionHeader('Channels'),
+          _buildSectionHeader(AppLocalizations.of(context)!.channels),
           const SizedBox(height: 16),
-          _buildSwitchTile('Push Notifications', 'Receive alerts on your device', _pushEnabled, (v) => _updateSetting('push_enabled', v)),
-          _buildSwitchTile('Email Notifications', 'Receive updates via email', _emailEnabled, (v) => _updateSetting('email_enabled', v)),
-          _buildSwitchTile('SMS Notifications', 'Receive urgent alerts via SMS', _smsEnabled, (v) => _updateSetting('sms_enabled', v)),
+          _buildSwitchTile(AppLocalizations.of(context)!.pushNotifications, AppLocalizations.of(context)!.receiveDeviceAlerts, _pushEnabled, (v) => _updateSetting('push_enabled', v)),
+          _buildSwitchTile(AppLocalizations.of(context)!.emailNotifications, AppLocalizations.of(context)!.receiveEmailUpdates, _emailEnabled, (v) => _updateSetting('email_enabled', v)),
+          _buildSwitchTile(AppLocalizations.of(context)!.smsNotifications, AppLocalizations.of(context)!.receiveSmsAlerts, _smsEnabled, (v) => _updateSetting('sms_enabled', v)),
           
           const SizedBox(height: 32),
-          _buildSectionHeader('Preferences'),
+          _buildSectionHeader(AppLocalizations.of(context)!.preferences),
           const SizedBox(height: 16),
-          _buildSwitchTile('New Listings', 'Alerts for saved searches', _listingAlerts, (v) => _updateSetting('alerts_listings', v)),
-          _buildSwitchTile('Messages', 'Chat messages from landlords/tenants', _messageAlerts, (v) => _updateSetting('alerts_messages', v)),
-          _buildSwitchTile('Promotions & Tips', 'News and tips from Kejapin', _promoAlerts, (v) => _updateSetting('alerts_promos', v)),
+          _buildSwitchTile(AppLocalizations.of(context)!.newListings, AppLocalizations.of(context)!.alertsSavedSearches, _listingAlerts, (v) => _updateSetting('alerts_listings', v)),
+          _buildSwitchTile(AppLocalizations.of(context)!.messages, AppLocalizations.of(context)!.alertsChatMessages, _messageAlerts, (v) => _updateSetting('alerts_messages', v)),
+          _buildSwitchTile(AppLocalizations.of(context)!.promotionsTips, AppLocalizations.of(context)!.newsTipsKejapin, _promoAlerts, (v) => _updateSetting('alerts_promos', v)),
         ],
       ),
     );

@@ -9,8 +9,8 @@ class SmartDashboardPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<UserProfile>(
-      future: ProfileRepository().getProfile(),
+    return StreamBuilder<UserProfile>(
+      stream: ProfileRepository().getProfileStream(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox.shrink();
         

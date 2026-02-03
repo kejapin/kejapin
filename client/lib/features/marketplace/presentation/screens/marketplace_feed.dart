@@ -12,13 +12,13 @@ import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/smart_dashboard_panel.dart';
 import '../../../../core/widgets/keja_state_view.dart';
 import 'marketplace_map.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart';
-import '../../../../core/widgets/web_layout_wrapper.dart';
-import '../widgets/animated_marketplace_hero.dart';
-import '../widgets/advanced_filters_sheet.dart';
-import '../widgets/marketplace_background.dart';
-import 'dart:async';
 import '../../../search/presentation/widgets/marketplace_search_bar.dart';
+import '../widgets/advanced_filters_sheet.dart';
+import '../widgets/animated_marketplace_hero.dart';
+import '../widgets/marketplace_background.dart';
+import '../../../../core/widgets/web_layout_wrapper.dart';
 
 class MarketplaceFeed extends StatefulWidget {
   final String? initialSearchQuery;
@@ -144,7 +144,7 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                   slivers: [
                     SliverPadding(
                         padding: EdgeInsets.only(top: kToolbarHeight + MediaQuery.of(context).padding.top + 20),
-                        sliver: const SliverToBoxAdapter(
+                        sliver: SliverToBoxAdapter(
                             child: AnimatedMarketplaceHero(),
                         ),
                     ),
@@ -224,7 +224,7 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                                         child: Row(
                                             children: [
                                             Text(
-                                                'Results for "${widget.initialSearchQuery}"',
+                                                '${AppLocalizations.of(context)!.resultsFor} "${widget.initialSearchQuery}"',
                                                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                                 color: AppColors.structuralBrown,
                                                 fontWeight: FontWeight.bold,
@@ -248,7 +248,7 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                                     child: Row(
                                       children: [
                                         Text(
-                                          'Filters Active',
+                                          AppLocalizations.of(context)!.filtersActive,
                                           style: GoogleFonts.montserrat(
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
@@ -265,7 +265,7 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                                             _cubit.loadListings(propertyType: null, filters: {});
                                           },
                                           child: Text(
-                                            'Clear All',
+                                            AppLocalizations.of(context)!.clearAll,
                                             style: GoogleFonts.montserrat(
                                               fontSize: 12,
                                               fontWeight: FontWeight.bold,
@@ -284,12 +284,12 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                                     scrollDirection: Axis.horizontal,
                                     padding: const EdgeInsets.symmetric(horizontal: 16),
                                     children: [
-                                    'All',
-                                    'BEDSITTER',
-                                    '1BHK',
-                                    '2BHK',
-                                    'SQ',
-                                    'BUNGALOW'
+                                    AppLocalizations.of(context)!.allCategory,
+                                    AppLocalizations.of(context)!.bedsitter.toUpperCase(),
+                                    AppLocalizations.of(context)!.oneBhk.toUpperCase(),
+                                    AppLocalizations.of(context)!.twoBhk.toUpperCase(),
+                                    AppLocalizations.of(context)!.sq.toUpperCase(),
+                                    AppLocalizations.of(context)!.bungalow.toUpperCase()
                                     ].map((category) {
                                     return _CategoryChip(
                                         label: category,
@@ -299,7 +299,7 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                                               // Smart filter update: Change category but preserve other filters (price, amenities)
                                               final updatedFilters = Map<String, dynamic>.from(_activeFilters);
                                               
-                                              if (category == 'All') {
+                                              if (category == AppLocalizations.of(context)!.allCategory) {
                                                 updatedFilters.remove('propertyTypes');
                                               } else {
                                                 updatedFilters['propertyTypes'] = [category];
@@ -320,7 +320,7 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                                               updatedFilters.remove('propertyTypes');
 
                                               setState(() {
-                                                _selectedCategory = 'All';
+                                                _selectedCategory = AppLocalizations.of(context)!.allCategory;
                                                 _activeFilters = updatedFilters;
                                               });
 
@@ -349,18 +349,18 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                           return SliverFillRemaining(
                             child: KejaStateView(
                               type: KejaStateType.error,
-                              title: "Feed Error",
+                              title: AppLocalizations.of(context)!.feedError,
                               message: state.message,
                               onRetry: () => context.read<ListingFeedCubit>().loadListings(),
                             ),
                           );
                         } else if (state is ListingFeedLoaded) {
                           if (state.listings.isEmpty) {
-                            return const SliverFillRemaining(
+                            return SliverFillRemaining(
                               child: KejaStateView(
                                 type: KejaStateType.empty,
-                                title: "No Listings",
-                                message: "We couldn't find any properties matching your criteria.",
+                                title: AppLocalizations.of(context)!.noListingsFound,
+                                message: AppLocalizations.of(context)!.noListingsMessage,
                               ),
                             );
                           }
@@ -386,11 +386,11 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                             ),
                           );
                         }
-                        return const SliverToBoxAdapter(child: SizedBox.shrink());
+                        return SliverToBoxAdapter(child: SizedBox.shrink());
                       },
                     ),
                     if (kIsWeb)
-                      const SliverToBoxAdapter(
+                      SliverToBoxAdapter(
                         child: WebFooter(),
                       ),
                   ],
@@ -421,7 +421,7 @@ class _MarketplaceFeedState extends State<MarketplaceFeed> {
                   Icon(_isMapView ? Icons.list : Icons.map_outlined, color: Colors.white),
                   const SizedBox(width: 12),
                   Text(
-                    _isMapView ? "List View" : "Map View",
+                    _isMapView ? AppLocalizations.of(context)!.listView : AppLocalizations.of(context)!.mapView,
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

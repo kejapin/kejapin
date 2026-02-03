@@ -4,9 +4,14 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
+  emoji_picker_flutter
   file_selector_windows
   firebase_core
+  flutter_sound
   geolocator_windows
+  permission_handler_windows
+  record_windows
+  syncfusion_pdfviewer_windows
   url_launcher_windows
 )
 

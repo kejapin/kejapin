@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -30,7 +31,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
       appBar: CustomAppBar(
-        title: 'Messages',
+        title: AppLocalizations.of(context)!.messages,
         showSearch: false,
       ),
       body: Stack(
@@ -42,7 +43,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Search landlord, property...',
+                hintText: AppLocalizations.of(context)!.searchLandlordProperty,
                 hintStyle: GoogleFonts.workSans(color: Colors.grey[400]),
                 prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
                 filled: true,
@@ -92,7 +93,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                           children: [
                             Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[300]),
                             const SizedBox(height: 16),
-                            Text("No messages yet", style: GoogleFonts.workSans(fontSize: 18, color: Colors.grey[400], fontWeight: FontWeight.bold)),
+                            Text(AppLocalizations.of(context)!.noMessagesYet, style: GoogleFonts.workSans(fontSize: 18, color: Colors.grey[400], fontWeight: FontWeight.bold)),
                           ],
                         ),
                       );
@@ -114,7 +115,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                           child: _buildMessageTile(
                             name: msg.otherUserName,
                             time: timeStr,
-                            property: msg.propertyTitle ?? 'General Inquiry',
+                            property: msg.propertyTitle ?? AppLocalizations.of(context)!.generalInquiry,
                             message: msg.content,
                             avatarUrl: msg.otherUserAvatar,
                             initials: msg.otherUserName.isNotEmpty ? msg.otherUserName[0] : '?',

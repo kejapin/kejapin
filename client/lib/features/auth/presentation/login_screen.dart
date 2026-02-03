@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:mesh_gradient/mesh_gradient.dart'; // Ensure you have this package or remove if unused
 
 import '../data/auth_repository.dart';
@@ -137,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               const SizedBox(height: 24),
                               Text(
-                                "kejapin",
+                                AppLocalizations.of(context)!.appTitle.toLowerCase(),
                                 style: Theme.of(context).textTheme.displayLarge?.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w800,
@@ -146,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                "Don't just list it. Pin it.",
+                                AppLocalizations.of(context)!.landingTitle,
                                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                       color: AppColors.mutedGold,
                                       letterSpacing: 2,
@@ -208,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Welcome Back",
+            AppLocalizations.of(context)!.loginWelcomeBack,
             style: Theme.of(context).textTheme.displayMedium?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -216,7 +217,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            "Sign in to continue to your dashboard",
+            AppLocalizations.of(context)!.loginSubtitle,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: Colors.white70,
                 ),
@@ -225,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
           TextFormField(
             controller: _emailController,
             decoration: InputDecoration(
-              labelText: "Email Address",
+              labelText: AppLocalizations.of(context)!.emailAddress,
               prefixIcon: const Icon(Icons.email_outlined),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -243,7 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your email';
+                return AppLocalizations.of(context)!.emailRequired;
               }
               return null;
             },
@@ -253,7 +254,7 @@ class _LoginScreenState extends State<LoginScreen> {
             controller: _passwordController,
             obscureText: !_isPasswordVisible,
             decoration: InputDecoration(
-              labelText: "Password",
+              labelText: AppLocalizations.of(context)!.password,
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(
@@ -282,7 +283,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your password';
+                return AppLocalizations.of(context)!.passwordRequired;
               }
               return null;
             },
@@ -303,9 +304,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               child: _isLoading
                   ? const CircularProgressIndicator(color: AppColors.structuralBrown)
-                  : const Text(
-                      "Login",
-                      style: TextStyle(
+                  : Text(
+                      AppLocalizations.of(context)!.loginLink,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.5,
@@ -319,7 +320,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Expanded(child: Divider(color: Colors.white24)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text("OR", style: TextStyle(color: Colors.white38, fontSize: 12)),
+                child: Text(AppLocalizations.of(context)!.orDivider, style: const TextStyle(color: Colors.white38, fontSize: 12)),
               ),
               Expanded(child: Divider(color: Colors.white24)),
             ],
@@ -337,9 +338,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 }
               },
               icon: const Icon(Icons.login, color: Colors.white), // Simplified icon for stability
-              label: const Text(
-                "Continue with Google",
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              label: Text(
+                AppLocalizations.of(context)!.continueWithGoogle,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
               ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.white24),
@@ -351,15 +352,15 @@ class _LoginScreenState extends State<LoginScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                "Don't have an account?",
-                style: TextStyle(color: Colors.white70),
+              Text(
+                AppLocalizations.of(context)!.dontHaveAccount,
+                style: const TextStyle(color: Colors.white70),
               ),
               TextButton(
                 onPressed: () => context.push('/register'),
-                child: const Text(
-                  "Sign Up",
-                  style: TextStyle(
+                child: Text(
+                  AppLocalizations.of(context)!.signUpLink,
+                  style: const TextStyle(
                     color: AppColors.mutedGold,
                     fontWeight: FontWeight.bold,
                   ),

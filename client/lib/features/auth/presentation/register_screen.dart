@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
 
 import '../data/auth_repository.dart';
@@ -120,7 +121,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                               const SizedBox(height: 24),
                               Text(
-                                "Join kejapin",
+                                "${AppLocalizations.of(context)!.getStarted} ${AppLocalizations.of(context)!.appTitle}",
                                 style: Theme.of(context).textTheme.displayLarge?.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w800,
@@ -129,7 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                "Find your perfect home today.",
+                                AppLocalizations.of(context)!.joinSubtitle,
                                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                       color: AppColors.mutedGold,
                                       letterSpacing: 1,
@@ -204,7 +205,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Create Account",
+            AppLocalizations.of(context)!.createAccount,
             style: Theme.of(context).textTheme.displayMedium?.copyWith(
                   color: Colors.white, // Changed to white
                   fontWeight: FontWeight.bold,
@@ -212,7 +213,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            "Start your journey with us",
+            AppLocalizations.of(context)!.registerStartJourney,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: Colors.white70, // Changed to white70
                 ),
@@ -221,7 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           TextFormField(
             controller: _emailController,
             decoration: InputDecoration(
-              labelText: "Email Address",
+              labelText: AppLocalizations.of(context)!.emailAddress,
               prefixIcon: const Icon(Icons.email_outlined),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -239,7 +240,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your email';
+                return AppLocalizations.of(context)!.emailRequired;
               }
               return null;
             },
@@ -250,7 +251,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             obscureText: !_isPasswordVisible,
             onChanged: (value) => setState(() {}), // Rebuild for strength indicator
             decoration: InputDecoration(
-              labelText: "Password",
+              labelText: AppLocalizations.of(context)!.password,
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(
@@ -279,10 +280,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your password';
+                return AppLocalizations.of(context)!.passwordRequired;
               }
               if (value.length < 8) {
-                return 'Password must be at least 8 characters';
+                return AppLocalizations.of(context)!.passwordLengthError;
               }
               return null;
             },
@@ -296,7 +297,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             controller: _confirmPasswordController,
             obscureText: !_isConfirmPasswordVisible,
             decoration: InputDecoration(
-              labelText: "Confirm Password",
+              labelText: AppLocalizations.of(context)!.confirmPassword,
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(
@@ -325,7 +326,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             validator: (value) {
               if (value != _passwordController.text) {
-                return 'Passwords do not match';
+                return AppLocalizations.of(context)!.passwordsDoNotMatch;
               }
               return null;
             },
@@ -344,9 +345,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               child: _isLoading
                   ? const CircularProgressIndicator(color: AppColors.structuralBrown)
-                  : const Text(
-                      "Sign Up",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                  : Text(
+                      AppLocalizations.of(context)!.signUpLink,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                     ),
             ),
           ),
@@ -356,7 +357,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Expanded(child: Divider(color: Colors.white24)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text("OR", style: TextStyle(color: Colors.white38, fontSize: 12)),
+                child: Text(AppLocalizations.of(context)!.orDivider, style: const TextStyle(color: Colors.white38, fontSize: 12)),
               ),
               Expanded(child: Divider(color: Colors.white24)),
             ],
@@ -378,9 +379,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 height: 24,
                 errorBuilder: (context, error, stackTrace) => const Icon(Icons.login, color: Colors.white),
               ),
-              label: const Text(
-                "Continue with Google",
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              label: Text(
+                AppLocalizations.of(context)!.continueWithGoogle,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
               ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.white24),
@@ -392,15 +393,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                "Already have an account?",
-                style: TextStyle(color: Colors.white70),
+              Text(
+                AppLocalizations.of(context)!.alreadyHaveAccount,
+                style: const TextStyle(color: Colors.white70),
               ),
               TextButton(
                 onPressed: () => context.go('/login'),
-                child: const Text(
-                  "Login",
-                  style: TextStyle(
+                child: Text(
+                  AppLocalizations.of(context)!.loginLink,
+                  style: const TextStyle(
                     color: AppColors.mutedGold, // Changed to Gold
                     fontWeight: FontWeight.bold,
                   ),

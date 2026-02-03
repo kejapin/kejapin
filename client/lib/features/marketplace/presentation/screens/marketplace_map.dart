@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/services/efficiency_service.dart';
 import '../../domain/listing_entity.dart';
+import 'package:client/l10n/app_localizations.dart';
 
 class MarketplaceMap extends StatefulWidget {
   final List<ListingEntity> listings;
@@ -148,7 +149,7 @@ class _DetailedMarker extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    listing.propertyType,
+                    _localizePropertyType(context, listing.propertyType),
                     style: TextStyle(
                       fontSize: 10,
                       color: Colors.grey[600],
@@ -173,6 +174,18 @@ class _DetailedMarker extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _localizePropertyType(BuildContext context, String type) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (type) {
+      case 'BEDSITTER': return l10n.bedsitter;
+      case '1BHK': return l10n.oneBhk;
+      case '2BHK': return l10n.twoBhk;
+      case 'SQ': return l10n.sq;
+      case 'BUNGALOW': return l10n.bungalow;
+      default: return type;
+    }
   }
 }
 

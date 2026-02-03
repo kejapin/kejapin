@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:client/features/profile/data/profile_repository.dart';
 import 'package:client/core/constants/app_colors.dart';
@@ -11,18 +12,18 @@ class HelpSupportScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
-      appBar: CustomAppBar(title: 'HELP & SUPPORT', showSearch: false),
+      appBar: CustomAppBar(title: AppLocalizations.of(context)!.helpAndSupport, showSearch: false),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            _buildSupportHeader(),
+            _buildSupportHeader(context),
             const SizedBox(height: 32),
-            _buildFAQSection(),
+            _buildFAQSection(context),
             const SizedBox(height: 32),
             _buildContactSection(context),
             const SizedBox(height: 40),
-            _buildFooterLinks(),
+            _buildFooterLinks(context),
             const SizedBox(height: 20),
           ],
         ),
@@ -30,7 +31,7 @@ class HelpSupportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSupportHeader() {
+  Widget _buildSupportHeader(BuildContext context) {
     return Center(
       child: Column(
         children: [
@@ -44,7 +45,7 @@ class HelpSupportScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'How can we help you?',
+            AppLocalizations.of(context)!.howCanWeHelp,
             style: GoogleFonts.workSans(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -53,7 +54,7 @@ class HelpSupportScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Find answers to common questions or reach out to our team.',
+            AppLocalizations.of(context)!.findAnswers,
             textAlign: TextAlign.center,
             style: GoogleFonts.workSans(
               color: Colors.grey[600],
@@ -64,12 +65,12 @@ class HelpSupportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFAQSection() {
+  Widget _buildFAQSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'FREQUENTLY ASKED QUESTIONS',
+          AppLocalizations.of(context)!.frequentlyAskedQuestions,
           style: GoogleFonts.workSans(
             fontSize: 12,
             fontWeight: FontWeight.bold,
@@ -78,10 +79,10 @@ class HelpSupportScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        _buildFAQItem('How do I verify my account?', 'Go to the Profile screen and click the "Verify" badge or apply through the "Become a Partner" section.'),
-        _buildFAQItem('Is my payment information secure?', 'Yes, we use industry-standard encryption and partner with trusted payment gateways like Stripe/M-Pesa.'),
-        _buildFAQItem('Can I cancel a booking?', 'Cancellations depend on the landlord\'s policy. Check the specific listing details for cancellation terms.'),
-        _buildFAQItem('How do I contact a landlord?', 'You can message a landlord directly through the "Messages" tab or from their listing page.'),
+        _buildFAQItem(AppLocalizations.of(context)!.faq1Question, AppLocalizations.of(context)!.faq1Answer),
+        _buildFAQItem(AppLocalizations.of(context)!.faq2Question, AppLocalizations.of(context)!.faq2Answer),
+        _buildFAQItem(AppLocalizations.of(context)!.faq3Question, AppLocalizations.of(context)!.faq3Answer),
+        _buildFAQItem(AppLocalizations.of(context)!.faq4Question, AppLocalizations.of(context)!.faq4Answer),
       ],
     );
   }
@@ -124,7 +125,7 @@ class HelpSupportScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'CONTACT US',
+          AppLocalizations.of(context)!.contactUs,
           style: GoogleFonts.workSans(
             fontSize: 12,
             fontWeight: FontWeight.bold,
@@ -139,7 +140,7 @@ class HelpSupportScreen extends StatelessWidget {
               child: _buildContactCard(
                 context,
                 Icons.email_outlined,
-                'Email Support',
+                AppLocalizations.of(context)!.emailSupport,
                 'support@kejapin.com',
                 () => _showCreateTicketDialog(context),
               ),
@@ -149,10 +150,10 @@ class HelpSupportScreen extends StatelessWidget {
               child: _buildContactCard(
                 context,
                 Icons.chat_bubble_outline,
-                'Live Chat',
-                'Available 9am - 5pm',
+                AppLocalizations.of(context)!.liveChat,
+                AppLocalizations.of(context)!.availableHours,
                 () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Live chat agents are currently offline.')));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.liveChatOffline)));
                 },
               ),
             ),
@@ -193,18 +194,18 @@ class HelpSupportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFooterLinks() {
+  Widget _buildFooterLinks(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         TextButton(
           onPressed: () {},
-          child: Text('Terms of Service', style: GoogleFonts.workSans(fontSize: 12, color: Colors.grey)),
+          child: Text(AppLocalizations.of(context)!.termsOfService, style: GoogleFonts.workSans(fontSize: 12, color: Colors.grey)),
         ),
         Text('|', style: GoogleFonts.workSans(fontSize: 12, color: Colors.grey)),
         TextButton(
           onPressed: () {},
-          child: Text('Privacy Policy', style: GoogleFonts.workSans(fontSize: 12, color: Colors.grey)),
+          child: Text(AppLocalizations.of(context)!.privacyPolicy, style: GoogleFonts.workSans(fontSize: 12, color: Colors.grey)),
         ),
       ],
     );
@@ -217,19 +218,19 @@ class HelpSupportScreen extends StatelessWidget {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Contact Support', style: GoogleFonts.workSans(fontWeight: FontWeight.bold)),
+        title: Text(AppLocalizations.of(context)!.contactSupport, style: GoogleFonts.workSans(fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: subjectController,
-              decoration: const InputDecoration(labelText: 'Subject', hintText: 'e.g. Booking Issue'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.subject, hintText: AppLocalizations.of(context)!.bookingIssue),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: messageController,
               maxLines: 3,
-              decoration: const InputDecoration(labelText: 'Message', hintText: 'Describe your issue...'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.message, hintText: AppLocalizations.of(context)!.describeIssue),
             ),
           ],
         ),
@@ -241,14 +242,14 @@ class HelpSupportScreen extends StatelessWidget {
               if (messageController.text.isNotEmpty) {
                  try {
                    await ProfileRepository().createSupportTicket(subjectController.text, messageController.text);
-                   if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Support ticket created. We will email you shortly.')));
+                   if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.ticketCreated)));
                  } catch (e) {
                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
                  }
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.structuralBrown, foregroundColor: Colors.white),
-            child: const Text('Submit'),
+            child: Text(AppLocalizations.of(context)!.submit),
           ),
         ],
       ),

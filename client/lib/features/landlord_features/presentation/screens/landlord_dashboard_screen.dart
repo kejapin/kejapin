@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +21,7 @@ class _LandlordDashboardScreenState extends State<LandlordDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
-      appBar: const CustomAppBar(title: 'PARTNER PORTAL', showSearch: false),
+      appBar: CustomAppBar(title: AppLocalizations.of(context)!.partnerPortal, showSearch: false),
       body: Stack(
         children: [
           SafeArea(
@@ -32,8 +33,8 @@ class _LandlordDashboardScreenState extends State<LandlordDashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   FadeInDown(
-                    child: const Text(
-                      'Business Insights',
+                    child: Text(
+                      AppLocalizations.of(context)!.businessInsights,
                       style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.structuralBrown),
                     ),
                   ),
@@ -45,7 +46,7 @@ class _LandlordDashboardScreenState extends State<LandlordDashboardScreen> {
                     child: _buildOccupancyChart(),
                   ),
                   const SizedBox(height: 24),
-                  const Text('Property Performance', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text(AppLocalizations.of(context)!.propertyPerformance, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
                   _buildPropertyPerformanceItem(name: 'Skyline Terrace', views: '2.4k', leads: '12'),
                   _buildPropertyPerformanceItem(name: 'Oakwood Studio', views: '1.2k', leads: '5'),
@@ -63,7 +64,7 @@ class _LandlordDashboardScreenState extends State<LandlordDashboardScreen> {
         },
         backgroundColor: AppColors.structuralBrown,
         icon: const Icon(Icons.add, color: AppColors.champagne),
-        label: const Text('Add Listing', style: TextStyle(color: AppColors.champagne)),
+        label: Text(AppLocalizations.of(context)!.addListing, style: const TextStyle(color: AppColors.champagne)),
       ),
     );
   }
@@ -73,7 +74,7 @@ class _LandlordDashboardScreenState extends State<LandlordDashboardScreen> {
       children: [
         Expanded(
           child: _ActionCard(
-            title: 'Leads',
+            title: AppLocalizations.of(context)!.leads,
             count: '14',
             icon: Icons.chat_bubble_outline,
             color: AppColors.mutedGold,
@@ -83,7 +84,7 @@ class _LandlordDashboardScreenState extends State<LandlordDashboardScreen> {
         const SizedBox(width: 12),
         Expanded(
           child: _ActionCard(
-            title: 'Revenue',
+            title: AppLocalizations.of(context)!.revenue,
             count: 'KES 85k',
             icon: Icons.trending_up,
             color: AppColors.sageGreen,
@@ -105,7 +106,7 @@ class _LandlordDashboardScreenState extends State<LandlordDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Portfolio Health', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Text(AppLocalizations.of(context)!.portfolioHealth, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             const SizedBox(height: 20),
             Expanded(
               child: BarChart(
@@ -136,7 +137,7 @@ class _LandlordDashboardScreenState extends State<LandlordDashboardScreen> {
         opacity: 0.7,
         child: ListTile(
           title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Text('Pulse Views: $views • Qualified Leads: $leads'),
+          subtitle: Text('${AppLocalizations.of(context)!.pulseViews}: $views • ${AppLocalizations.of(context)!.qualifiedLeads}: $leads'),
           trailing: const Icon(Icons.arrow_forward_ios, size: 14),
           onTap: () {},
         ),

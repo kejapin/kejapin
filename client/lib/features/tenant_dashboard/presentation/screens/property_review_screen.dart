@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
@@ -23,15 +24,15 @@ class _PropertyReviewScreenState extends State<PropertyReviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
-      appBar: CustomAppBar(title: 'Review ${widget.propertyName}', showSearch: false),
+      appBar: CustomAppBar(title: AppLocalizations.of(context)!.reviewPropertyTitle(widget.propertyName), showSearch: false),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
             FadeInDown(
-              child: const Text(
-                'How was your stay?',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              child: Text(
+                AppLocalizations.of(context)!.howWasYourStay,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 32),
@@ -40,9 +41,9 @@ class _PropertyReviewScreenState extends State<PropertyReviewScreen> {
             TextField(
               controller: _commentController,
               maxLines: 5,
-              decoration: const InputDecoration(
-                hintText: 'Tell us about the management, wifi, and neighborhood...',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.reviewHint,
+                border: const OutlineInputBorder(),
               ),
             ),
             const Spacer(),
@@ -57,7 +58,7 @@ class _PropertyReviewScreenState extends State<PropertyReviewScreen> {
                 ),
                 child: _isSubmitting 
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('SUBMIT REVIEW', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  : Text(AppLocalizations.of(context)!.submitReview, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -86,7 +87,7 @@ class _PropertyReviewScreenState extends State<PropertyReviewScreen> {
     setState(() => _isSubmitting = true);
     await Future.delayed(const Duration(seconds: 1)); // Simulation
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Thank you! Your review is live.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.reviewSubmitted)));
       Navigator.pop(context);
     }
   }

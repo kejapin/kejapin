@@ -8,14 +8,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:client/l10n/app_localizations.dart';
+import 'package:client/core/services/notification_service.dart';
 import 'package:animate_do/animate_do.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/services/efficiency_service.dart';
-import '../../../../core/widgets/glass_container.dart';
-import '../../domain/listing_entity.dart';
-import '../../data/listings_repository.dart';
+import 'package:client/core/constants/app_colors.dart';
+import 'package:client/core/widgets/glass_container.dart';
+import 'package:client/features/marketplace/domain/listing_entity.dart';
+import 'package:client/features/marketplace/data/listings_repository.dart';
 import 'package:client/features/messages/data/notifications_repository.dart';
-import '../../../../core/services/notification_service.dart';
+import 'package:client/core/services/efficiency_service.dart';
 
 class ListingCard extends StatefulWidget {
   final ListingEntity listing;
@@ -74,30 +75,30 @@ class _ListingCardState extends State<ListingCard> {
         
         if (_isSaved) {
           _notificationsRepo.createNotification(
-            title: 'Property Pinned! 📍',
-            message: 'You pinned "${widget.listing.title}" to your life-path.',
+            title: AppLocalizations.of(context)!.propertyPinned,
+            message: '${AppLocalizations.of(context)!.pinnedToLifePath} "${widget.listing.title}"',
             type: 'FAVORITE',
             route: '/saved',
           );
           NotificationService().showNotification(
-            title: 'Listing Saved 📍',
-            body: 'You saved "${widget.listing.title}"',
+            title: AppLocalizations.of(context)!.propertyPinned,
+            body: '${AppLocalizations.of(context)!.pinnedToLifePath} "${widget.listing.title}"',
           );
         } else {
           NotificationService().showNotification(
-            title: 'Listing Removed 🗑️',
-            body: 'You removed "${widget.listing.title}" from your saved list.',
+            title: AppLocalizations.of(context)!.propertyRemoved,
+            body: '${AppLocalizations.of(context)!.removedFromLifePath} "${widget.listing.title}" from your saved list.',
           );
           _notificationsRepo.createNotification(
-            title: 'Property Removed 🗑️',
-            message: 'You removed "${widget.listing.title}" from your life-path.',
+            title: AppLocalizations.of(context)!.propertyRemoved,
+            message: '${AppLocalizations.of(context)!.removedFromLifePath} "${widget.listing.title}" from your life-path.',
             type: 'SYSTEM',
           );
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_isSaved ? 'Listing saved!' : 'Listing removed.'),
+            content: Text(_isSaved ? AppLocalizations.of(context)!.listingSaved : AppLocalizations.of(context)!.listingRemoved),
             duration: const Duration(seconds: 1),
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppColors.structuralBrown,
@@ -219,7 +220,7 @@ class _ListingCardState extends State<ListingCard> {
                       borderRadius: BorderRadius.circular(30),
                       padding: const EdgeInsets.all(8),
                       child: _isSaving 
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20, 
                             height: 20, 
                             child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.structuralBrown)
@@ -260,7 +261,6 @@ class _ListingCardState extends State<ListingCard> {
                   ),
                 ),
 
-                // Market Percentile Badge
                 Positioned(
                   bottom: 12,
                   right: 12,
@@ -271,7 +271,7 @@ class _ListingCardState extends State<ListingCard> {
                     borderRadius: BorderRadius.circular(12),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     child: Text(
-                      'TOP ${max(1, ((1 - efficiency.percentileComparedToMarket) * 100).toInt())}%',
+                      '${AppLocalizations.of(context)!.topPercentile} ${max(1, ((1 - efficiency.percentileComparedToMarket) * 100).toInt())}%',
                       style: GoogleFonts.montserrat(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -289,7 +289,7 @@ class _ListingCardState extends State<ListingCard> {
                     children: [
                       _buildMiniIconButton(
                         icon: Icons.bar_chart_rounded,
-                        label: 'STATS',
+                        label: AppLocalizations.of(context)!.stats,
                         onTap: () {
                           setState(() => _backViewMode = 'stats');
                           cardKey.currentState?.toggleCard();
@@ -298,7 +298,7 @@ class _ListingCardState extends State<ListingCard> {
                       const SizedBox(width: 8),
                       _buildMiniIconButton(
                         icon: Icons.map_outlined,
-                        label: 'MAP',
+                        label: AppLocalizations.of(context)!.map,
                         onTap: () {
                           setState(() => _backViewMode = 'map');
                           cardKey.currentState?.toggleCard();
@@ -350,7 +350,7 @@ class _ListingCardState extends State<ListingCard> {
                                 ),
                               ),
                               Text(
-                                widget.listing.isForRent ? '/ ${widget.listing.rentPeriod.toLowerCase()}' : 'Full Price',
+                                widget.listing.isForRent ? '/ ${widget.listing.rentPeriod.toLowerCase()}' : AppLocalizations.of(context)!.fullPrice,
                                 style: GoogleFonts.lato(fontSize: 10, color: Colors.grey),
                               ),
                             ],
@@ -403,7 +403,7 @@ class _ListingCardState extends State<ListingCard> {
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           elevation: 0,
                         ),
-                        child: const Text('View', style: TextStyle(color: Colors.white)),
+                        child: Text(AppLocalizations.of(context)!.view, style: const TextStyle(color: Colors.white)),
                       ),
                     ],
                   ),
@@ -433,7 +433,7 @@ class _ListingCardState extends State<ListingCard> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'SPATIAL PULSE',
+                  AppLocalizations.of(context)!.spatialPulse,
                   style: GoogleFonts.montserrat(
                     fontSize: 8,
                     fontWeight: FontWeight.w900,
@@ -528,7 +528,7 @@ class _ListingCardState extends State<ListingCard> {
                   ),
                 ),
                 Text(
-                  '10-DIMENSIONAL ANALYSIS',
+                  AppLocalizations.of(context)!.dimensionalAnalysis,
                   style: GoogleFonts.lato(fontSize: 10, letterSpacing: 1.2, color: Colors.grey),
                 ),
               ],
@@ -564,7 +564,7 @@ class _ListingCardState extends State<ListingCard> {
                     SizedBox(
                       width: 95,
                       child: Text(
-                        entry.key,
+                        _localizeCategory(context, entry.key),
                         style: GoogleFonts.lato(fontSize: 11, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -603,9 +603,9 @@ class _ListingCardState extends State<ListingCard> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildQuickStat('Prop Score', '${efficiency.totalScore.toInt()}', AppColors.structuralBrown),
-            _buildQuickStat('Market %', 'Top ${((1-efficiency.percentileComparedToMarket)*100).toInt()}%', AppColors.sageGreen),
-            _buildQuickStat('Fit', efficiency.efficiencyLabel.split(' ').first, AppColors.mutedGold),
+            _buildQuickStat(AppLocalizations.of(context)!.propScore, '${efficiency.totalScore.toInt()}', AppColors.structuralBrown),
+            _buildQuickStat(AppLocalizations.of(context)!.marketPercentile, 'Top ${((1-efficiency.percentileComparedToMarket)*100).toInt()}%', AppColors.sageGreen),
+            _buildQuickStat(AppLocalizations.of(context)!.fit, efficiency.efficiencyLabel.split(' ').first, AppColors.mutedGold),
           ],
         ),
         
@@ -626,7 +626,7 @@ class _ListingCardState extends State<ListingCard> {
                 elevation: 0,
             ),
             child: Text(
-              'VIEW FULL KEJAPIN BLUEPRINT', 
+              AppLocalizations.of(context)!.viewFullBlueprint, 
               style: GoogleFonts.montserrat(fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.5)
             ),
           ),
@@ -796,7 +796,7 @@ class _ListingCardState extends State<ListingCard> {
                 color: Colors.white,
                 opacity: 0.85,
                 child: Text(
-                  '${distance.toStringAsFixed(1)} km from you',
+                  '${distance.toStringAsFixed(1)} ${AppLocalizations.of(context)!.kmFromYou}',
                   style: GoogleFonts.lato(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.structuralBrown),
                 ),
               ),
@@ -955,6 +955,23 @@ class _ListingCardState extends State<ListingCard> {
       color: color.withOpacity(0.35),
     );
   }
+
+  String _localizeCategory(BuildContext context, String category) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (category) {
+      case 'Life-Path Fit': return l10n.lifePathFit;
+      case 'Stage Radar': return l10n.stageRadar;
+      case 'Network Strength': return l10n.networkStrength;
+      case 'Water Reliability': return l10n.waterReliability;
+      case 'Power Stability': return l10n.powerStability;
+      case 'Security': return l10n.security;
+      case 'Retail Density': return l10n.retailDensity;
+      case 'Healthcare': return l10n.healthcare;
+      case 'Wellness': return l10n.wellness;
+      case 'Vibe Match': return l10n.vibeMatch;
+      default: return category;
+    }
+  }
 }
 
 class _MiniListingMarker extends StatelessWidget {
@@ -1008,12 +1025,12 @@ class _MiniListingMarker extends StatelessWidget {
                                                 ),
                                                 child: Text(
                                                     '${score.toInt()}', 
-                                                    style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.structuralBrown)
+                                                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.structuralBrown)
                                                 ),
                                             ),
                                             const SizedBox(width: 4),
-                                            const Icon(Icons.star, size: 8, color: AppColors.mutedGold),
-                                            Text(' ${listing.rating}', style: const TextStyle(fontSize: 8, color: Colors.grey)),
+                                            Icon(Icons.star, size: 8, color: AppColors.mutedGold),
+                                            Text(' ${listing.rating}', style: TextStyle(fontSize: 8, color: Colors.grey)),
                                         ],
                                     ),
                                 ],

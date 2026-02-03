@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../data/auth_repository.dart';
 import '../../../core/constants/app_colors.dart';
+import 'package:client/l10n/app_localizations.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -135,8 +136,8 @@ class _SplashScreenState extends State<SplashScreen>
                           ],
                         ).createShader(bounds),
                         child: Text(
-                          'kejapin',
-                          style: TextStyle(
+                          AppLocalizations.of(context)!.appTitle.toLowerCase(),
+                          style: const TextStyle(
                             fontSize: 56,
                             fontWeight: FontWeight.w800,
                             color: Colors.white,
@@ -146,7 +147,7 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        "Don't just list it. Pin it.",
+                        AppLocalizations.of(context)!.landingTitle,
                         style: TextStyle(
                           fontSize: 14,
                           color: AppColors.alabaster.withOpacity(0.8),

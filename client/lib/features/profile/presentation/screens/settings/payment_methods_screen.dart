@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:client/features/profile/data/profile_repository.dart';
 import 'package:client/core/constants/app_colors.dart';
@@ -19,7 +20,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
-      appBar: CustomAppBar(title: 'PAYMENT METHODS', showSearch: false),
+      appBar: CustomAppBar(title: AppLocalizations.of(context)!.paymentMethods, showSearch: false),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _profileRepo.getPaymentMethods(),
         builder: (context, snapshot) {
@@ -33,9 +34,9 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             padding: const EdgeInsets.all(20),
             children: [
               if (cards.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('No payment methods added yet.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(AppLocalizations.of(context)!.noPaymentMethods, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
                 ),
               
               ...cards.map((card) {
@@ -58,7 +59,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               InkWell(
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Add Payment Method requires a payment gateway integration.')),
+                    SnackBar(content: Text(AppLocalizations.of(context)!.addPaymentMethodInfo)),
                   );
                 },
                 borderRadius: BorderRadius.circular(16),
@@ -77,7 +78,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                       Icon(Icons.add, color: Colors.grey[600]),
                       const SizedBox(width: 8),
                       Text(
-                        'Add New Method',
+                        AppLocalizations.of(context)!.addNewMethod,
                         style: GoogleFonts.workSans(
                           fontWeight: FontWeight.bold,
                           color: Colors.grey[600],
@@ -156,7 +157,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'DEFAULT',
+                AppLocalizations.of(context)!.defaultText,
                 style: GoogleFonts.workSans(
                   fontWeight: FontWeight.bold,
                   fontSize: 10,

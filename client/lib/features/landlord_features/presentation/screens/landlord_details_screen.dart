@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../search/data/models/search_result.dart';
 
@@ -11,7 +12,7 @@ class LandlordDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Landlord Profile', showSearch: false),
+      appBar: CustomAppBar(title: AppLocalizations.of(context)!.landlordProfile, showSearch: false),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -23,7 +24,7 @@ class LandlordDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              extra?.title ?? 'Landlord Name',
+              extra?.title ?? AppLocalizations.of(context)!.landlordName,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             Text(
@@ -33,9 +34,9 @@ class LandlordDetailsScreen extends StatelessWidget {
             const SizedBox(height: 32),
             // Listings by this landlord
             const Divider(),
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(16.0),
-              child: Text("Listings by this landlord"),
+              child: Text(AppLocalizations.of(context)!.listingsByLandlord),
             ),
             // Placeholder list
           ],

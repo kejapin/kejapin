@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -53,7 +54,7 @@ class _ManageListingsScreenState extends State<ManageListingsScreen> {
       _loadListings();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Listing is now ${listing.status == 'AVAILABLE' ? 'Hidden' : 'Visible'}')),
+          SnackBar(content: Text(listing.status == 'AVAILABLE' ? AppLocalizations.of(context)!.listingHidden : AppLocalizations.of(context)!.listingVisible)),
         );
       }
     } catch (e) {
@@ -65,14 +66,14 @@ class _ManageListingsScreenState extends State<ManageListingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Listing?'),
-        content: const Text('This action cannot be undone. Are you sure?'),
+        title: Text(AppLocalizations.of(context)!.deleteListingConfirm),
+        content: Text(AppLocalizations.of(context)!.deleteListingWarning),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('CANCEL')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(AppLocalizations.of(context)!.cancel)),
           TextButton(
             onPressed: () => Navigator.pop(context, true), 
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('DELETE'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -92,7 +93,7 @@ class _ManageListingsScreenState extends State<ManageListingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
-      appBar: const CustomAppBar(title: 'MANAGE LISTINGS', showSearch: false),
+      appBar: CustomAppBar(title: AppLocalizations.of(context)!.manageListings, showSearch: false),
       body: Stack(
         children: [
           _buildBody(),
@@ -109,7 +110,7 @@ class _ManageListingsScreenState extends State<ManageListingsScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const KejaStateView(type: KejaStateType.loading, title: "Loading Listings");
+      return KejaStateView(type: KejaStateType.loading, title: AppLocalizations.of(context)!.loadingListings);
     }
     if (_error != null) {
       return KejaStateView(
@@ -122,8 +123,8 @@ class _ManageListingsScreenState extends State<ManageListingsScreen> {
     if (_listings.isEmpty) {
       return KejaStateView(
         type: KejaStateType.empty, 
-        title: "No Listings", 
-        message: "You haven't posted any properties yet.",
+        title: AppLocalizations.of(context)!.noListings, 
+        message: AppLocalizations.of(context)!.noListingsDesc,
         onRetry: _loadListings,
       );
     }
@@ -192,12 +193,12 @@ class _ManageListingsScreenState extends State<ManageListingsScreen> {
                         }
                       },
                       itemBuilder: (context) => [
-                        const PopupMenuItem(value: 'edit', child: Row(children: [Icon(Icons.edit, size: 18), SizedBox(width: 8), Text('Edit')])),
+                        PopupMenuItem(value: 'edit', child: Row(children: [const Icon(Icons.edit, size: 18), const SizedBox(width: 8), Text(AppLocalizations.of(context)!.edit)])),
                         PopupMenuItem(
                           value: 'toggle', 
-                          child: Row(children: [Icon(isAvailable ? Icons.visibility_off : Icons.visibility, size: 18), const SizedBox(width: 8), Text(isAvailable ? 'Deactivate' : 'Activate')])
+                          child: Row(children: [Icon(isAvailable ? Icons.visibility_off : Icons.visibility, size: 18), const SizedBox(width: 8), Text(isAvailable ? AppLocalizations.of(context)!.deactivate : AppLocalizations.of(context)!.activate)])
                         ),
-                        const PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete, size: 18, color: Colors.red), SizedBox(width: 8), Text('Delete', style: TextStyle(color: Colors.red))])),
+                        PopupMenuItem(value: 'delete', child: Row(children: [const Icon(Icons.delete, size: 18, color: Colors.red), const SizedBox(width: 8), Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red))])),
                       ],
                     ),
                   ),

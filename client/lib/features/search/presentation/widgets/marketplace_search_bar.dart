@@ -5,6 +5,7 @@ import 'dart:async';
 import '../bloc/search_bloc.dart';
 import 'search_results_overlay.dart';
 import '../../../../core/constants/app_colors.dart';
+import 'package:client/l10n/app_localizations.dart';
 
 class MarketplaceSearchBar extends StatefulWidget {
   final Function(bool isMapView) onToggleView;
@@ -114,7 +115,7 @@ class _MarketplaceSearchBarState extends State<MarketplaceSearchBar> {
           focusNode: _focusNode,
           onChanged: _onSearchChanged,
           decoration: InputDecoration(
-            hintText: 'Search location or apartment name...',
+            hintText: AppLocalizations.of(context)!.searchHintMarketplace,
             hintStyle: TextStyle(
               color: AppColors.structuralBrown.withOpacity(0.5),
             ),

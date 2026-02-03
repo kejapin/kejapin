@@ -123,7 +123,6 @@ class _VerificationDetailScreenState extends State<VerificationDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final app = widget.application;
-    final user = app.userDetails ?? {};
     final docs = app.documents;
 
     return Scaffold(
@@ -138,20 +137,20 @@ class _VerificationDetailScreenState extends State<VerificationDetailScreen> {
               child: _buildSection("User Information", [
                 _buildInfoRow("Full Name", app.userFullName ?? 'N/A'),
                 _buildInfoRow("Email", app.userEmail ?? 'N/A'),
-                _buildInfoRow("Phone", user['phone_number'] ?? 'N/A'),
-                _buildInfoRow("National ID", user['national_id'] ?? 'N/A'),
-                _buildInfoRow("KRA PIN", user['kra_pin'] ?? 'N/A'),
-                _buildInfoRow("Business Role", user['business_role'] ?? 'N/A'),
+                _buildInfoRow("Phone", app.phoneNumber ?? 'N/A'),
+                _buildInfoRow("National ID", app.nationalId ?? 'N/A'),
+                _buildInfoRow("KRA PIN", app.kraPin ?? 'N/A'),
+                _buildInfoRow("Business Role", app.businessRole ?? 'N/A'),
               ]),
             ),
             const SizedBox(height: 24),
             FadeInDown(
               delay: const Duration(milliseconds: 100),
               child: _buildSection("Company Details", [
-                _buildInfoRow("Company Name", user['company_name'] ?? 'N/A'),
-                _buildInfoRow("Company Bio", user['company_bio'] ?? 'N/A'),
-                _buildInfoRow("Payout Method", user['payout_method'] ?? 'N/A'),
-                _buildInfoRow("Payout Details", user['payout_details'] ?? 'N/A'),
+                _buildInfoRow("Company Name", app.companyName ?? 'N/A'),
+                _buildInfoRow("Company Bio", app.companyBio ?? 'N/A'),
+                _buildInfoRow("Payout Method", app.payoutMethod ?? 'N/A'),
+                _buildInfoRow("Payout Details", app.payoutDetails ?? 'N/A'),
               ]),
             ),
             const SizedBox(height: 24),
@@ -189,6 +188,22 @@ class _VerificationDetailScreenState extends State<VerificationDetailScreen> {
                     _buildActionButton("DECLINE / REJECT", Colors.red, () => _showActionDialog('REJECT')),
                   ],
                 ),
+            const SizedBox(height: 40),
+            // DEBUG SECTION
+            Text("Raw Application Data (Debug)", style: GoogleFonts.workSans(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: Colors.black.withOpacity(0.05), borderRadius: BorderRadius.circular(12)),
+              child: Text(
+                "Phone: ${app.phoneNumber}\n"
+                "Nat ID: ${app.nationalId}\n"
+                "KRA: ${app.kraPin}\n"
+                "Company: ${app.companyName}\n"
+                "Payout Details: ${app.payoutDetails}",
+                style: GoogleFonts.jetBrainsMono(fontSize: 10, color: Colors.blueGrey),
+              ),
+            ),
             const SizedBox(height: 40),
           ],
         ),

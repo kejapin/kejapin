@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
+import 'package:client/l10n/app_localizations.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/web_layout_wrapper.dart';
@@ -129,7 +130,7 @@ class _LandingPageState extends State<LandingPage>
                       TextButton(
                         onPressed: () => context.go('/login'),
                         child: Text(
-                          'Login',
+                          AppLocalizations.of(context)!.loginLink,
                           style: TextStyle(
                             color: _isScrolled
                                 ? AppColors.structuralBrown
@@ -152,9 +153,9 @@ class _LandingPageState extends State<LandingPage>
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
-                          'Get Started',
-                          style: TextStyle(fontWeight: FontWeight.w700),
+                        child: Text(
+                          AppLocalizations.of(context)!.getStarted,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ),
                     ],
@@ -206,8 +207,8 @@ class _LandingPageState extends State<LandingPage>
                               );
                             },
                             child: Text(
-                              "Don't just list it. Pin it.",
-                              style: TextStyle(
+                              AppLocalizations.of(context)!.landingTitle,
+                              style: const TextStyle(
                                 fontSize: 56,
                                 fontWeight: FontWeight.w800,
                                 color: Colors.white,
@@ -227,9 +228,7 @@ class _LandingPageState extends State<LandingPage>
                               );
                             },
                             child: Text(
-                              'Find your perfect home with real commute times, '
-                              'transparent costs, and verified listings. '
-                              'Kenya\'s smartest rental marketplace.',
+                              AppLocalizations.of(context)!.landingSubtitle,
                               style: TextStyle(
                                 fontSize: 20,
                                 color: Colors.white.withOpacity(0.9),
@@ -255,9 +254,9 @@ class _LandingPageState extends State<LandingPage>
                                 ),
                                 elevation: 8,
                               ),
-                              child: const Text(
-                                'Start Your Search',
-                                style: TextStyle(
+                              child: Text(
+                                AppLocalizations.of(context)!.startSearch,
+                                style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: 0.5,
@@ -323,8 +322,8 @@ class _LandingPageState extends State<LandingPage>
                   child: Column(
                     children: [
                       Text(
-                        'Life-Path Features',
-                        style: TextStyle(
+                        AppLocalizations.of(context)!.featuresTitle,
+                        style: const TextStyle(
                           fontSize: 42,
                           fontWeight: FontWeight.w800,
                           color: AppColors.structuralBrown,
@@ -333,7 +332,7 @@ class _LandingPageState extends State<LandingPage>
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Connect. Live. Thrive.',
+                        AppLocalizations.of(context)!.featuresSubtitle,
                         style: TextStyle(
                           fontSize: 18,
                           color: AppColors.structuralBrown.withOpacity(0.7),
@@ -370,26 +369,23 @@ class _LandingPageState extends State<LandingPage>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildFeatureItem(
-                                  icon: Icons.route,
-                                  title: 'Real Commute Times',
-                                  description:
-                                      'Calculate exact travel times to your workplace, gym, and all your life pins.',
-                                ),
-                                const SizedBox(height: 32),
-                                _buildFeatureItem(
-                                  icon: Icons.attach_money,
-                                  title: 'Total Cost Transparency',
-                                  description:
-                                      'See the complete monthly cost including rent, commute, and utilities.',
-                                ),
-                                const SizedBox(height: 32),
-                                _buildFeatureItem(
-                                  icon: Icons.verified_user,
-                                  title: 'Verified Listings',
-                                  description:
-                                      'Every property is verified. Every landlord is screened. Your peace of mind guaranteed.',
-                                ),
+                                  _buildFeatureItem(
+                                    icon: Icons.route,
+                                    title: AppLocalizations.of(context)!.commuteTitle,
+                                    description: AppLocalizations.of(context)!.commuteDesc,
+                                  ),
+                                  const SizedBox(height: 32),
+                                  _buildFeatureItem(
+                                    icon: Icons.attach_money,
+                                    title: AppLocalizations.of(context)!.transparencyTitle,
+                                    description: AppLocalizations.of(context)!.transparencyDesc,
+                                  ),
+                                  const SizedBox(height: 32),
+                                  _buildFeatureItem(
+                                    icon: Icons.verified_user,
+                                    title: AppLocalizations.of(context)!.verifiedTitle,
+                                    description: AppLocalizations.of(context)!.verifiedDesc,
+                                  ),
                               ],
                             ),
                           ),
@@ -498,8 +494,8 @@ class _LandingPageState extends State<LandingPage>
               child: Column(
                 children: [
                   Text(
-                    'Join the Community',
-                    style: TextStyle(
+                    AppLocalizations.of(context)!.communityTitle,
+                    style: const TextStyle(
                       fontSize: 42,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
@@ -508,8 +504,7 @@ class _LandingPageState extends State<LandingPage>
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Thousands of tenants and landlords trust kejapin to find and list homes. '
-                    'Be part of Kenya\'s most transparent rental community.',
+                    AppLocalizations.of(context)!.communityDesc,
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.white.withOpacity(0.9),
@@ -555,8 +550,8 @@ class _LandingPageState extends State<LandingPage>
               child: Column(
                 children: [
                   Text(
-                    'Ready to Find Your Home?',
-                    style: TextStyle(
+                    AppLocalizations.of(context)!.ctaTitle,
+                    style: const TextStyle(
                       fontSize: 42,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
@@ -565,7 +560,7 @@ class _LandingPageState extends State<LandingPage>
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Start your journey to the perfect rental. It\'s free to browse.',
+                    AppLocalizations.of(context)!.ctaSubtitle,
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.white.withOpacity(0.9),
@@ -589,9 +584,9 @@ class _LandingPageState extends State<LandingPage>
                         ),
                         elevation: 8,
                       ),
-                      child: const Text(
-                        'Get Started Free',
-                        style: TextStyle(
+                      child: Text(
+                        AppLocalizations.of(context)!.getStartedFree,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:client/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:client/core/constants/app_colors.dart';
@@ -20,30 +21,30 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.alabaster,
-      appBar: CustomAppBar(title: 'ACCOUNT SECURITY', showSearch: false),
+      appBar: CustomAppBar(title: AppLocalizations.of(context)!.accountSecurity, showSearch: false),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionHeader('Login Details'),
+            _buildSectionHeader(AppLocalizations.of(context)!.loginDetails),
             const SizedBox(height: 16),
             _buildInfoCard(
               icon: Icons.email_outlined,
-              title: 'Email Address',
-              value: user?.email ?? 'Unknown',
+              title: AppLocalizations.of(context)!.emailAddressLabel,
+              value: user?.email ?? AppLocalizations.of(context)!.unknown,
               showEdit: false,
             ),
             const SizedBox(height: 12),
             _buildActionCard(
               icon: Icons.lock_reset,
-              title: 'Change Password',
-              subtitle: 'Update your password securely',
+              title: AppLocalizations.of(context)!.changePassword,
+              subtitle: AppLocalizations.of(context)!.updatePasswordSecurely,
               onTap: () => context.push('/forgot-password'), // Reusing forgot password flow
             ),
 
             const SizedBox(height: 32),
-            _buildSectionHeader('Enhanced Security'),
+            _buildSectionHeader(AppLocalizations.of(context)!.enhancedSecurity),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(16),
@@ -63,25 +64,25 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                 contentPadding: EdgeInsets.zero,
                 activeColor: AppColors.mutedGold,
                 title: Text(
-                  'Two-Factor Authentication',
+                  AppLocalizations.of(context)!.twoFactorAuth,
                   style: GoogleFonts.workSans(fontWeight: FontWeight.w600, color: AppColors.structuralBrown),
                 ),
                 subtitle: Text(
-                  'Add an extra layer of security to your account.',
+                  AppLocalizations.of(context)!.twoFactorDesc,
                   style: GoogleFonts.workSans(fontSize: 12, color: Colors.grey),
                 ),
                 value: _twoFactorEnabled,
                 onChanged: (val) {
                   setState(() => _twoFactorEnabled = val);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('2FA settings updated')),
+                    SnackBar(content: Text(AppLocalizations.of(context)!.twoFactorUpdated)),
                   );
                 },
               ),
             ),
 
             const SizedBox(height: 48),
-            _buildSectionHeader('Danger Zone'),
+            _buildSectionHeader(AppLocalizations.of(context)!.dangerZone),
             const SizedBox(height: 16),
             InkWell(
               onTap: _showDeleteAccountDialog,
@@ -102,14 +103,14 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Delete Account',
+                            AppLocalizations.of(context)!.deleteAccount,
                             style: GoogleFonts.workSans(
                               fontWeight: FontWeight.bold,
                               color: Colors.red[700],
                             ),
                           ),
                           Text(
-                            'Permanently remove your data',
+                            AppLocalizations.of(context)!.permanentlyRemoveData,
                             style: GoogleFonts.workSans(
                               fontSize: 12,
                               color: Colors.red[300],
@@ -217,23 +218,23 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Account?', style: GoogleFonts.workSans(fontWeight: FontWeight.bold)),
-        content: const Text('Are you sure you want to delete your account? This action cannot be undone.'),
+        title: Text(AppLocalizations.of(context)!.deleteAccountConfirm, style: GoogleFonts.workSans(fontWeight: FontWeight.bold)),
+        content: Text(AppLocalizations.of(context)!.deleteAccountConfirmDesc),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () {
               // TODO: Implement actual delete logic
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Request submitted. Support will contact you.')),
+                SnackBar(content: Text(AppLocalizations.of(context)!.supportContactSubmit)),
               );
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),

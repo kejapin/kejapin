@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupportTicket {
@@ -42,6 +43,14 @@ class VerificationApplication {
   final String? userEmail;
   final String? userFullName;
   final Map<String, dynamic>? userDetails;
+  final String? phoneNumber;
+  final String? nationalId;
+  final String? kraPin;
+  final String? companyName;
+  final String? companyBio;
+  final String? payoutMethod;
+  final String? payoutDetails;
+  final String? businessRole;
 
   VerificationApplication({
     required this.id,
@@ -53,6 +62,14 @@ class VerificationApplication {
     this.userEmail,
     this.userFullName,
     this.userDetails,
+    this.phoneNumber,
+    this.nationalId,
+    this.kraPin,
+    this.companyName,
+    this.companyBio,
+    this.payoutMethod,
+    this.payoutDetails,
+    this.businessRole,
   });
 
   factory VerificationApplication.fromJson(Map<String, dynamic> json) {
@@ -61,16 +78,40 @@ class VerificationApplication {
         ? '${userMap['first_name'] ?? ''} ${userMap['last_name'] ?? ''}'.trim()
         : 'Unknown User';
     
+    dynamic rawDocs = json['documents'];
+    Map<String, dynamic> parsedDocs = {};
+    
+    if (rawDocs is String) {
+      try {
+        parsedDocs = Map<String, dynamic>.from(jsonDecode(rawDocs));
+      } catch (e) {
+        print('Error decoding documents string: $e');
+      }
+    } else if (rawDocs is Map) {
+      parsedDocs = Map<String, dynamic>.from(rawDocs);
+    }
+
     return VerificationApplication(
       id: json['id'],
       userId: json['user_id'],
-      documents: json['documents'] is String ? Map<String, dynamic>.from(Map.castFrom({})) : json['documents'] ?? {},
+      documents: parsedDocs,
       status: json['status'] ?? 'PENDING',
       adminNotes: json['admin_notes'],
       createdAt: DateTime.parse(json['created_at']),
-      userEmail: userMap?['email'],
-      userFullName: fullName.isEmpty ? 'Unknown User' : fullName,
+      userEmail: userMap?['email'] ?? json['email'] ?? json['user_email'],
+      userFullName: (json['full_name'] as String?)?.isNotEmpty == true 
+          ? json['full_name'] 
+          : fullName.isEmpty ? 'Unknown User' : fullName,
       userDetails: userMap,
+      // Aggressive fallback logic: check Snapshot Col -> Documents JSON -> User Profile
+      phoneNumber: json['phone_number'] ?? parsedDocs['phone_number'] ?? userMap?['phone_number'],
+      nationalId: json['national_id'] ?? parsedDocs['national_id'] ?? userMap?['national_id'],
+      kraPin: json['kra_pin'] ?? parsedDocs['kra_pin'] ?? userMap?['kra_pin'],
+      companyName: json['company_name'] ?? parsedDocs['company_name'] ?? userMap?['company_name'],
+      companyBio: json['company_bio'] ?? parsedDocs['company_bio'] ?? userMap?['company_bio'],
+      payoutMethod: json['payout_method'] ?? parsedDocs['payout_method'] ?? userMap?['payout_method'],
+      payoutDetails: json['payout_details'] ?? parsedDocs['payout_details'] ?? userMap?['payout_details'],
+      businessRole: json['business_role'] ?? parsedDocs['business_role'] ?? userMap?['business_role'],
     );
   }
 }
@@ -111,9 +152,15 @@ class AdminRepository {
           .select('*, users(*)')
           .order('created_at', ascending: false);
       
+      if (response.isNotEmpty) {
+        print('DEBUG: First Application Row Keys: ${response.first.keys.toList()}');
+        print('DEBUG: First Application Row Data: ${response.first}');
+      }
+      
+      print('DEBUG: Fetched ${response.length} verification applications');
       return (response as List).map((json) => VerificationApplication.fromJson(json)).toList();
     } catch (e) {
-      print('Error fetching verification applications: $e');
+      print('DEBUG ERROR: Fetching verification applications failed: $e');
       return [];
     }
   }

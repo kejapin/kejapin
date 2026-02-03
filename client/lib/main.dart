@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'core/providers/locale_provider.dart';
 import 'features/admin_features/presentation/screens/component_gallery_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'core/theme/app_theme.dart';
@@ -138,31 +142,52 @@ class _KejapinAppState extends State<KejapinApp> {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider(
-      create: (context) => SupabaseSearchRepository(),
-      child: BlocProvider(
-        create: (context) => SearchBloc(context.read<SupabaseSearchRepository>()),
-        child: MaterialApp.router(
-          title: 'kejapin',
-          theme: AppTheme.lightTheme,
-          routerConfig: _router,
-          debugShowCheckedModeBanner: false,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+      ],
+      child: RepositoryProvider(
+        create: (context) => SupabaseSearchRepository(),
+        child: BlocProvider(
+          create: (context) => SearchBloc(context.read<SupabaseSearchRepository>()),
+          child: Consumer<LocaleProvider>(
+            builder: (context, localeProvider, child) {
+              return MaterialApp.router(
+                title: 'kejapin',
+                theme: AppTheme.lightTheme,
+                routerConfig: _router,
+                debugShowCheckedModeBanner: false,
+                locale: localeProvider.locale,
+                localizationsDelegates: [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [
+                  Locale('en'), // English
+                  Locale('sw'), // Swahili Sanifu
+                  Locale('sw', 'KE'), // Swahili Kenyan
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
 }
 
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final GoRouter _router = GoRouter(
+  navigatorKey: _rootNavigatorKey,
   initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',
       builder: (context, state) {
-        // Web: Landing page, Mobile: Splash screen
-        if (kIsWeb) {
-          return const LandingPage();
-        }
+        if (kIsWeb) return const LandingPage();
         return const SplashScreen();
       },
     ),
@@ -303,22 +328,6 @@ final GoRouter _router = GoRouter(
             );
           },
         ),
-      ],
-    ),
-    // Settings Sub-Routes (Outside Shell for full screen focus, or inside if preferred. Let's keep inside Shell actually, or maybe stack? 
-    // The user asked for screens that open when routes are tapped. Usually settings are better with the bottom bar visible? 
-    // Actually standard practice for deep settings is often full screen push. 
-    // Let's put them IN the shell so user can still nav easily? No, usually settings pages have back buttons. 
-    // Let's put them as sub-routes of /settings or just standalone routes. 
-    // Standalone routes inside the shell is easiest for navigation stack preservation if we want bottom bar.
-    // But if we want back button, `GoRoute` at root level or nested under one of the shell branches.
-    // Let's add them to the ShellRoute list for now so they have the bottom bar, OR better yet, 
-    // let's put them outside the shell if we want them to feel like "drilling down" without the distracted bottom nav.
-    // The existing /settings route is inside the shell. I'll put these new ones there too for consistency, 
-    // or arguably better: keep them inside the shell but standard push.
-    
-    // Actually, let's keep them inside ShellRoute to maintain state, but maybe hide bottom bar? 
-    // For simplicity, I will add them to the main ShellRoute list.
         GoRoute(
           path: '/settings/security',
           builder: (context, state) => const AccountSecurityScreen(),
@@ -335,8 +344,9 @@ final GoRouter _router = GoRouter(
           path: '/settings/help',
           builder: (context, state) => const HelpSupportScreen(),
         ),
-
-    // Search & Details Routes
+      ],
+    ),
+    // Search & Details Routes (Outside shell for full-screen feel)
     GoRoute(
       path: '/search-results',
       builder: (context, state) {
@@ -356,12 +366,8 @@ final GoRouter _router = GoRouter(
       builder: (context, state) {
         final id = state.pathParameters['id']!;
         final map = state.extra as Map<String, dynamic>?;
-        // final listing = map?['listing']; // We might pass entities too eventually
         final initialView = map?['initialView'] as String? ?? 'image';
-        return ListingDetailsScreen(
-          id: id, 
-          activeViewMode: initialView
-        );
+        return ListingDetailsScreen(id: id, activeViewMode: initialView);
       },
     ),
     GoRoute(

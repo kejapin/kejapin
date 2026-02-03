@@ -114,6 +114,17 @@ class ProfileRepository {
     }
   }
 
+  Stream<UserProfile> getProfileStream() {
+    final user = supabase.auth.currentUser;
+    if (user == null) return const Stream.empty();
+
+    return supabase
+        .from('users')
+        .stream(primaryKey: ['id'])
+        .eq('id', user.id)
+        .map((data) => UserProfile.fromJson(data.first));
+  }
+
   Future<void> updateProfile({
     String? firstName,
     String? lastName,
@@ -124,6 +135,14 @@ class ProfileRepository {
     String? username,
     String? bio,
     bool? profileCompleted,
+    String? phoneNumber,
+    String? nationalId,
+    String? kraPin,
+    String? businessRole,
+    String? companyName,
+    String? companyBio,
+    String? payoutMethod,
+    String? payoutDetails,
   }) async {
     final user = supabase.auth.currentUser;
     if (user == null) throw Exception('User not logged in');
@@ -138,6 +157,14 @@ class ProfileRepository {
       if (username != null) 'username': username,
       if (bio != null) 'bio': bio,
       if (profileCompleted != null) 'profile_completed': profileCompleted,
+      if (phoneNumber != null) 'phone_number': phoneNumber,
+      if (nationalId != null) 'national_id': nationalId,
+      if (kraPin != null) 'kra_pin': kraPin,
+      if (businessRole != null) 'business_role': businessRole,
+      if (companyName != null) 'company_name': companyName,
+      if (companyBio != null) 'company_bio': companyBio,
+      if (payoutMethod != null) 'payout_method': payoutMethod,
+      if (payoutDetails != null) 'payout_details': payoutDetails,
       'updated_at': DateTime.now().toIso8601String(),
     };
 
@@ -174,6 +201,7 @@ class ProfileRepository {
 
   Future<void> submitLandlordApplication({
     required Map<String, dynamic> documents,
+    String? fullName,
     String? companyName,
     String? companyBio,
     String? nationalId,
@@ -186,19 +214,52 @@ class ProfileRepository {
     final user = supabase.auth.currentUser;
     if (user == null) throw Exception('User not logged in');
 
+    // Create a rich documents map that includes everything as a backup
+    final fullMetadata = {
+      ...documents,
+      'full_name': fullName,
+      'phone_number': phoneNumber,
+      'national_id': nationalId,
+      'kra_pin': kraPin,
+      'company_name': companyName,
+      'company_bio': companyBio,
+      'business_role': businessRole,
+      'payout_method': payoutMethod,
+      'payout_details': payoutDetails,
+    };
+
+    print('🚀 SUBMITTING PARTNER APP: $fullMetadata');
+
     try {
       // 1. Insert into role_applications table (Supabase)
       await supabase.from('role_applications').insert({
         'user_id': user.id,
-        'documents': documents, // Stored as JSONB
+        'documents': fullMetadata, // Save everything inside JSON map too!
         'status': 'PENDING',
+        'full_name': fullName, 
+        'phone_number': phoneNumber,
+        'national_id': nationalId,
+        'kra_pin': kraPin,
+        'company_name': companyName,
+        'company_bio': companyBio,
+        'business_role': businessRole,
+        'payout_method': payoutMethod,
+        'payout_details': payoutDetails,
         'created_at': DateTime.now().toIso8601String(),
       });
 
-      // 2. Update user table to show they have a pending application
+      // 2. Update user table with current profile sync
       await updateProfile(
         vStatus: 'PENDING',
         isVerified: false,
+        companyName: companyName,
+        companyBio: companyBio,
+        nationalId: nationalId,
+        kraPin: kraPin,
+        businessRole: businessRole,
+        payoutMethod: payoutMethod,
+        payoutDetails: payoutDetails,
+        phoneNumber: phoneNumber,
       );
 
       // 3. (Optional) Also hit Go backend if parallel sync is needed
