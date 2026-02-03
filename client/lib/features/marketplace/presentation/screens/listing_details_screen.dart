@@ -14,6 +14,7 @@ import 'package:client/core/services/navigation_service.dart';
 import 'package:client/core/services/notification_service.dart';
 import 'package:client/core/services/efficiency_service.dart';
 import 'package:client/core/widgets/custom_app_bar.dart';
+import 'package:client/core/widgets/app_drawer.dart';
 import 'package:client/core/widgets/glass_container.dart';
 import 'package:client/features/search/data/models/search_result.dart';
 import 'package:client/features/marketplace/data/listings_repository.dart';
@@ -45,9 +46,11 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   final CommuteService _commuteService = CommuteService();
   final NavigationService _navService = NavigationService();
   final MapController _mapController = MapController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late Future<ListingEntity> _listingFuture;
-  late Future<List<LifePin>> _lifePinsFuture;
+  // Use nullable to check if already loaded
+  Future<ListingEntity>? _listingFuture;
+  Future<List<LifePin>>? _lifePinsFuture;
   final Map<String, CommuteResult> _commuteResults = {};
   
   late bool _showMap;
@@ -59,8 +62,9 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   void initState() {
     super.initState();
     _showMap = widget.activeViewMode == 'map';
-    _listingFuture = _listingsRepo.fetchListingById(widget.id);
-    _lifePinsFuture = _lifePinRepo.getLifePins();
+    // Initialize futures only once
+    _listingFuture ??= _listingsRepo.fetchListingById(widget.id);
+    _lifePinsFuture ??= _lifePinRepo.getLifePins();
     _calculateCommutes();
     _checkSavedStatus();
   }
@@ -135,18 +139,24 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
 
   Future<void> _calculateCommutes() async {
     try {
-      final listing = await _listingFuture;
-      final pins = await _lifePinsFuture;
+      if (_listingFuture == null || _lifePinsFuture == null) return;
+      
+      final listing = await _listingFuture!;
+      final pins = await _lifePinsFuture!;
 
-      for (final pin in pins) {
-        final result = await _commuteService.calculateCommute(
-          origin: LatLng(listing.latitude, listing.longitude),
-          destination: LatLng(pin.latitude, pin.longitude),
-          mode: pin.transportMode,
-        );
-        setState(() {
-          _commuteResults[pin.id] = result;
-        });
+      if (mounted) {
+         for (final pin in pins) {
+          final result = await _commuteService.calculateCommute(
+            origin: LatLng(listing.latitude, listing.longitude),
+            destination: LatLng(pin.latitude, pin.longitude),
+            mode: pin.transportMode,
+          );
+          if (mounted) {
+            setState(() {
+              _commuteResults[pin.id] = result;
+            });
+          }
+         }
       }
     } catch (e) {
       print('Error calculating commutes: $e');
@@ -156,10 +166,18 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: AppColors.alabaster,
-      appBar: CustomAppBar(title: AppLocalizations.of(context)!.propertyDetails, showSearch: false),
+      drawer: const AppDrawer(), // Add drawer directly to this Scaffold
+      appBar: CustomAppBar(
+        title: AppLocalizations.of(context)!.propertyDetails,
+        showSearch: false,
+        onMenuPressed: () {
+          _scaffoldKey.currentState?.openDrawer();
+        },
+      ),
       body: FutureBuilder(
-        future: Future.wait([_listingFuture, _lifePinsFuture]),
+        future: Future.wait([_listingFuture!, _lifePinsFuture!]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
