@@ -92,32 +92,49 @@ class _ChatScreenState extends State<ChatScreen> {
       backgroundColor: AppColors.structuralBrown,
       body: Stack(
         children: [
-          // Background - Mesh or Static Gradient for Web
+          // Background - Image for Mobile, Mesh/Gradient for larger screens
           Positioned.fill(
-            child: kIsWeb
-                ? Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+            child: MediaQuery.of(context).size.width < 600
+                ? Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Background image
+                      Image.asset(
+                        'assets/images/backgrounds/chat_bg_mobile.jpeg',
+                        fit: BoxFit.cover,
+                      ),
+                      // Low opacity overlay
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.structuralBrown.withOpacity(0.75),
+                        ),
+                      ),
+                    ],
+                  )
+                : kIsWeb
+                    ? Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppColors.structuralBrown,
+                              Color(0xFF4E342E),
+                              Color(0xFF5D4037),
+                              AppColors.structuralBrown,
+                            ],
+                          ),
+                        ),
+                      )
+                    : AnimatedMeshGradient(
                         colors: [
                           AppColors.structuralBrown,
-                          Color(0xFF4E342E),
-                          Color(0xFF5D4037),
+                          const Color(0xFF5D4037),
+                          AppColors.mutedGold.withOpacity(0.3),
                           AppColors.structuralBrown,
                         ],
+                        options: AnimatedMeshGradientOptions(speed: 1.2),
                       ),
-                    ),
-                  )
-                : AnimatedMeshGradient(
-                    colors: [
-                      AppColors.structuralBrown,
-                      const Color(0xFF5D4037),
-                      AppColors.mutedGold.withOpacity(0.3),
-                      AppColors.structuralBrown,
-                    ],
-                    options: AnimatedMeshGradientOptions(speed: 1.2),
-                  ),
           ),
           
           SafeArea(
