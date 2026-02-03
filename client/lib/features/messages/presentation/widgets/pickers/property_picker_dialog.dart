@@ -4,7 +4,7 @@ import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/widgets/glass_container.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../marketplace/domain/listing_entity.dart';
-import '../../../../marketplace/data/listing_repository.dart';
+import '../../../../marketplace/data/listings_repository.dart';
 
 class PropertyPickerDialog extends StatefulWidget {
   const PropertyPickerDialog({super.key});
@@ -14,7 +14,7 @@ class PropertyPickerDialog extends StatefulWidget {
 }
 
 class _PropertyPickerDialogState extends State<PropertyPickerDialog> {
-  final _repository = ListingRepository();
+  final _repository = ListingsRepository();
   List<ListingEntity> _properties = [];
   bool _loading = true;
 
@@ -150,7 +150,7 @@ class _PropertyPickerDialogState extends State<PropertyPickerDialog> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'KES ${property.price.toStringAsFixed(0)}/mo',
+                      'KES ${property.priceAmount.toStringAsFixed(0)}/mo',
                       style: GoogleFonts.workSans(
                         color: AppColors.mutedGold,
                         fontSize: 14,

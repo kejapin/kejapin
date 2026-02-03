@@ -610,7 +610,7 @@ class _ChatScreenState extends State<ChatScreen> {
         type: 'property',
         metadata: {
           'title': property.title,
-          'price': 'KES ${property.price.toStringAsFixed(0)}/mo',
+          'price': 'KES ${property.priceAmount.toStringAsFixed(0)}/mo',
           'image': property.photos.isNotEmpty ? property.photos.first : null,
           'id': property.id,
         },
