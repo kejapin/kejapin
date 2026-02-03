@@ -178,15 +178,7 @@ class AppDrawer extends StatelessWidget {
                                 _showLanguageSelector(context);
                               },
                             ),
-                            const Divider(color: Colors.white10),
-                            _DrawerItem(
-                              icon: Icons.bug_report,
-                              title: 'Debug Chat',
-                              onTap: () {
-                                Navigator.pop(context);
-                                context.push('/debug-chat');
-                              },
-                            ),
+
                           ],
                         );
                       },

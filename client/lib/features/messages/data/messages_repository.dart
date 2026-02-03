@@ -118,11 +118,7 @@ class MessagesRepository {
       }
     }
     
-    final finalUrl = Uri.encodeFull(url);
-    if (!kReleaseMode) {
-      debugPrint('📷 ensureFullUrl: $finalUrl (from "$path")');
-    }
-    return finalUrl;
+    return Uri.encodeFull(url);
   }
 
   static Map<String, dynamic>? getUserCache(String userId) => _userCache[userId];
