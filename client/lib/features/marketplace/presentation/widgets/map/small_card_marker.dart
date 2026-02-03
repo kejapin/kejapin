@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/constants/app_colors.dart';
-import '../../../../domain/listing_entity.dart';
+import 'package:client/core/constants/app_colors.dart';
+import 'package:client/features/marketplace/domain/listing_entity.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class SmallCardMarker extends StatelessWidget {

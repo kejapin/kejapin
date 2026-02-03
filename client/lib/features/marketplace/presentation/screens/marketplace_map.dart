@@ -222,7 +222,7 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                             ],
                             color: AppColors.structuralBrown,
                             strokeWidth: 3.0,
-                            isDotted: true, 
+                            // pattern: StrokePattern.dotted(), // Uncomment if StrokePattern is available in this version
                           ),
                         ],
                       ),
