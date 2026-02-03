@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'dart:io';
+import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../marketplace/domain/listing_entity.dart';
 import '../../profile/data/profile_repository.dart';
@@ -148,19 +149,23 @@ class MessagesRepository {
   Stream<List<MessageEntity>> getMessagesStream() {
     final user = _supabase.auth.currentUser;
     if (user == null) return Stream.value([]);
-
-    return _supabase
-        .from('messages')
-        .stream(primaryKey: ['id'])
-        .map((data) {
-          final userMessages = data.where((m) => 
+    
+    late StreamController<List<MessageEntity>> controller;
+    StreamSubscription? sub;
+    List<Map<String, dynamic>> lastData = [];
+    
+    void emit() {
+        if (controller.isClosed) return;
+        
+        // Filter messages for current user
+        final userMessages = lastData.where((m) => 
             m['sender_id'] == user.id || m['recipient_id'] == user.id
-          ).toList();
+        ).toList();
 
-          return userMessages.map((e) {
+        final entities = userMessages.map((e) {
             final otherId = e['sender_id'] == user.id ? e['recipient_id'] : e['sender_id'];
             
-            // If user not in cache, trigger a fetch (without blocking)
+            // Trigger background fetches if needed
             if (!_userCache.containsKey(otherId) && !_pendingProfileFetches.contains(otherId)) {
                 _fetchAndCacheUser(otherId);
             }
@@ -175,9 +180,29 @@ class MessagesRepository {
               recipientData: e['recipient_id'] == user.id ? null : _userCache[otherId],
               propertyData: _propertyCache[e['property_id']],
             );
-          }).toList()
-            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        });
+        }).toList();
+        
+        entities.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        controller.add(entities);
+    }
+
+    void onCacheChanged() => emit();
+
+    controller = StreamController<List<MessageEntity>>(
+      onListen: () {
+         sub = _supabase.from('messages').stream(primaryKey: ['id']).listen((data) {
+             lastData = data;
+             emit();
+         });
+         cacheVersion.addListener(onCacheChanged);
+      },
+      onCancel: () {
+         sub?.cancel();
+         cacheVersion.removeListener(onCacheChanged);
+      },
+    );
+    
+    return controller.stream;
   }
 
   Future<void> _fetchAndCacheUser(String userId) async {
@@ -209,21 +234,26 @@ class MessagesRepository {
   Stream<List<MessageEntity>> getConversationStream(String otherUserId) {
     final user = _supabase.auth.currentUser;
     if (user == null) return Stream.value([]);
+    
+    late StreamController<List<MessageEntity>> controller;
+    StreamSubscription? sub;
+    List<Map<String, dynamic>> lastData = [];
 
-    return _supabase
-        .from('messages')
-        .stream(primaryKey: ['id'])
-        .map((data) {
-          final conversationMessages = data.where((m) => 
+    void emit() {
+        if (controller.isClosed) return;
+        
+        final conversationMessages = lastData.where((m) => 
             (m['sender_id'] == user.id && m['recipient_id'] == otherUserId) ||
             (m['sender_id'] == otherUserId && m['recipient_id'] == user.id)
-          ).toList();
+        ).toList();
 
-          return conversationMessages.map((e) {
+        final entities = conversationMessages.map((e) {
             final otherId = e['sender_id'] == user.id ? e['recipient_id'] : e['sender_id'];
 
             // Ensure we have the user/property in cache
-            if (!_userCache.containsKey(otherId)) _fetchAndCacheUser(otherId);
+            if (!_userCache.containsKey(otherId) && !_pendingProfileFetches.contains(otherId)) {
+                _fetchAndCacheUser(otherId);
+            }
             if (e['property_id'] != null && !_propertyCache.containsKey(e['property_id'])) {
                 _fetchAndCacheProperty(e['property_id']);
             }
@@ -235,9 +265,29 @@ class MessagesRepository {
               recipientData: e['recipient_id'] == user.id ? null : _userCache[otherId],
               propertyData: _propertyCache[e['property_id']],
             );
-          }).toList()
-            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        });
+        }).toList();
+
+        entities.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        controller.add(entities);
+    }
+
+    void onCacheChanged() => emit();
+
+    controller = StreamController<List<MessageEntity>>(
+      onListen: () {
+         sub = _supabase.from('messages').stream(primaryKey: ['id']).listen((data) {
+             lastData = data;
+             emit();
+         });
+         cacheVersion.addListener(onCacheChanged);
+      },
+      onCancel: () {
+         sub?.cancel();
+         cacheVersion.removeListener(onCacheChanged);
+      },
+    );
+    
+    return controller.stream;
   }
 
   /// Helper to warm up the cache with conversation partners
