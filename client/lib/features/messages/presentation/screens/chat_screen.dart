@@ -540,16 +540,28 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _uploadAndSendImage(XFile image, String source) async {
-    try {
-      // Show loading
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(color: AppColors.mutedGold),
+    // Show inline loading message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(width: 12),
+            Text('Uploading image...'),
+          ],
         ),
-      );
+        duration: Duration(hours: 1), // Will be dismissed manually
+      ),
+    );
 
+    try {
       final file = File(image.path);
       final fileName = '${DateTime.now().millisecondsSinceEpoch}_${image.name}';
       final supabase = Supabase.instance.client;
@@ -563,8 +575,6 @@ class _ChatScreenState extends State<ChatScreen> {
           .from('chat-media')
           .getPublicUrl('images/$fileName');
 
-      Navigator.pop(context); // Close loading
-
       // Send message with image
       await _repository.sendMessage(
         recipientId: widget.otherUserId,
@@ -573,9 +583,30 @@ class _ChatScreenState extends State<ChatScreen> {
         type: 'image',
         metadata: {'url': imageUrl, 'source': source},
       );
+
+      // Dismiss loading and show success
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Image sent successfully'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
-      Navigator.pop(context); // Close loading
-      rethrow;
+      // Dismiss loading and show error
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Failed to upload: $e'),
+            duration: const Duration(seconds: 3),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -659,16 +690,28 @@ class _ChatScreenState extends State<ChatScreen> {
     );
 
     if (result != null && result.files.single.path != null) {
-      try {
-        // Show loading
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => const Center(
-            child: CircularProgressIndicator(color: AppColors.mutedGold),
+      // Show inline loading message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(width: 12),
+              Text('Uploading document...'),
+            ],
           ),
-        );
+          duration: Duration(hours: 1), // Will be dismissed manually
+        ),
+      );
 
+      try {
         final file = File(result.files.single.path!);
         final fileName = '${DateTime.now().millisecondsSinceEpoch}_${result.files.single.name}';
         final supabase = Supabase.instance.client;
@@ -681,8 +724,6 @@ class _ChatScreenState extends State<ChatScreen> {
             .from('chat-media')
             .getPublicUrl('documents/$fileName');
 
-        Navigator.pop(context); // Close loading
-
         await _repository.sendMessage(
           recipientId: widget.otherUserId,
           content: '📄 Shared document: ${result.files.single.name}',
@@ -694,9 +735,30 @@ class _ChatScreenState extends State<ChatScreen> {
             'type': 'lease',
           },
         );
+
+        // Dismiss loading and show success
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Document sent successfully'),
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       } catch (e) {
-        Navigator.pop(context); // Close loading
-        rethrow;
+        // Dismiss loading and show error
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('❌ Failed to upload: $e'),
+              duration: const Duration(seconds: 3),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }
