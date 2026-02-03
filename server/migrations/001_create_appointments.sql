@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS appointments (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     requester_id UUID NOT NULL REFERENCES auth.users(id),
     recipient_id UUID NOT NULL REFERENCES auth.users(id),
-    property_id UUID REFERENCES listings(id),
+    property_id UUID REFERENCES properties(id),
     
     title TEXT NOT NULL,
     description TEXT,
