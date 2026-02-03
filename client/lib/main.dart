@@ -316,19 +316,6 @@ final GoRouter _router = GoRouter(
           builder: (context, state) => const NotificationsScreen(),
         ),
         GoRoute(
-          path: '/chat',
-          builder: (context, state) {
-            final extras = state.extra as Map<String, dynamic>;
-            return ChatScreen(
-              otherUserId: extras['otherUserId'],
-              otherUserName: extras['otherUserName'],
-              avatarUrl: extras['avatarUrl'],
-              propertyTitle: extras['propertyTitle'],
-              propertyId: extras['propertyId'],
-            );
-          },
-        ),
-        GoRoute(
           path: '/settings/security',
           builder: (context, state) => const AccountSecurityScreen(),
         ),
@@ -345,6 +332,20 @@ final GoRouter _router = GoRouter(
           builder: (context, state) => const HelpSupportScreen(),
         ),
       ],
+    ),
+    // Chat Route (Outside shell for full-screen immersive chat without bottom nav)
+    GoRoute(
+      path: '/chat',
+      builder: (context, state) {
+        final extras = state.extra as Map<String, dynamic>;
+        return ChatScreen(
+          otherUserId: extras['otherUserId'],
+          otherUserName: extras['otherUserName'],
+          avatarUrl: extras['avatarUrl'],
+          propertyTitle: extras['propertyTitle'],
+          propertyId: extras['propertyId'],
+        );
+      },
     ),
     // Search & Details Routes (Outside shell for full-screen feel)
     GoRoute(
