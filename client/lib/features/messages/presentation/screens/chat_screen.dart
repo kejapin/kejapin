@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:client/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
 import 'package:flutter/foundation.dart';
@@ -313,28 +314,67 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildAvatar(String? url) {
-    // Resolve URL if relative and not on web (where it's already resolved in the stream)
+    // Resolve URL (handling localhost fix for Android)
     final effectiveUrl = (url != null && !url.startsWith('http')) 
         ? MessagesRepository.ensureFullUrl(url) 
         : url;
+        
+    final isSvg = effectiveUrl != null && effectiveUrl.toLowerCase().endsWith('.svg');
 
     return ClipOval(
       child: effectiveUrl != null && effectiveUrl.isNotEmpty
-          ? CachedNetworkImage(
-              imageUrl: effectiveUrl,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Center(
-                child: Text(widget.otherUserName.isNotEmpty ? widget.otherUserName[0].toUpperCase() : '?', 
-                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+          ? (isSvg 
+              ? SvgPicture.network(
+                  effectiveUrl,
+                  fit: BoxFit.cover,
+                  placeholderBuilder: (context) => Container(
+                    color: AppColors.structuralBrown.withOpacity(0.1),
+                    child: Center(
+                      child: Text(
+                        widget.otherUserName.isNotEmpty ? widget.otherUserName[0].toUpperCase() : '?',
+                        style: GoogleFonts.workSans(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.structuralBrown,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : CachedNetworkImage(
+                  imageUrl: effectiveUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: AppColors.structuralBrown.withOpacity(0.1),
+                    child: Center(
+                      child: Text(
+                        widget.otherUserName.isNotEmpty ? widget.otherUserName[0].toUpperCase() : '?',
+                        style: GoogleFonts.workSans(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.structuralBrown,
+                        ),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Center(
+                    child: Text(
+                      widget.otherUserName.isNotEmpty ? widget.otherUserName[0].toUpperCase() : '?',
+                      style: GoogleFonts.workSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ))
+          : CircleAvatar(
+              backgroundColor: AppColors.structuralBrown.withOpacity(0.2),
+              child: Text(
+                widget.otherUserName.isNotEmpty ? widget.otherUserName[0].toUpperCase() : '?',
+                style: GoogleFonts.workSans(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.structuralBrown,
+                ),
               ),
-              errorWidget: (context, url, error) => Center(
-                child: Text(widget.otherUserName.isNotEmpty ? widget.otherUserName[0].toUpperCase() : '?', 
-                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
-              ),
-            )
-          : Center(
-              child: Text(widget.otherUserName.isNotEmpty ? widget.otherUserName[0].toUpperCase() : '?', 
-                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
             ),
     );
   }

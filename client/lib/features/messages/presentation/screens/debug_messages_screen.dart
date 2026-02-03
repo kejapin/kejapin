@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../data/messages_repository.dart';
 
 class DebugMessagesScreen extends StatefulWidget {
@@ -56,25 +57,30 @@ class _DebugMessagesScreenState extends State<DebugMessagesScreen> {
                 leading: SizedBox(
                    width: 60, height: 60,
                    child: avatarUrl != null && avatarUrl.isNotEmpty
-                     ? CachedNetworkImage(
-                         imageUrl: avatarUrl,
-                         progressIndicatorBuilder: (context, url, progress) => const CircularProgressIndicator(),
-                         errorWidget: (ctx, url, error) {
-                            debugPrint('❌ DEBUG: IMAGE ERROR for URL: $url');
-                            debugPrint('❌ DEBUG: Error Detail: $error');
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.error, color: Colors.red, size: 20),
-                                Text('ERR', style: TextStyle(fontSize: 8, color: Colors.red)),
-                              ],
-                            );
-                         },
-                         imageBuilder: (context, imageProvider) {
-                           debugPrint('✅ DEBUG: IMAGE SUCCESS for URL: $avatarUrl');
-                           return CircleAvatar(backgroundImage: imageProvider);
-                         },
-                       )
+                     ? (avatarUrl.toLowerCase().endsWith('.svg')
+                         ? SvgPicture.network(
+                             avatarUrl,
+                             placeholderBuilder: (context) => const CircularProgressIndicator(),
+                           )
+                         : CachedNetworkImage(
+                             imageUrl: avatarUrl,
+                             progressIndicatorBuilder: (context, url, progress) => const CircularProgressIndicator(),
+                             errorWidget: (ctx, url, error) {
+                                debugPrint('❌ DEBUG: IMAGE ERROR for URL: $url');
+                                debugPrint('❌ DEBUG: Error Detail: $error');
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.error, color: Colors.red, size: 20),
+                                    Text('ERR', style: TextStyle(fontSize: 8, color: Colors.red)),
+                                  ],
+                                );
+                             },
+                             imageBuilder: (context, imageProvider) {
+                               debugPrint('✅ DEBUG: IMAGE SUCCESS for URL: $avatarUrl');
+                               return CircleAvatar(backgroundImage: imageProvider);
+                             },
+                           ))
                      : const CircleAvatar(child: Icon(Icons.person)),
                 ),
                 title: Text('${msg.otherUserName} (ID: ${msg.otherUserId.substring(0,4)}...)'),

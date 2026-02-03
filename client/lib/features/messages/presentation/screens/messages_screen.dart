@@ -1,6 +1,9 @@
+```
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:client/l10n/app_localizations.dart';
+import 'package:client/features/marketplace/presentation/widgets/property_bubble.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -164,38 +167,57 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                 ),
-                child: ClipOval(
+                  child: ClipOval(
                   child: (avatarUrl != null && avatarUrl.isNotEmpty)
-                      ? CachedNetworkImage(
-                          imageUrl: avatarUrl,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            color: AppColors.structuralBrown.withOpacity(0.1),
-                            child: Center(
-                              child: Text(
-                                initials ?? '',
-                                style: GoogleFonts.workSans(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.structuralBrown,
+                      ? (avatarUrl.toLowerCase().endsWith('.svg') 
+                          ? SvgPicture.network(
+                              avatarUrl,
+                              fit: BoxFit.cover,
+                              placeholderBuilder: (context) => Container(
+                                color: AppColors.structuralBrown.withOpacity(0.1),
+                                child: Center(
+                                  child: Text(
+                                    initials ?? '',
+                                    style: GoogleFonts.workSans(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.structuralBrown,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            color: AppColors.structuralBrown.withOpacity(0.1),
-                            child: Center(
-                              child: Text(
-                                initials ?? '',
-                                style: GoogleFonts.workSans(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.structuralBrown,
+                            )
+                          : CachedNetworkImage(
+                              imageUrl: avatarUrl,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                color: AppColors.structuralBrown.withOpacity(0.1),
+                                child: Center(
+                                  child: Text(
+                                    initials ?? '',
+                                    style: GoogleFonts.workSans(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.structuralBrown,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        )
+                              errorWidget: (context, url, error) => Container(
+                                color: AppColors.structuralBrown.withOpacity(0.1),
+                                child: Center(
+                                  child: Text(
+                                    initials ?? '',
+                                    style: GoogleFonts.workSans(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.structuralBrown,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ))
+                      : Container(
                       : Container(
                           color: AppColors.structuralBrown.withOpacity(0.1),
                           child: Center(
