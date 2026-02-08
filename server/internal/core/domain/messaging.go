@@ -36,6 +36,7 @@ type Notification struct {
 	Title     string           `gorm:"type:varchar(255);not null" json:"title"`
 	Message   string           `gorm:"type:text;not null" json:"message"`
 	Type      NotificationType `gorm:"type:varchar(50);not null" json:"type"`
+	Route     string           `gorm:"type:text" json:"route,omitempty"`
 	Metadata  datatypes.JSON   `gorm:"type:jsonb" json:"metadata,omitempty"`
 	IsRead    bool             `gorm:"default:false" json:"is_read"`
 	CreatedAt time.Time        `json:"created_at"`

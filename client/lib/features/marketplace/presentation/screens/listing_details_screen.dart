@@ -11,11 +11,14 @@ import 'package:client/l10n/app_localizations.dart';
 import 'package:client/core/constants/app_colors.dart';
 import 'package:client/core/services/commute_service.dart';
 import 'package:client/core/services/navigation_service.dart';
+import 'package:client/core/constants/api_endpoints.dart';
+import 'package:client/core/widgets/animated_indicators.dart';
 import 'package:client/core/services/notification_service.dart';
 import 'package:client/core/services/efficiency_service.dart';
 import 'package:client/core/widgets/custom_app_bar.dart';
 import 'package:client/core/widgets/app_drawer.dart';
 import 'package:client/core/widgets/glass_container.dart';
+import 'package:client/core/services/map_service.dart';
 import 'package:client/features/search/data/models/search_result.dart';
 import 'package:client/features/marketplace/data/listings_repository.dart';
 import 'package:client/features/marketplace/domain/listing_entity.dart';
@@ -23,7 +26,7 @@ import 'package:client/features/profile/data/life_pin_repository.dart';
 import 'package:client/features/profile/domain/life_pin_model.dart';
 import 'package:client/features/messages/data/notifications_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:shimmer/shimmer.dart' as shimmer;
 
 class ListingDetailsScreen extends StatefulWidget {
   final String id;
@@ -58,6 +61,8 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   final NavigationService _navService = NavigationService();
   final MapController _mapController = MapController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  LatLng? _userLocation;
+  TileProvider? _cachedTileProvider;
 
   Future<PageData>? _pageDataFuture;
   late bool _showMap;
@@ -68,6 +73,8 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   void initState() {
     super.initState();
     _showMap = widget.activeViewMode == 'map';
+    _initLocation();
+    _initMap();
     _pageDataFuture = _loadPageData().then((data) {
       if (mounted) {
         setState(() => _isSaved = data.isSaved);
@@ -79,6 +86,22 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  Future<void> _initLocation() async {
+    try {
+      final pos = await _navService.getCurrentLocation();
+      if (mounted) {
+        setState(() => _userLocation = LatLng(pos.latitude, pos.longitude));
+      }
+    } catch (e) {
+      debugPrint("ListingDetails context location error: $e");
+    }
+  }
+
+  Future<void> _initMap() async {
+    final tp = await MapService.getCachedTileProvider();
+    if (mounted) setState(() => _cachedTileProvider = tp);
   }
 
   Future<PageData> _loadPageData() async {
@@ -296,7 +319,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   Widget _buildLoadingSkeleton(BuildContext context) {
     return SingleChildScrollView(
       physics: const NeverScrollableScrollPhysics(),
-      child: Shimmer.fromColors(
+      child: shimmer.Shimmer.fromColors(
         baseColor: Colors.grey[300]!,
         highlightColor: Colors.grey[100]!,
         child: Column(
@@ -372,7 +395,9 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
           children: [
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.kejapin.app',
+              tileProvider: _cachedTileProvider ?? NetworkTileProvider(
+                headers: {'User-Agent': ApiEndpoints.osmUserAgent},
+              ),
             ),
             // Floating Navigation Button
             Positioned(
@@ -453,6 +478,14 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                     child: Icon(_getIconForMode(pin.transportMode), color: Colors.white, size: 16),
                   ),
                 )),
+                // User Location Marker
+                if (_userLocation != null)
+                  Marker(
+                    point: _userLocation!,
+                    width: 80,
+                    height: 80,
+                    child: LifePathPin(),
+                  ),
               ],
             ),
             PolylineLayer(

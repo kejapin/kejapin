@@ -32,7 +32,7 @@ class NotificationService {
 
     // Initialize local notifications for foreground
     if (!const bool.fromEnvironment('dart.library.html')) {
-      const androidInit = AndroidInitializationSettings('@mipmap/launcher_icon');
+      const androidInit = AndroidInitializationSettings('@drawable/ic_notification');
       const iosInit = DarwinInitializationSettings();
       const initSettings = InitializationSettings(android: androidInit, iOS: iosInit);
       
@@ -81,7 +81,7 @@ class NotificationService {
               'High Importance Notifications',
               importance: Importance.max,
               priority: Priority.high,
-              icon: '@mipmap/launcher_icon',
+              icon: '@drawable/ic_notification',
             ),
           ),
         );
@@ -106,7 +106,7 @@ class NotificationService {
       channelDescription: 'Notifications for app interactions',
       importance: Importance.max,
       priority: Priority.high,
-      icon: '@mipmap/launcher_icon',
+      icon: '@drawable/ic_notification',
       color: Color(0xFF5D4037), // App's structural brown
     );
     const notificationDetails = NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails());
@@ -155,7 +155,7 @@ class NotificationService {
       importance: Importance.max,
       priority: Priority.high,
       styleInformation: messagingStyle,
-      icon: '@mipmap/launcher_icon',
+      icon: '@drawable/ic_notification',
       category: AndroidNotificationCategory.message,
       color: const Color(0xFF5D4037),
     );

@@ -16,4 +16,10 @@ class ApiEndpoints {
   static String get nearbyAmenities => '$baseUrl/geo/nearby';
   static String get lifePins => '$baseUrl/lifepins';
   static String get verificationApply => '$baseUrl/verification/apply';
+
+  // OpenStreetMap Policy Compliance (User-Agent)
+  static const String osmUserAgent = 'Kejapin-Flutter-Mobile-App/1.0 (https://kejapin.com; contact: admin@kejapin.com)';
+
+  // Google Auth
+  static const String googleWebClientId = '698029781603-9geh5l3pn2f4e9p0pn3aeo8j53m5t51r.apps.googleusercontent.com';
 }

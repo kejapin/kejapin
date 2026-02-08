@@ -4,8 +4,12 @@ import 'package:latlong2/latlong.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/widgets/animated_indicators.dart';
+import '../../../../../core/services/navigation_service.dart';
 import '../../../../../core/widgets/glass_container.dart';
+import '../../../../../core/constants/api_endpoints.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../core/services/map_service.dart';
 
 class LocationPickerDialog extends StatefulWidget {
   const LocationPickerDialog({super.key});
@@ -16,14 +20,22 @@ class LocationPickerDialog extends StatefulWidget {
 
 class _LocationPickerDialogState extends State<LocationPickerDialog> {
   final MapController _mapController = MapController();
+  final NavigationService _navService = NavigationService();
   LatLng _selectedLocation = const LatLng(-1.286389, 36.817223); // Nairobi default
   final TextEditingController _nameController = TextEditingController();
   bool _loadingCurrentLocation = false;
+  TileProvider? _cachedTileProvider;
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
+    _initMap();
+  }
+
+  Future<void> _initMap() async {
+    final tp = await MapService.getCachedTileProvider();
+    if (mounted) setState(() => _cachedTileProvider = tp);
   }
 
   @override
@@ -35,34 +47,24 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
   Future<void> _getCurrentLocation() async {
     setState(() => _loadingCurrentLocation = true);
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        setState(() => _loadingCurrentLocation = false);
-        return;
+      final pos = await _navService.getCurrentLocation();
+      if (mounted) {
+        setState(() {
+          _selectedLocation = LatLng(pos.latitude, pos.longitude);
+          _loadingCurrentLocation = false;
+        });
+        _mapController.move(_selectedLocation, 15);
       }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          setState(() => _loadingCurrentLocation = false);
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        setState(() => _loadingCurrentLocation = false);
-        return;
-      }
-
-      Position position = await Geolocator.getCurrentPosition();
-      setState(() {
-        _selectedLocation = LatLng(position.latitude, position.longitude);
-        _loadingCurrentLocation = false;
-      });
-      _mapController.move(_selectedLocation, 15);
     } catch (e) {
-      setState(() => _loadingCurrentLocation = false);
+      if (mounted) {
+        setState(() => _loadingCurrentLocation = false);
+        if (e.toString().contains('permanently denied')) {
+          Geolocator.openAppSettings();
+        } else if (e.toString().contains('not enabled')) {
+          Geolocator.openLocationSettings();
+        }
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      }
     }
   }
 
@@ -143,19 +145,17 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                       children: [
                         TileLayer(
                           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                          userAgentPackageName: 'com.kejapin.app',
+                          tileProvider: _cachedTileProvider ?? NetworkTileProvider(
+                            headers: {'User-Agent': ApiEndpoints.osmUserAgent},
+                          ),
                         ),
                         MarkerLayer(
                           markers: [
                             Marker(
                               point: _selectedLocation,
-                              width: 40,
-                              height: 40,
-                              child: const Icon(
-                                Icons.location_pin,
-                                color: AppColors.mutedGold,
-                                size: 40,
-                              ),
+                              width: 80,
+                              height: 80,
+                              child: LifePathPin(),
                             ),
                           ],
                         ),

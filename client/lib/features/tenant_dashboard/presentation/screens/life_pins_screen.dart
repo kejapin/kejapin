@@ -14,9 +14,11 @@ import '../../../profile/data/life_pin_repository.dart';
 import '../../../profile/domain/life_pin_model.dart';
 import '../../../../core/widgets/smart_dashboard_panel.dart';
 import '../../../search/data/models/search_result.dart';
+import '../../../../core/widgets/animated_indicators.dart';
 import 'package:client/features/messages/data/notifications_repository.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../../../core/services/map_service.dart';
 
 class LifePinsScreen extends StatefulWidget {
   const LifePinsScreen({super.key});
@@ -39,6 +41,7 @@ class _LifePinsScreenState extends State<LifePinsScreen> with TickerProviderStat
   bool _isCardsMinimized = false;
   LatLng? _userLocation;
   LifePin? _selectedPin;
+  TileProvider? _cachedTileProvider;
   int _activePageIndex = 0;
   final PageController _pageController = PageController(viewportFraction: 0.85);
 
@@ -55,6 +58,12 @@ class _LifePinsScreenState extends State<LifePinsScreen> with TickerProviderStat
     )..repeat();
     _loadPins();
     _initLocation();
+    _initMap();
+  }
+
+  Future<void> _initMap() async {
+    final tp = await MapService.getCachedTileProvider();
+    if (mounted) setState(() => _cachedTileProvider = tp);
   }
 
   @override
@@ -109,7 +118,7 @@ class _LifePinsScreenState extends State<LifePinsScreen> with TickerProviderStat
         // NOMINATIM REQUIRES A USER-AGENT or it will return 403 Forbidden
         final response = await http.get(
           Uri.parse('https://nominatim.openstreetmap.org/search?q=$query&format=json&limit=5&addressdetails=1'),
-          headers: {'User-Agent': 'Kejapin_App_v1'},
+          headers: {'User-Agent': ApiEndpoints.osmUserAgent},
         );
         
         if (response.statusCode == 200) {
@@ -171,18 +180,20 @@ class _LifePinsScreenState extends State<LifePinsScreen> with TickerProviderStat
               },
             ),
             children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.kejapin.app',
-              ),
+               TileLayer(
+                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                 tileProvider: _cachedTileProvider ?? NetworkTileProvider(
+                   headers: {'User-Agent': ApiEndpoints.osmUserAgent},
+                 ),
+               ),
               MarkerLayer(
                 markers: [
                   if (_userLocation != null)
                     Marker(
                       point: _userLocation!,
-                      width: 40,
-                      height: 40,
-                      child: _buildPulseMarker(AppColors.champagne),
+                      width: 80,
+                      height: 80,
+                      child: LifePathPin(),
                     ),
                   ..._pins.asMap().entries.map((entry) {
                     final index = entry.key;

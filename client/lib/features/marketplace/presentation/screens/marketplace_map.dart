@@ -18,6 +18,10 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/services/geo_service.dart';
 import '../../domain/listing_entity.dart';
+import '../../../../core/constants/api_endpoints.dart';
+import '../../../../core/services/navigation_service.dart';
+import '../../../../core/widgets/animated_indicators.dart';
+import '../../../../core/services/map_service.dart';
 
 class MarketplaceMap extends StatelessWidget {
   final List<ListingEntity> listings;
@@ -57,35 +61,39 @@ class _MarketplaceMapView extends StatefulWidget {
 class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerProviderStateMixin {
   final MapController _mapController = MapController();
   final PanelController _panelController = PanelController();
+  final NavigationService _navService = NavigationService();
   
   double _currentZoom = 13.0;
   LatLng? _userLocation;
   Map<String, NearbyAmenity> _nearbyAmenities = {};
   ListingEntity? _lastSelectedListing;
+  TileProvider? _cachedTileProvider;
 
   @override
   void initState() {
     super.initState();
+    _initMap();
     _fetchLocation();
+  }
+
+  Future<void> _initMap() async {
+    final tp = await MapService.getCachedTileProvider();
+    if (mounted) setState(() => _cachedTileProvider = tp);
   }
 
   Future<void> _fetchLocation() async {
     try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-      
-      if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
-        final pos = await Geolocator.getCurrentPosition();
-        if (mounted) {
-          setState(() {
-            _userLocation = LatLng(pos.latitude, pos.longitude);
-          });
-        }
+      final pos = await _navService.getCurrentLocation();
+      if (mounted) {
+        setState(() {
+          _userLocation = LatLng(pos.latitude, pos.longitude);
+        });
       }
     } catch (e) {
       debugPrint("Location error: $e");
+      if (e.toString().contains('permanently denied')) {
+         // Optionally show instructions to open settings
+      }
     }
   }
 
@@ -216,7 +224,9 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                   children: [
                     TileLayer(
                       urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'com.kejapin.client',
+                      tileProvider: _cachedTileProvider ?? NetworkTileProvider(
+                        headers: {'User-Agent': ApiEndpoints.osmUserAgent},
+                      ),
                     ),
                     
                     // Polylines Layer - Lines to amenities
@@ -255,17 +265,9 @@ class _MarketplaceMapViewState extends State<_MarketplaceMapView> with TickerPro
                         markers: [
                           Marker(
                             point: _userLocation!,
-                            width: 24,
-                            height: 24,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: AppColors.sageGreen,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2),
-                                boxShadow: const [BoxShadow(blurRadius: 5, color: Colors.black26)],
-                              ),
-                              child: const Icon(Icons.person, color: Colors.white, size: 12),
-                            ),
+                            width: 80,
+                            height: 80,
+                            child: LifePathPin(),
                           ),
                         ],
                       ),

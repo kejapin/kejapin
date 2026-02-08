@@ -7,9 +7,12 @@ import 'package:glassmorphism/glassmorphism.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/animated_indicators.dart';
 import '../../../../core/services/navigation_service.dart';
+import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/services/commute_service.dart';
 import '../../data/models/search_result.dart';
+import '../../../../core/services/map_service.dart';
 
 class MapScreen extends StatefulWidget {
   final SearchResult? extra;
@@ -29,11 +32,18 @@ class _MapScreenState extends State<MapScreen> {
   CommuteResult? _routeInfo;
   bool _isNavigating = false;
   bool _isLoading = false;
+  TileProvider? _cachedTileProvider;
 
   @override
   void initState() {
     super.initState();
     _initLocation();
+    _initMap();
+  }
+
+  Future<void> _initMap() async {
+    final tp = await MapService.getCachedTileProvider();
+    if (mounted) setState(() => _cachedTileProvider = tp);
   }
 
   Future<void> _initLocation() async {
@@ -108,7 +118,9 @@ class _MapScreenState extends State<MapScreen> {
             children: [
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.kejapin.app',
+                tileProvider: _cachedTileProvider ?? NetworkTileProvider(
+                  headers: {'User-Agent': ApiEndpoints.osmUserAgent},
+                ),
               ),
               if (_routePoints.isNotEmpty)
                 PolylineLayer(
@@ -135,31 +147,9 @@ class _MapScreenState extends State<MapScreen> {
                   if (_userLocation != null)
                     Marker(
                       point: _userLocation!,
-                      width: 40,
-                      height: 40,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.champagne.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Container(
-                            width: 15,
-                            height: 15,
-                            decoration: const BoxDecoration(
-                              color: AppColors.champagne,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.white,
-                                  blurRadius: 10,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                      width: 80,
+                      height: 80,
+                      child: LifePathPin(),
                     ),
                 ],
               ),

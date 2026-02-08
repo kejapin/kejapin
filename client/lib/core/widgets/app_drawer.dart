@@ -47,7 +47,6 @@ class AppDrawer extends StatelessWidget {
                             Image.asset(
                               'assets/images/logo.png',
                               height: 40,
-                              color: AppColors.champagne,
                             ),
                             const SizedBox(width: 12),
                             const Text(

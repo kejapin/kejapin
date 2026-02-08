@@ -45,6 +45,8 @@ dependencies:
   shared_preferences: ^2.5.4
   http: ^1.6.0
   flutter_map: ^8.2.2
+  flutter_map_cache: ^1.1.0
+  dio_cache_interceptor_file_store: ^1.2.3
   latlong2: ^0.9.1
   video_player: ^2.9.2
   mesh_gradient: ^1.3.8
@@ -54,6 +56,7 @@ dependencies:
   shimmer: ^3.0.0
   animate_do: ^3.3.4
   supabase_flutter: ^2.12.0
+  google_sign_in: ^6.2.1
   crypto: ^3.0.7
   flutter_flip_card: ^0.0.6
   flip_card: ^0.7.0
@@ -149,5 +152,5 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/logo.png"
+  image_path: "assets/images/launcher_icon.png"
   min_sdk_android: 21 # android min sdk value

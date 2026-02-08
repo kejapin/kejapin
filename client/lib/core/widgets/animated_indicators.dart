@@ -163,9 +163,9 @@ class Glitch extends StatelessWidget {
   }
 }
 
-class Shimmer extends StatelessWidget {
+class KejaShimmer extends StatelessWidget {
   final Widget child;
-  const Shimmer({super.key, required this.child});
+  const KejaShimmer({super.key, required this.child});
   @override
   Widget build(BuildContext context) {
     return LoopAnimation(
@@ -319,7 +319,7 @@ class TotalCostBadge extends StatelessWidget {
   const TotalCostBadge({super.key});
   @override
   Widget build(BuildContext context) {
-    return Shimmer(
+    return KejaShimmer(
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
@@ -430,7 +430,7 @@ class SecureShieldGlint extends StatelessWidget {
   const SecureShieldGlint({super.key});
   @override
   Widget build(BuildContext context) {
-    return Shimmer(child: const Icon(Icons.verified_user, color: AppColors.sageGreen, size: 40));
+    return KejaShimmer(child: const Icon(Icons.verified_user, color: AppColors.sageGreen, size: 40));
   }
 }
 

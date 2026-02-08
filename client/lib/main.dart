@@ -11,6 +11,7 @@ import 'features/auth/presentation/landing_page.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/onboarding_screen.dart';
 import 'features/auth/presentation/register_screen.dart';
+import 'features/auth/presentation/terms_screen.dart';
 import 'features/auth/presentation/splash_screen.dart';
 
 import 'features/marketplace/presentation/screens/marketplace_feed.dart';
@@ -203,6 +204,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/register',
       builder: (context, state) => const RegisterScreen(),
+    ),
+    GoRoute(
+      path: '/terms',
+      builder: (context, state) => const TermsAndConditionsScreen(),
     ),
     GoRoute(
       path: '/forgot-password',

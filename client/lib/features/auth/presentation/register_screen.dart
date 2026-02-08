@@ -25,10 +25,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false;
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+  bool _agreedToTerms = false;
 
   final _authRepository = AuthRepository();
 
   void _register() async {
+    if (!_agreedToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please agree to the Terms and Conditions to continue.')),
+      );
+      return;
+    }
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       try {
@@ -117,7 +124,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               Image.asset(
                                 'assets/images/logo.png',
                                 height: 80,
-                                color: Colors.white,
                               ),
                               const SizedBox(height: 24),
                               Text(
@@ -162,7 +168,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             Image.asset(
                               'assets/images/logo.png',
                               height: 60,
-                              color: Colors.white,
                             ),
                             const SizedBox(height: 40),
                             GlassContainer(
@@ -331,7 +336,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
               return null;
             },
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Checkbox(
+                value: _agreedToTerms,
+                onChanged: (value) {
+                  setState(() {
+                    _agreedToTerms = value ?? false;
+                  });
+                },
+                activeColor: AppColors.mutedGold,
+                checkColor: AppColors.structuralBrown,
+                side: const BorderSide(color: Colors.white70),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => context.push('/terms'),
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'I agree to the ',
+                      style: const TextStyle(color: Colors.white70),
+                      children: [
+                        TextSpan(
+                          text: 'Terms and Conditions',
+                          style: TextStyle(
+                            color: AppColors.mutedGold,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             height: 56,
@@ -368,17 +410,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
             height: 56,
             child: OutlinedButton.icon(
               onPressed: () async {
+                setState(() => _isLoading = true);
                 try {
-                  await _authRepository.signInWithGoogle();
+                  final response = await _authRepository.signInWithGoogle();
+                  if (response != null && response.user != null) {
+                    await NotificationsRepository().createNotification(
+                      title: 'Welcome to Kejapin! ✨',
+                      message: 'Your journey starts here. Start pinning properties to your life-path to see your efficiency scores!',
+                      type: 'WELCOME',
+                    );
+                    
+                    if (mounted) {
+                      context.go('/marketplace');
+                    }
+                  }
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                    );
+                  }
+                } finally {
+                  if (mounted) setState(() => _isLoading = false);
                 }
               },
-              icon: Image.network(
-                'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_\"G\"_Logo.svg',
+              icon: Image.asset(
+                'assets/images/google_logo.png',
                 height: 24,
+                width: 24,
                 errorBuilder: (context, error, stackTrace) => const Icon(Icons.login, color: Colors.white),
-              ),
+              ), 
               label: Text(
                 AppLocalizations.of(context)!.continueWithGoogle,
                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),

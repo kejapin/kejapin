@@ -12,6 +12,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/api_endpoints.dart';
+import '../../../../core/services/navigation_service.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../../core/widgets/smart_dashboard_panel.dart';
@@ -23,6 +25,7 @@ import '../../../../core/services/supabase_storage_service.dart';
 import '../../../../core/globals.dart';
 import '../../../marketplace/data/listings_repository.dart';
 import '../../../marketplace/domain/listing_entity.dart';
+import '../../../../core/services/map_service.dart';
 
 class CreateListingScreen extends StatefulWidget {
   final ListingEntity? existingListing;
@@ -36,6 +39,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   final _repository = ListingsRepository();
   final _efficiencyService = EfficiencyService();
   final _storageService = SupabaseStorageService();
+  final _navService = NavigationService();
   final _mapController = MapController();
   final _picker = ImagePicker();
   
@@ -69,6 +73,8 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   bool _isSearching = false;
   Timer? _debounce;
   bool _mapTapped = false;
+  LatLng? _userLocation;
+  TileProvider? _cachedTileProvider;
 
   final List<String> _amenityOptions = [
     'WiFi', 'Parking', 'Gym', 'Pool', 'Security', 'Borehole', 'Lift', 'Balcony'
@@ -85,7 +91,14 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
       if (widget.existingListing != null) {
         _populateFields(widget.existingListing!);
       }
+      _initUserLocation();
+      _initMap();
     });
+  }
+
+  Future<void> _initMap() async {
+    final tp = await MapService.getCachedTileProvider();
+    if (mounted) setState(() => _cachedTileProvider = tp);
   }
 
   @override
@@ -151,7 +164,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
       try {
         final response = await http.get(
           Uri.parse('https://nominatim.openstreetmap.org/search?q=$query&format=json&limit=5&addressdetails=1'),
-          headers: {'User-Agent': 'Kejapin_App_v1'},
+          headers: {'User-Agent': ApiEndpoints.osmUserAgent},
         );
         if (response.statusCode == 200) {
           setState(() {
@@ -169,7 +182,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
     try {
       final response = await http.get(
         Uri.parse('https://nominatim.openstreetmap.org/reverse?lat=${point.latitude}&lon=${point.longitude}&format=json&addressdetails=1'),
-        headers: {'User-Agent': 'Kejapin_App_v1'},
+        headers: {'User-Agent': ApiEndpoints.osmUserAgent},
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -192,12 +205,30 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
     }
   }
 
+  Future<void> _initUserLocation() async {
+    try {
+      final pos = await _navService.getCurrentLocation();
+      if (mounted) {
+        setState(() => _userLocation = LatLng(pos.latitude, pos.longitude));
+      }
+    } catch (e) {
+      debugPrint("CreateListing context location error: $e");
+    }
+  }
+
   Future<void> _getCurrentLocation() async {
     try {
-      Position position = await Geolocator.getCurrentPosition();
-      _reverseGeocode(LatLng(position.latitude, position.longitude));
+      final pos = await _navService.getCurrentLocation();
+      _reverseGeocode(LatLng(pos.latitude, pos.longitude));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not get location: $e')));
+      if (mounted) {
+        if (e.toString().contains('permanently denied')) {
+          Geolocator.openAppSettings();
+        } else if (e.toString().contains('not enabled')) {
+          Geolocator.openLocationSettings();
+        }
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not get location: $e')));
+      }
     }
   }
 
@@ -642,7 +673,12 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                   onTap: (tapPos, point) => _reverseGeocode(point),
                 ),
                 children: [
-                  TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
+                  TileLayer(
+                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    tileProvider: _cachedTileProvider ?? NetworkTileProvider(
+                      headers: {'User-Agent': ApiEndpoints.osmUserAgent},
+                    ),
+                  ),
                   MarkerLayer(
                     markers: [
                       Marker(
@@ -653,6 +689,13 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                           child: const Icon(Icons.location_on, color: Colors.red, size: 45),
                         ),
                       ),
+                      if (_userLocation != null)
+                        Marker(
+                          point: _userLocation!,
+                          width: 80,
+                          height: 80,
+                          child: LifePathPin(),
+                        ),
                     ],
                   ),
                 ],

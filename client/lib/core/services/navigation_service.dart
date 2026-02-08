@@ -14,7 +14,7 @@ class NavigationService {
     // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
+      return Future.error('Location service is not enabled');
     }
 
     permission = await Geolocator.checkPermission();
@@ -26,11 +26,15 @@ class NavigationService {
     }
     
     if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-        'Location permissions are permanently denied, we cannot request permissions.');
+      return Future.error('Location permissions are permanently denied');
     } 
 
-    return await Geolocator.getCurrentPosition();
+    return await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        timeLimit: Duration(seconds: 10),
+      ),
+    );
   }
 
   /// Calculates a route from the current location to the destination.

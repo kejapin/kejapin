@@ -133,7 +133,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               Image.asset(
                                 'assets/images/logo.png',
                                 height: 80,
-                                color: Colors.white,
                                 errorBuilder: (c,e,s) => const Icon(Icons.home, size: 80, color: Colors.white),
                               ),
                               const SizedBox(height: 24),
@@ -179,7 +178,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             Image.asset(
                               'assets/images/logo.png',
                               height: 60,
-                              color: Colors.white,
                               errorBuilder: (c,e,s) => const Icon(Icons.home, size: 60, color: Colors.white),
                             ),
                             const SizedBox(height: 40),
@@ -331,13 +329,50 @@ class _LoginScreenState extends State<LoginScreen> {
             height: 56,
             child: OutlinedButton.icon(
               onPressed: () async {
+                setState(() => _isLoading = true);
                 try {
-                  await _authRepository.signInWithGoogle();
+                  final response = await _authRepository.signInWithGoogle();
+                  if (response != null && response.user != null) {
+                    // Handle Welcome Notification or Sign-in alert
+                    final prefs = await SharedPreferences.getInstance();
+                    final isFirstLogin = prefs.getBool('first_login_${response.user!.id}') ?? true;
+                    
+                    if (isFirstLogin) {
+                      await NotificationsRepository().createNotification(
+                        title: 'Welcome to Kejapin! ✨',
+                        message: 'Great to see you! Start pinning properties to your life-path to see your efficiency scores!',
+                        type: 'WELCOME',
+                      );
+                      await prefs.setBool('first_login_${response.user!.id}', false);
+                    } else {
+                      await NotificationsRepository().createNotification(
+                        title: 'New Sign-in Alert 🛡️',
+                        message: 'A new login via Google was detected. If this wasn\'t you, please secure your account.',
+                        type: 'SYSTEM',
+                        route: '/profile',
+                      );
+                    }
+
+                    if (mounted) {
+                      context.go('/marketplace');
+                    }
+                  }
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                    );
+                  }
+                } finally {
+                  if (mounted) setState(() => _isLoading = false);
                 }
               },
-              icon: const Icon(Icons.login, color: Colors.white), // Simplified icon for stability
+              icon: Image.asset(
+                'assets/images/google_logo.png',
+                height: 24,
+                width: 24,
+                errorBuilder: (context, error, stackTrace) => const Icon(Icons.login, color: Colors.white),
+              ), 
               label: Text(
                 AppLocalizations.of(context)!.continueWithGoogle,
                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),

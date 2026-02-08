@@ -4,9 +4,13 @@ import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../core/widgets/animated_indicators.dart';
+import '../../../../../core/constants/api_endpoints.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class LocationBubble extends StatelessWidget {
+import '../../../../../core/services/map_service.dart';
+
+class LocationBubble extends StatefulWidget {
   final String locationName;
   final double? latitude;
   final double? longitude;
@@ -20,9 +24,27 @@ class LocationBubble extends StatelessWidget {
     this.longitude,
   });
 
+  @override
+  State<LocationBubble> createState() => _LocationBubbleState();
+}
+
+class _LocationBubbleState extends State<LocationBubble> {
+  TileProvider? _cachedTileProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    _initMap();
+  }
+
+  Future<void> _initMap() async {
+    final tp = await MapService.getCachedTileProvider();
+    if (mounted) setState(() => _cachedTileProvider = tp);
+  }
+
   Future<void> _openInMaps() async {
-    if (latitude != null && longitude != null) {
-      final googleMapsUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    if (widget.latitude != null && widget.longitude != null) {
+      final googleMapsUrl = 'https://www.google.com/maps/search/?api=1&query=${widget.latitude},${widget.longitude}';
       final uri = Uri.parse(googleMapsUrl);
       
       try {
@@ -38,7 +60,7 @@ class LocationBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasCoordinates = latitude != null && longitude != null;
+    final hasCoordinates = widget.latitude != null && widget.longitude != null;
 
     return GestureDetector(
       onTap: hasCoordinates ? _openInMaps : null,
@@ -68,7 +90,7 @@ class LocationBubble extends StatelessWidget {
                   child: AbsorbPointer(
                     child: FlutterMap(
                       options: MapOptions(
-                        initialCenter: LatLng(latitude!, longitude!),
+                        initialCenter: LatLng(widget.latitude!, widget.longitude!),
                         initialZoom: 15,
                         interactionOptions: const InteractionOptions(
                           flags: InteractiveFlag.none,
@@ -77,19 +99,17 @@ class LocationBubble extends StatelessWidget {
                       children: [
                         TileLayer(
                           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                          userAgentPackageName: 'com.kejapin.app',
+                          tileProvider: _cachedTileProvider ?? NetworkTileProvider(
+                            headers: {'User-Agent': ApiEndpoints.osmUserAgent},
+                          ),
                         ),
                         MarkerLayer(
                           markers: [
                             Marker(
-                              point: LatLng(latitude!, longitude!),
-                              width: 40,
-                              height: 40,
-                              child: const Icon(
-                                Icons.location_pin,
-                                color: AppColors.sageGreen,
-                                size: 40,
-                              ),
+                              point: LatLng(widget.latitude!, widget.longitude!),
+                              width: 80,
+                              height: 80,
+                              child: LifePathPin(),
                             ),
                           ],
                         ),
@@ -127,7 +147,7 @@ class LocationBubble extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          locationName,
+                          widget.locationName,
                           style: GoogleFonts.workSans(
                             fontWeight: FontWeight.bold, 
                             fontSize: 14,

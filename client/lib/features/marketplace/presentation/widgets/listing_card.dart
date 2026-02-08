@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flip_card/flip_card.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:shimmer/shimmer.dart' as shimmer;
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -12,11 +12,15 @@ import 'package:client/l10n/app_localizations.dart';
 import 'package:client/core/services/notification_service.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:client/core/constants/app_colors.dart';
+import 'package:client/core/widgets/animated_indicators.dart';
+import 'package:client/core/services/navigation_service.dart';
+import 'package:client/core/constants/api_endpoints.dart';
 import 'package:client/core/widgets/glass_container.dart';
 import 'package:client/features/marketplace/domain/listing_entity.dart';
 import 'package:client/features/marketplace/data/listings_repository.dart';
 import 'package:client/features/messages/data/notifications_repository.dart';
 import 'package:client/core/services/efficiency_service.dart';
+import 'package:client/core/services/map_service.dart';
 
 class ListingCard extends StatefulWidget {
   final ListingEntity listing;
@@ -36,17 +40,25 @@ class _ListingCardState extends State<ListingCard> {
   final GlobalKey<FlipCardState> cardKey = GlobalKey<FlipCardState>();
   final _repository = ListingsRepository();
   final _notificationsRepo = NotificationsRepository();
+  final _navService = NavigationService();
   String _backViewMode = 'stats'; // 'stats' or 'map'
   Position? _currentPosition;
   bool _showLegend = false;
   bool _isSaved = false;
   bool _isSaving = false;
+  TileProvider? _cachedTileProvider;
 
   @override
   void initState() {
     super.initState();
     _determinePosition();
     _checkSavedStatus();
+    _initMap();
+  }
+
+  Future<void> _initMap() async {
+    final tp = await MapService.getCachedTileProvider();
+    if (mounted) setState(() => _cachedTileProvider = tp);
   }
 
   Future<void> _checkSavedStatus() async {
@@ -117,28 +129,14 @@ class _ListingCardState extends State<ListingCard> {
 
   Future<void> _determinePosition() async {
     try {
-      bool serviceEnabled;
-      LocationPermission permission;
-
-      serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return;
-
-      permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) return;
-      }
-      
-      if (permission == LocationPermission.deniedForever) return;
-
-      final position = await Geolocator.getCurrentPosition();
+      final pos = await _navService.getCurrentLocation();
       if (mounted) {
         setState(() {
-          _currentPosition = position;
+          _currentPosition = pos;
         });
       }
     } catch (e) {
-      debugPrint("Error getting location: $e");
+      debugPrint("ListingCard context location error: $e");
     }
   }
 
@@ -722,7 +720,9 @@ class _ListingCardState extends State<ListingCard> {
             children: [
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.kejapin.client',
+                tileProvider: _cachedTileProvider ?? NetworkTileProvider(
+                  headers: {'User-Agent': ApiEndpoints.osmUserAgent},
+                ),
               ),
               PolylineLayer<Object>(
               polylines: [
@@ -753,17 +753,9 @@ class _ListingCardState extends State<ListingCard> {
                   if (_currentPosition != null)
                     Marker(
                       point: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-                      width: 24,
-                      height: 24,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.sageGreen,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                          boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
-                        ),
-                        child: const Icon(Icons.person, color: Colors.white, size: 12),
-                      ),
+                      width: 80,
+                      height: 80,
+                      child: LifePathPin(),
                     ),
                   // 10 Category Markers
                   ...efficiency.categories.entries.map((entry) {
@@ -1094,7 +1086,7 @@ class CircularScoreIndicator extends StatelessWidget {
 class _ShimmerPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
+    return shimmer.Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
       period: const Duration(milliseconds: 1200),

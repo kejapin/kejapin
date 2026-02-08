@@ -77,7 +77,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
                 Image.asset(
                   'assets/images/logo.png',
                   height: 24,
-                  color: AppColors.champagne,
                   errorBuilder: (_, __, ___) => const Icon(Icons.home_filled, size: 24, color: AppColors.champagne),
                 ),
                 const SizedBox(width: 8),
