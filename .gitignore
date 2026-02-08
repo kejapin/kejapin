@@ -43,3 +43,6 @@ node_modules/
 .flutter-plugins-dependencies
 .packages
 pubspec.lock
+
+# Chat Exports
+Google Sign-In Setup.md
